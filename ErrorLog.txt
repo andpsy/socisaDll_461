@@ -1,0 +1,3 @@
+System.InvalidCastException: Unable to cast object of type 'System.Object[]' to type 'SOCISA.Models.Action[]'.
+   at SOCISA.Models.ActionsRepository.GetAll() in C:\Users\AndreiLiviu\documents\visual studio 2015\Projects\socisa\src\socisa\Models\IActionsRepository.cs:line 49
+=====================================================
