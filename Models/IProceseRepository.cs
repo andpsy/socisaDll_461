@@ -71,6 +71,12 @@ namespace SOCISA.Models
         {
             try
             {
+                try
+                {
+                    string newFilter = CommonFunctions.GenerateFilterFromJsonObject(typeof(Proces), _filter, authenticatedUserId, connectionString);
+                    _filter = newFilter == null ? _filter : newFilter;
+                }
+                catch { }
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "PROCESEsp_select", new object[] {
                 new MySqlParameter("_SORT", _sort),
                 new MySqlParameter("_ORDER", _order),

@@ -40,6 +40,7 @@ namespace SOCISA.Models
         Asigurat GetAsiguratRca(Dosar item);
         Intervenient GetIntervenient(Dosar item);
         DocumentScanat[] GetDocumente(Dosar item);
+        Proces[] GetProcese(Dosar item);
         Nomenclator GetTipDosar(Dosar item);
         string ExportDocumenteDosarToPdf(Dosar item);
         string ExportDosarToPdf(string templateFileName, Dosar item);
@@ -89,6 +90,12 @@ namespace SOCISA.Models
         {
             try
             {
+                try
+                {
+                    string newFilter = CommonFunctions.GenerateFilterFromJsonObject(typeof(Dosar), _filter, authenticatedUserId, connectionString);
+                    _filter = newFilter == null ? _filter : newFilter;
+                }
+                catch { }
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_select", new object[] {
                 new MySqlParameter("_SORT", _sort),
                 new MySqlParameter("_ORDER", _order),
@@ -232,6 +239,12 @@ namespace SOCISA.Models
         {
             return item.GetDocumente();
         }
+
+        public Proces[] GetProcese(Dosar item)
+        {
+            return item.GetProcese();
+        }
+
         public Nomenclator GetTipDosar(Dosar item)
         {
             return item.GetTipDosar();

@@ -12,6 +12,7 @@ using System.Text;
 using System.Reflection;
 using Newtonsoft.Json;
 using System.Xml;
+using System.Dynamic;
 
 namespace SOCISA
 {
@@ -99,6 +100,52 @@ namespace SOCISA
     /// </summary>
     public static class CommonFunctions
     {
+        public static string GenerateFilterFromJsonObject(Type T, string _filter, int authenticatedUserId, string connectionString)
+        {
+            string toReturn = null;
+            try
+            {
+                try
+                {
+                    dynamic x = JsonConvert.DeserializeObject(_filter, T);
+                    toReturn = x.GenerateFilterFromJsonObject();
+                }
+                catch
+                {
+                    try
+                    {
+                        dynamic jObj = JsonConvert.DeserializeObject(_filter);
+                        var x = Activator.CreateInstance(T, new object[] { authenticatedUserId, connectionString });
+                        PropertyInfo[] pisX = x.GetType().GetProperties();
+                        PropertyInfo[] pisJObj = jObj.GetType().GetProperties();
+                        foreach (PropertyInfo piX in pisX)
+                        {
+                            foreach (PropertyInfo piJObj in pisJObj)
+                            {
+                                if (piX.Name == piJObj.Name)
+                                {
+                                    piX.SetValue(x, piJObj.GetValue(jObj));
+                                    break;
+                                }
+                            }
+                        }
+                        MethodInfo mi = x.GetType().GetMethod("ValidareColoane");
+                        response res = (response)mi.Invoke(x, new object[] { _filter });
+                        if (res.Status)
+                        {
+                            mi = x.GetType().GetMethod("GenerateFilterFromJsonObject");
+                            var r = mi.Invoke(x, null);
+                            toReturn = r.ToString();
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            return toReturn;
+        }
+
         public static IEnumerable<Dictionary<string, object>> Serialize(DbDataReader reader)
         {
             var results = new List<Dictionary<string, object>>();
@@ -111,8 +158,7 @@ namespace SOCISA
 
             return results;
         }
-        private static Dictionary<string, object> SerializeRow(IEnumerable<string> cols,
-                                                        DbDataReader reader)
+        private static Dictionary<string, object> SerializeRow(IEnumerable<string> cols, DbDataReader reader)
         {
             var result = new Dictionary<string, object>();
             foreach (var col in cols)
@@ -237,7 +283,7 @@ namespace SOCISA
 
         public static string MySqlErrorParser(MySqlException mySqlException)
         {
-            return SOCISA.ErrorParser.ParseError(mySqlException);
+            return ErrorParser.ParseError(mySqlException);
         }
 
         public static string getConditie(string _strConditie)

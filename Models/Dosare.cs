@@ -292,29 +292,33 @@ namespace SOCISA.Models
             catch { return null; }
         }
 
-        /*
         /// <summary>
         /// Metoda pt. popularea Proceselor asociate Dosarului
         /// </summary>
         /// <returns>vector de SOCISA.Procese</returns>
-        public ProceseJson[] GetProcese()
+        public Proces[] GetProcese()
         {
             try
             {
-                DataAccess da = new DataAccess(CommandType.StoredProcedure, "DOSARE_PROCESEsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
-                DataTable dosareProcese = da.ExecuteSelectQuery().Tables[0];
-                // this.DosareProcese = SOCISA.DosareProcese.GetDosareProcese(dosareProcese);
-
-                ProceseJson[] toReturn = new ProceseJson[dosareProcese.Rows.Count];
-                for (int i = 0; i < dosareProcese.Rows.Count; i++)
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_PROCESEsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
+                DbDataReader r = da.ExecuteSelectQuery();
+                ArrayList aList = new ArrayList();
+                while (r.Read())
                 {
-                    toReturn[i] = new ProceseJson(Convert.ToInt32(dosareProcese.Rows[i]["ID_PROCES"]));
+                    Proces p = new Proces(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
+                    aList.Add(p);
+                }
+                Proces[] toReturn = new Proces[aList.Count];
+                for (int i = 0; i < aList.Count; i++)
+                {
+                    toReturn[i] = (Proces)aList[i];
                 }
                 return toReturn;
             }
             catch { return null; }
         }
 
+        /*
         /// <summary>
         /// Metoda pt. popularea Platilor asociate Dosarului
         /// </summary>

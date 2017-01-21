@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+//using System.Reflection;
 
 namespace SOCISA.Models
 {
@@ -66,6 +67,50 @@ namespace SOCISA.Models
         {
             try
             {
+                #region -- initial --
+                /*
+                string newFilter = null;
+                try
+                {
+                    try
+                    {
+                        Action x = Newtonsoft.Json.JsonConvert.DeserializeObject<Action>(_filter);
+                        newFilter = x.GenerateFilterFromJsonObject();
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            dynamic jObj = Newtonsoft.Json.JsonConvert.DeserializeObject(_filter);
+                            Action x = new Action(authenticatedUserId, connectionString);
+                            PropertyInfo[] pisX = x.GetType().GetProperties();
+                            PropertyInfo[] pisJObj = jObj.GetType().GetProperties();
+                            foreach (PropertyInfo piX in pisX)
+                            {
+                                foreach (PropertyInfo piJObj in pisJObj)
+                                {
+                                    if (piX.Name == piJObj.Name)
+                                    {
+                                        piX.SetValue(x, piJObj.GetValue(jObj));
+                                        break;
+                                    }
+                                }
+                            }
+                            newFilter = x.GenerateFilterFromJsonObject();
+                        }
+                        catch { }
+                    }
+                }
+                catch { }
+                if (newFilter != null) _filter = newFilter;
+                */
+                #endregion
+                try
+                {
+                    string newFilter = CommonFunctions.GenerateFilterFromJsonObject(typeof(Action), _filter, authenticatedUserId, connectionString);
+                    _filter = newFilter == null ? _filter : newFilter;
+                }
+                catch { }
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_select", new object[] {
                 new MySqlParameter("_SORT", _sort),
                 new MySqlParameter("_ORDER", _order),
