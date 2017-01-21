@@ -28,6 +28,7 @@ namespace SOCISA.Models
         public byte[] FILE_CONTENT { get; set; }
         public byte[] SMALL_ICON { get; set; }
         public byte[] MEDIUM_ICON { get; set; }
+        public string CALE_FISIER { get; set; }
 
         /// <summary>
         /// Constructorul default
@@ -69,7 +70,8 @@ namespace SOCISA.Models
         /// <param name="_DENUMIRE_INITIALA">denumirea initiala a fisierului (de la client)</param>
         /// <param name="_DIMENSIUNE_FISIER">dimensiunea in bytes a fisierului</param>
         /// <param name="_ID_TIP_DOCUMENT">id-ul de legatura cu tabela cu tipurile de documente</param>
-        public DocumentScanat(int? _ID, string _DENUMIRE_FISIER, string _EXTENSIE_FISIER, string _CALE_FISIER, DateTime? _DATA_INCARCARE, string _DENUMIRE_INITIALA, long _DIMENSIUNE_FISIER, int _ID_TIP_DOCUMENT, int _ID_DOSAR, bool _VIZA_CASCO, string _DETALII, byte[] _FILE_CONTENT, byte[] _SMALL_ICON, byte[] _MEDIUM_ICON){
+        public DocumentScanat(int? _ID, string _DENUMIRE_FISIER, string _EXTENSIE_FISIER, DateTime? _DATA_INCARCARE, long _DIMENSIUNE_FISIER, int _ID_TIP_DOCUMENT, int _ID_DOSAR, bool _VIZA_CASCO, string _DETALII, byte[] _FILE_CONTENT, byte[] _SMALL_ICON, byte[] _MEDIUM_ICON, string _CALE_FISIER)
+        {
             this.ID = _ID;
             this.DENUMIRE_FISIER = _DENUMIRE_FISIER;
             this.EXTENSIE_FISIER = _EXTENSIE_FISIER;
@@ -81,6 +83,7 @@ namespace SOCISA.Models
             this.DETALII = _DETALII;
             this.SMALL_ICON = _SMALL_ICON;
             this.MEDIUM_ICON = _MEDIUM_ICON;
+            this.CALE_FISIER = _CALE_FISIER;
         }
 
         public DocumentScanat(int _authenticatedUserId, string _connectionString, IDataRecord document_scanat)
@@ -116,6 +119,8 @@ namespace SOCISA.Models
             catch { }
             try { this.MEDIUM_ICON = (byte[])documentScanat["MEDIUM_ICON"]; }
             catch { }
+            try { this.CALE_FISIER = documentScanat["CALE_FISIER"].ToString(); }
+            catch { }
         }
 
         /// <summary>
@@ -126,6 +131,15 @@ namespace SOCISA.Models
         {
             try { if (this.DATA_INCARCARE == new DateTime()) this.DATA_INCARCARE = GetFileCreationDate(); }
             catch { }
+            try
+            {
+                if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
+                {
+                    this.FILE_CONTENT = CommonFunctions.GetFileContentFromFile(this.CALE_FISIER);
+                    File.Delete(this.CALE_FISIER);
+                }
+            }
+            catch { }
             response toReturn = Validare();
             if (!toReturn.Status)
             {
@@ -133,9 +147,9 @@ namespace SOCISA.Models
             }
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "documente_scanate");
             foreach (PropertyInfo prop in props)
             {
-                var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "documente_scanate");
                 if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                 {
                     string propName = prop.Name;
@@ -183,6 +197,15 @@ namespace SOCISA.Models
         {
             try { this.DATA_INCARCARE = GetFileCreationDate(); }
             catch { }
+            try
+            {
+                if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
+                {
+                    this.FILE_CONTENT = CommonFunctions.GetFileContentFromFile(this.CALE_FISIER);
+                    File.Delete(this.CALE_FISIER);
+                }
+            }
+            catch { }
             response toReturn = Validare();
             if (!toReturn.Status)
             {
@@ -190,9 +213,9 @@ namespace SOCISA.Models
             }
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "documente_scanate");
             foreach (PropertyInfo prop in props)
             {
-                var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "documente_scanate");
                 if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                 {
                     string propName = prop.Name;

@@ -90,6 +90,7 @@ namespace SOCISA.Models
             }
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, TableName);
             foreach (PropertyInfo prop in props)
             {
                 string propName = prop.Name;
@@ -98,7 +99,6 @@ namespace SOCISA.Models
                 propValue = propValue == null ? DBNull.Value : propValue;
                 if (propType != null)
                 {
-                    var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, TableName);
                     if (propName.ToUpper() != "ID" && propName != "TableName" && col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         _parameters.Add(new MySqlParameter(String.Format("_{0}", propName.ToUpper()), propValue));
                 }
@@ -123,6 +123,7 @@ namespace SOCISA.Models
             }
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, TableName);
             foreach (PropertyInfo prop in props)
             {
                 string propName = prop.Name;
@@ -131,7 +132,6 @@ namespace SOCISA.Models
                 propValue = propValue == null ? DBNull.Value : propValue;
                 if (propType != null)
                 {
-                    var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, TableName);
                     if (propName != "TableName" && col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         _parameters.Add(new MySqlParameter(String.Format("_{0}", propName.ToUpper()), propValue));
                 }

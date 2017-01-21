@@ -66,9 +66,9 @@ namespace SOCISA.Models
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
 
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "setari");
             foreach (PropertyInfo prop in props)
             {
-                var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "setari");
                 if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                 {
                     string propName = prop.Name;
@@ -98,9 +98,9 @@ namespace SOCISA.Models
             }
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "setari");
             foreach (PropertyInfo prop in props)
             {
-                var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "setari");
                 if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                 {
                     string propName = prop.Name;
