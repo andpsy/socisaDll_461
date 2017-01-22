@@ -48,93 +48,81 @@ namespace SOCISA
         public static string GenerateFilterFromJsonObject(Type T, string _filter, int authenticatedUserId, string connectionString)
         {
             string toReturn = null;
+
             try
             {
-                try
+                dynamic jObj = JsonConvert.DeserializeObject(_filter);
+                var x = Activator.CreateInstance(T, new object[] { authenticatedUserId, connectionString });
+                string className = x.GetType().Name; // to check if it returns only the short name
+                string tableAllias = CommonFunctions.ClassNamesTableNamesAlliases[className].ToUpper();
+                PropertyInfo[] pisX = x.GetType().GetProperties();
+                PropertyInfo[] pisJObj = jObj.GetType().GetProperties();
+                foreach (PropertyInfo piJObj in pisJObj)
                 {
-                    dynamic x = JsonConvert.DeserializeObject(_filter, T);
-                    toReturn = x.GenerateFilterFromJsonObject();
-                }
-                catch
-                {
-                    try
+                    bool propertyInMasterObject = false;
+                    foreach (PropertyInfo piX in pisX)
                     {
-                        dynamic jObj = JsonConvert.DeserializeObject(_filter);
-                        var x = Activator.CreateInstance(T, new object[] { authenticatedUserId, connectionString });
-                        string className = x.GetType().Name; // to check if it returns only the short name
-                        string tableAllias = CommonFunctions.ClassNamesTableNamesAlliases[className].ToUpper();
-                        PropertyInfo[] pisX = x.GetType().GetProperties();
-                        PropertyInfo[] pisJObj = jObj.GetType().GetProperties();
-                        foreach (PropertyInfo piJObj in pisJObj)
+                        if (piX.Name == piJObj.Name)
                         {
-                            bool propertyInMasterObject = false;
-                            foreach (PropertyInfo piX in pisX)
+                            //piX.SetValue(x, piJObj.GetValue(jObj));
+                            switch (piX.PropertyType.ToString())
                             {
-                                if (piX.Name == piJObj.Name)
-                                {
-                                    //piX.SetValue(x, piJObj.GetValue(jObj));
-                                    switch (piX.PropertyType.ToString())
-                                    {
-                                        case "System.DateTime":
-                                            toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
-                                            break;
-                                        default:
-                                            toReturn += String.Format("{2}{3}.`{0}` like '%{1}%'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
-                                            break;
-                                    }
-                                    propertyInMasterObject = true;
+                                case "System.DateTime":
+                                    toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
                                     break;
-                                }
+                                default:
+                                    toReturn += String.Format("{2}{3}.`{0}` like '%{1}%'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
+                                    break;
                             }
-                            if (!propertyInMasterObject) // pt. campuri externe trimise pt. filtrare - ex. Nume societate sau asigurat din Dosar
-                            {
-                                switch (piJObj.Name.ToLower().Replace("_","").Replace(" ",""))
-                                {
-                                    case "asiguratcasco":
-                                        toReturn += String.Format("{2}ASIGC.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                    case "asiguratrca":
-                                        toReturn += String.Format("{2}ASIGR.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                    case "autocasco":
-                                        toReturn += String.Format("{2}AC.`{0}` LIKE '%{1}%'", "NR_AUTO", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                    case "autorca":
-                                        toReturn += String.Format("{2}AR.`{0}` LIKE '%{1}%'", "NR_AUTO", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                    case "societatecasco":
-                                    case "asiguratorcasco":
-                                        toReturn += String.Format("{2}SC.`{0}` LIKE '%{1}%'", "DENUMIRE_SCURTA", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                    case "societaterca":
-                                    case "asiguratorrca":
-                                        toReturn += String.Format("{2}SR.`{0}` LIKE '%{1}%'", "DENUMIRE_SCURTA", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                    case "intervenient":
-                                        toReturn += String.Format("{2}I.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                    case "tipdosar":
-                                        toReturn += String.Format("{2}TD.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
-                                        break;
-                                }
-                            }
+                            propertyInMasterObject = true;
+                            break;
                         }
-                        /*
-                        MethodInfo mi = x.GetType().GetMethod("ValidareColoane");
-                        response res = (response)mi.Invoke(x, new object[] { _filter });
-                        if (res.Status)
-                        {
-                            mi = x.GetType().GetMethod("GenerateFilterFromJsonObject");
-                            var r = mi.Invoke(x, null);
-                            toReturn = r.ToString();
-                        }
-                        */
                     }
-                    catch { }
+                    if (!propertyInMasterObject) // pt. campuri externe trimise pt. filtrare - ex. Nume societate sau asigurat din Dosar
+                    {
+                        switch (piJObj.Name.ToLower().Replace("_", "").Replace(" ", ""))
+                        {
+                            case "asiguratcasco":
+                                toReturn += String.Format("{2}ASIGC.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "asiguratrca":
+                                toReturn += String.Format("{2}ASIGR.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "autocasco":
+                                toReturn += String.Format("{2}AC.`{0}` LIKE '%{1}%'", "NR_AUTO", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "autorca":
+                                toReturn += String.Format("{2}AR.`{0}` LIKE '%{1}%'", "NR_AUTO", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "societatecasco":
+                            case "asiguratorcasco":
+                                toReturn += String.Format("{2}SC.`{0}` LIKE '%{1}%'", "DENUMIRE_SCURTA", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "societaterca":
+                            case "asiguratorrca":
+                                toReturn += String.Format("{2}SR.`{0}` LIKE '%{1}%'", "DENUMIRE_SCURTA", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "intervenient":
+                                toReturn += String.Format("{2}I.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "tipdosar":
+                                toReturn += String.Format("{2}TD.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
+                                break;
+                        }
+                    }
                 }
+                /*
+                MethodInfo mi = x.GetType().GetMethod("ValidareColoane");
+                response res = (response)mi.Invoke(x, new object[] { _filter });
+                if (res.Status)
+                {
+                    mi = x.GetType().GetMethod("GenerateFilterFromJsonObject");
+                    var r = mi.Invoke(x, null);
+                    toReturn = r.ToString();
+                }
+                */
             }
             catch { }
-
             return toReturn;
         }
 
