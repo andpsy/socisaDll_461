@@ -92,7 +92,7 @@ namespace SOCISA.Models
             {
                 try
                 {
-                    string newFilter = CommonFunctions.GenerateFilterFromJsonObject(typeof(Dosar), _filter, authenticatedUserId, connectionString);
+                    string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(Dosar), _filter, authenticatedUserId, connectionString);
                     _filter = newFilter == null ? _filter : newFilter;
                 }
                 catch { }
@@ -341,7 +341,7 @@ namespace SOCISA.Models
                     }
                     catch
                     {
-                        Error err = CommonFunctions.ErrorMessage("couldNotInsertAsiguratCasco");
+                        Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratCasco");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
                         r = new response(false, err.ERROR_MESSAGE, null, errs);
@@ -373,7 +373,7 @@ namespace SOCISA.Models
                     }
                     catch
                     {
-                        Error err = CommonFunctions.ErrorMessage("couldNotInsertAsiguratRca");
+                        Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratRca");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
                         r = new response(false, err.ERROR_MESSAGE, null, errs);
@@ -405,7 +405,7 @@ namespace SOCISA.Models
                     }
                     catch
                     {
-                        Error err = CommonFunctions.ErrorMessage("couldNotInsertAsiguratorCasco");
+                        Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratorCasco");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
                         r = new response(false, err.ERROR_MESSAGE, null, errs);
@@ -437,7 +437,7 @@ namespace SOCISA.Models
                     }
                     catch
                     {
-                        Error err = CommonFunctions.ErrorMessage("couldNotInsertAsiguratorRca");
+                        Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratorRca");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
                         r = new response(false, err.ERROR_MESSAGE, null, errs);
@@ -470,7 +470,7 @@ namespace SOCISA.Models
                     }
                     catch
                     {
-                        Error err = CommonFunctions.ErrorMessage("couldNotInsertAutoCasco");
+                        Error err = ErrorParser.ErrorMessage("couldNotInsertAutoCasco");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
                         r = new response(false, err.ERROR_MESSAGE, null, errs);
@@ -503,7 +503,7 @@ namespace SOCISA.Models
                     }
                     catch
                     {
-                        Error err = CommonFunctions.ErrorMessage("couldNotInsertAutoRca");
+                        Error err = ErrorParser.ErrorMessage("couldNotInsertAutoRca");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
                         r = new response(false, err.ERROR_MESSAGE, null, errs);
@@ -529,7 +529,7 @@ namespace SOCISA.Models
                     catch
                     {
                         /*
-                        Error err = CommonFunctions.ErrorMessage("couldNotInsertIntervenient");
+                        Error err = ErrorParser.ErrorMessage("couldNotInsertIntervenient");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
                         r = new response(false, err.ERROR_MESSAGE, null, errs);

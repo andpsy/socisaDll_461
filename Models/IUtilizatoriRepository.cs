@@ -67,7 +67,7 @@ namespace SOCISA.Models
             {
                 try
                 {
-                    string newFilter = CommonFunctions.GenerateFilterFromJsonObject(typeof(Utilizator), _filter, authenticatedUserId, connectionString);
+                    string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(Utilizator), _filter, authenticatedUserId, connectionString);
                     _filter = newFilter == null ? _filter : newFilter;
                 }
                 catch { }

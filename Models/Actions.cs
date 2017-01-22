@@ -20,7 +20,7 @@ namespace SOCISA.Models
         public string ACTION { get; set; }
         public string OBJECT_NAME { get; set; }
         public string TYPE { get; set; }
-        public int ORDER { get; set; }
+        public int? ORDER { get; set; }
 
         public Action() { }
 
@@ -188,7 +188,7 @@ namespace SOCISA.Models
             if (this.NAME == null || this.NAME.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyNumeActiune");
+                err = ErrorParser.ErrorMessage("emptyNumeActiune");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -196,7 +196,7 @@ namespace SOCISA.Models
             if (this.ACTION == null || this.ACTION.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyAction");
+                err = ErrorParser.ErrorMessage("emptyAction");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -211,7 +211,7 @@ namespace SOCISA.Models
 
         public string GenerateFilterFromJsonObject()
         {
-            return CommonFunctions.GenerateFilterFromJsonObject(this);
+            return Filtering.GenerateFilterFromJsonObject(this);
         }
 
         public bool HasChildrens(string tableName)

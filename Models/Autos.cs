@@ -192,7 +192,7 @@ namespace SOCISA.Models
             if (this.NR_AUTO == null || this.NR_AUTO.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyNrAuto");
+                err = ErrorParser.ErrorMessage("emptyNrAuto");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -200,7 +200,7 @@ namespace SOCISA.Models
             if (this.SERIE_SASIU == null || this.SERIE_SASIU.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptySerieSasiuAuto");
+                err = ErrorParser.ErrorMessage("emptySerieSasiuAuto");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -215,7 +215,7 @@ namespace SOCISA.Models
 
         public string GenerateFilterFromJsonObject()
         {
-            return CommonFunctions.GenerateFilterFromJsonObject(this);
+            return Filtering.GenerateFilterFromJsonObject(this);
         }
 
         public bool HasChildrens(string tableName)

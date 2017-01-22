@@ -186,7 +186,7 @@ namespace SOCISA.Models
             if (this.DENUMIRE == null || this.DENUMIRE.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyDenumireDrept");
+                err = ErrorParser.ErrorMessage("emptyDenumireDrept");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -207,7 +207,7 @@ namespace SOCISA.Models
         /// <returns>string cu filtrul ce va fi trimis ca parametru in procedura stocata din BD pentru filtrare</returns>
         public string GenerateFilterFromJsonObject()
         {
-            return CommonFunctions.GenerateFilterFromJsonObject(this);
+            return Filtering.GenerateFilterFromJsonObject(this);
         }
 
         public bool HasChildrens(string tableName)

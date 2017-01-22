@@ -225,7 +225,7 @@ namespace SOCISA.Models
             if (this.NR_SENTINTA == null || this.NR_SENTINTA.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyNrSentinta");
+                err = ErrorParser.ErrorMessage("emptyNrSentinta");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -233,7 +233,7 @@ namespace SOCISA.Models
             if (this.DATA_SENTINTA == null || this.DATA_SENTINTA == new DateTime())
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyDataSentinta");
+                err = ErrorParser.ErrorMessage("emptyDataSentinta");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -242,7 +242,7 @@ namespace SOCISA.Models
             if (this.ID_SOLUTIE == null || this.ID_SOLUTIE <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptySolutieSentinta");
+                err = ErrorParser.ErrorMessage("emptySolutieSentinta");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -258,7 +258,7 @@ namespace SOCISA.Models
 
         public string GenerateFilterFromJsonObject()
         {
-            return CommonFunctions.GenerateFilterFromJsonObject(this);
+            return Filtering.GenerateFilterFromJsonObject(this);
         }
 
         public bool HasChildrens(string tableName)

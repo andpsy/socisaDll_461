@@ -208,7 +208,7 @@ namespace SOCISA.Models
             if (this.ID_SENDER <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyMessageSender");
+                err = ErrorParser.ErrorMessage("emptyMessageSender");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -216,7 +216,7 @@ namespace SOCISA.Models
             if (this.GetReceiversByIdDosar().Length == 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyMessageReceiver");
+                err = ErrorParser.ErrorMessage("emptyMessageReceiver");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -224,7 +224,7 @@ namespace SOCISA.Models
             if (this.SUBIECT == null || this.SUBIECT.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyMessageSubject");
+                err = ErrorParser.ErrorMessage("emptyMessageSubject");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -232,7 +232,7 @@ namespace SOCISA.Models
             if (this.BODY == null || this.BODY.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyMessageBody");
+                err = ErrorParser.ErrorMessage("emptyMessageBody");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -247,7 +247,7 @@ namespace SOCISA.Models
 
         public string GenerateFilterFromJsonObject()
         {
-            return CommonFunctions.GenerateFilterFromJsonObject(this);
+            return Filtering.GenerateFilterFromJsonObject(this);
         }
 
         public bool HasChildrens(string tableName)

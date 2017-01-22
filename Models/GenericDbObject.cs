@@ -153,14 +153,14 @@ namespace SOCISA.Models
                     }
                     if (!gasit)
                     {
-                        Error err = CommonFunctions.ErrorMessage("campInexistentInTabela");
+                        Error err = ErrorParser.ErrorMessage("campInexistentInTabela");
                         return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
                     }
                 }
             }
             catch
             {
-                Error err = CommonFunctions.ErrorMessage("cannotConvertStringToTableColumns");
+                Error err = ErrorParser.ErrorMessage("cannotConvertStringToTableColumns");
                 return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
             }
             return toReturn;

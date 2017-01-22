@@ -166,7 +166,7 @@ namespace SOCISA.Models
             if (this.NUME == null || this.NUME.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyNumeSetare");
+                err = ErrorParser.ErrorMessage("emptyNumeSetare");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -174,7 +174,7 @@ namespace SOCISA.Models
             if (this.VALOARE == null || this.VALOARE.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyValoareSetare");
+                err = ErrorParser.ErrorMessage("emptyValoareSetare");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -189,7 +189,7 @@ namespace SOCISA.Models
 
         public string GenerateFilterFromJsonObject()
         {
-            return CommonFunctions.GenerateFilterFromJsonObject(this);
+            return Filtering.GenerateFilterFromJsonObject(this);
         }
 
         public bool HasChildrens(string tableName)

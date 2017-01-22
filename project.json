@@ -3,7 +3,7 @@
   "copyright": "AndPsy",
   "description": "socisa Db Layer",
   "language": "en",
-  "version": "1.0.11-beta",
+  "version": "1.0.12-beta",
   "authors": [ "Andpsy" ],
 
   "dependencies": {

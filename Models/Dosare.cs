@@ -1035,7 +1035,7 @@ namespace SOCISA.Models
             if (this.ID_ASIGURAT_CASCO == null || this.ID_ASIGURAT_CASCO <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyAsiguratCasco");
+                err = ErrorParser.ErrorMessage("emptyAsiguratCasco");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1043,7 +1043,7 @@ namespace SOCISA.Models
             if (this.ID_ASIGURAT_RCA == null || this.ID_ASIGURAT_RCA <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyAsiguratRca");
+                err = ErrorParser.ErrorMessage("emptyAsiguratRca");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1051,7 +1051,7 @@ namespace SOCISA.Models
             if (this.ID_SOCIETATE_CASCO == null || this.ID_SOCIETATE_CASCO <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyAsiguratorCasco");
+                err = ErrorParser.ErrorMessage("emptyAsiguratorCasco");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1059,7 +1059,7 @@ namespace SOCISA.Models
             if (this.ID_SOCIETATE_RCA == null || this.ID_SOCIETATE_RCA <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyAsiguratorRca");
+                err = ErrorParser.ErrorMessage("emptyAsiguratorRca");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1067,7 +1067,7 @@ namespace SOCISA.Models
             if (this.NR_DOSAR_CASCO == null || this.NR_DOSAR_CASCO.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyNrDosarCasco");
+                err = ErrorParser.ErrorMessage("emptyNrDosarCasco");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1075,7 +1075,7 @@ namespace SOCISA.Models
             if (this.NR_POLITA_CASCO == null || this.NR_POLITA_CASCO.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyNrPolitaCasco");
+                err = ErrorParser.ErrorMessage("emptyNrPolitaCasco");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1083,7 +1083,7 @@ namespace SOCISA.Models
             if (this.NR_POLITA_RCA == null || this.NR_POLITA_RCA.Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyNrPolitaRca");
+                err = ErrorParser.ErrorMessage("emptyNrPolitaRca");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1091,7 +1091,7 @@ namespace SOCISA.Models
             if (this.ID_AUTO_CASCO == null || this.ID_AUTO_CASCO <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyAutoCasco");
+                err = ErrorParser.ErrorMessage("emptyAutoCasco");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1099,7 +1099,7 @@ namespace SOCISA.Models
             if (this.ID_AUTO_RCA == null || this.ID_AUTO_RCA <= 0)
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyAutoRca");
+                err = ErrorParser.ErrorMessage("emptyAutoRca");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1107,7 +1107,7 @@ namespace SOCISA.Models
             if (this.VALOARE_DAUNA == null || this.VALOARE_DAUNA.ToString().Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyValoareDauna");
+                err = ErrorParser.ErrorMessage("emptyValoareDauna");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1115,7 +1115,7 @@ namespace SOCISA.Models
             if (this.VALOARE_REGRES == null || this.VALOARE_REGRES.ToString().Trim() == "")
             {
                 toReturn.Status = false;
-                err = CommonFunctions.ErrorMessage("emptyValoareRegres");
+                err = ErrorParser.ErrorMessage("emptyValoareRegres");
                 toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
@@ -1128,7 +1128,7 @@ namespace SOCISA.Models
                     if (dj != null)
                     {
                         toReturn.Status = false;
-                        err = CommonFunctions.ErrorMessage("dosarExistent");
+                        err = ErrorParser.ErrorMessage("dosarExistent");
                         toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                         toReturn.InsertedId = null;
                         toReturn.Error.Add(err);
@@ -1198,7 +1198,7 @@ namespace SOCISA.Models
         /// <returns>string cu filtrul ce va fi trimis ca parametru in procedura stocata din BD pentru filtrare</returns>
         public string GenerateFilterFromJsonObject()
         {
-            return CommonFunctions.GenerateFilterFromJsonObject(this);
+            return Filtering.GenerateFilterFromJsonObject(this);
         }
 
         public bool HasChildrens(string tableName)

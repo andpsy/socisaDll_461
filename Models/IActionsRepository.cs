@@ -107,7 +107,7 @@ namespace SOCISA.Models
                 #endregion
                 try
                 {
-                    string newFilter = CommonFunctions.GenerateFilterFromJsonObject(typeof(Action), _filter, authenticatedUserId, connectionString);
+                    string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(Action), _filter, authenticatedUserId, connectionString);
                     _filter = newFilter == null ? _filter : newFilter;
                 }
                 catch { }

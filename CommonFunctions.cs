@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections;
-using MySql.Data.MySqlClient;
-using System.Collections.Specialized;
+﻿using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Data;
 using System.Data.Common;
-using System.Text.RegularExpressions;
+using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Reflection;
-using Newtonsoft.Json;
-using System.Xml;
-using System.Dynamic;
 
 namespace SOCISA
 {
@@ -28,124 +23,38 @@ namespace SOCISA
     }
 
     /// <summary>
-    /// Clasa pentru definirea unei erori
-    /// </summary>
-    public class Error
-    {
-        /// <summary>
-        /// ID-ul uni pentru identificarea erorii
-        /// </summary>
-        public int ID { get; set; }
-        /// <summary>
-        /// Cod unic pentru identificarea erorii
-        /// </summary>
-        public string ERROR_CODE { get; set; }
-        /// <summary>
-        /// Mesajul de eroare
-        /// </summary>
-        public string ERROR_MESSAGE {get; set; }
-        /// <summary>
-        /// Denumirea obiectului care a generat eroarea
-        /// </summary>
-        public string ERROR_OBJECT { get; set; }
-        /// <summary>
-        /// Tipul erorii
-        /// </summary>
-        public string ERROR_TYPE { get; set; } // Critical, Warning, Information
-
-        /// <summary>
-        /// Constructorul default
-        /// </summary>
-        public Error() { }
-    }
-
-    /// <summary>
-    /// Clasa care defineste un Filtru pentru selectia inregistrarilor din baza de date
-    /// </summary>
-    public class Filtru
-    {
-        /// <summary>
-        /// Coloana din tabel pe care se aplica filtrul
-        /// </summary>
-        public string Coloana { get; set; }
-        /// <summary>
-        /// Conditia pe care trebuie sa o indeplineasca valoarea din coloana
-        /// </summary>
-        public string Conditie { get; set; }
-        /// <summary>
-        /// Valoarea cu care se compara valorile din coloana
-        /// </summary>
-        public string Valoare { get; set; }
-        /// <summary>
-        /// Operatorul pentru crearea unui filtru compus (SI, SAU)
-        /// </summary>
-        public string Operator { get; set; }
-    }
-
-    public class Filter
-    {
-        public string Sort { get; set; }
-        public string Order { get; set; }
-        public string Filtru { get; set; }
-        public string Limit { get; set; }
-
-        public Filter(string _sort, string _order, string _filtru, string _limit)
-        {
-            Sort = _sort; Order = _order; Filtru = _filtru; Limit = _limit;
-        }
-    }
-
-    /// <summary>
     /// Summary description for SOCISA.CommonFunctions
     /// </summary>
     public static class CommonFunctions
     {
-        public static string GenerateFilterFromJsonObject(Type T, string _filter, int authenticatedUserId, string connectionString)
+        public static Dictionary<string, string> ClassNamesTableNamesAlliases = new Dictionary<string, string>()
         {
-            string toReturn = null;
-            try
-            {
-                try
-                {
-                    dynamic x = JsonConvert.DeserializeObject(_filter, T);
-                    toReturn = x.GenerateFilterFromJsonObject();
-                }
-                catch
-                {
-                    try
-                    {
-                        dynamic jObj = JsonConvert.DeserializeObject(_filter);
-                        var x = Activator.CreateInstance(T, new object[] { authenticatedUserId, connectionString });
-                        PropertyInfo[] pisX = x.GetType().GetProperties();
-                        PropertyInfo[] pisJObj = jObj.GetType().GetProperties();
-                        foreach (PropertyInfo piX in pisX)
-                        {
-                            foreach (PropertyInfo piJObj in pisJObj)
-                            {
-                                if (piX.Name == piJObj.Name)
-                                {
-                                    piX.SetValue(x, piJObj.GetValue(jObj));
-                                    break;
-                                }
-                            }
-                        }
-                        MethodInfo mi = x.GetType().GetMethod("ValidareColoane");
-                        response res = (response)mi.Invoke(x, new object[] { _filter });
-                        if (res.Status)
-                        {
-                            mi = x.GetType().GetMethod("GenerateFilterFromJsonObject");
-                            var r = mi.Invoke(x, null);
-                            toReturn = r.ToString();
-                        }
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-
-            return toReturn;
-        }
-
+            {"Action", "actions" },
+            {"Asigurat","asigurati" },
+            {"Auto","auto" },
+            { "DocumentScanat","documente_scanate"},
+            {"Dosar", "dosare" },
+            {"DosarProces","dosare_procese" },
+            {"DosarStadiu","dosare_stadii" },
+            {"DosarStadiuSentinta", "dosare_stadii_sentinte" },
+            {"Drept","drepturi" },
+            {"Intervenient", "intervenienti" },
+            {"Mesaj","mesaje" },
+            {"MesajUtilizator","mesaje_utilizatori" },
+            {"Nomenclator","nomenclatoare" },
+            {"Proces","procese" },
+            {"Sentinta", "sentinte" },
+            {"Setare", "setari" },
+            {"SocietateAsigurare", "societati_asigurare" },
+            {"Stadiu", "stadii" },
+            {"Utilizator", "utilizatori" },
+            {"UtilizatorAction", "utilizatori_actions" },
+            {"UtilizatorDosar", "utilizatori_dosare" },
+            {"UtilizatorDrept", "utilizatori_drepturi" },
+            {"UtilizatorSetare", "utilizatori_setari" },
+            {"UtilizatorSocietateAdministrata", "utilizatori_societati" },
+            {"UtilizatorSocietate", "utilizatori_societati" }
+        };
         public static IEnumerable<Dictionary<string, object>> Serialize(DbDataReader reader)
         {
             var results = new List<Dictionary<string, object>>();
@@ -172,21 +81,6 @@ namespace SOCISA
             string json = JsonConvert.SerializeObject(dict, Formatting.Indented);
             return json;
         }
-
-        public static object[] Conditii = new object[]{
-          "egal cu",
-          "diferit de",
-          "mai mic decat",
-          "mai mic sau egal cu",
-          "mai mare decat",
-          "mai mare sau egal cu",
-          "incepe cu",
-          "nu incepe cu",
-          "se termina cu",
-          "nu se termina cu",
-          "contine",
-          "nu contine"
-        };
 
         public static string ToMySqlFormatDate(DateTime dt)
         {
@@ -281,81 +175,6 @@ namespace SOCISA
             return _newParam;
         }
 
-        public static string MySqlErrorParser(MySqlException mySqlException)
-        {
-            return ErrorParser.ParseError(mySqlException);
-        }
-
-        public static string getConditie(string _strConditie)
-        {
-            switch (_strConditie)
-            {
-                case "egal cu":
-                    return " = ";
-                //break;
-                case "diferit de":
-                    return " != ";
-                //break;
-                case "mai mic decat":
-                    return " < ";
-                //break;
-                case "mai mic sau egal cu":
-                    return " <= ";
-                //break;
-                case "mai mare decat":
-                    return " > ";
-                //break;
-                case "mai mare sau egal cu":
-                    return " >= ";
-                //break;
-                case "incepe cu":
-                    return " LIKE <#VALUE#>% ";
-                //break;
-                case "nu incepe cu":
-                    return " NOT LIKE <#VALUE#>% ";
-                //break;
-                case "se termina cu":
-                    return " LIKE %<#VALUE#> ";
-                //break;
-                case "contine":
-                    return " LIKE %<#VALUE#>% ";
-                //break;
-                case "nu contine":
-                    return " NOT LIKE %<#VALUE#>% ";
-                    //break;
-            }
-            return null;
-        }
-
-        public static string GenerateSimpleFilter(string _filtru, DbDataReader _table)
-        {
-            string _strFilter = "";
-            int column_counter = 0;
-            int counter = GetDbReaderRowCount(_table);
-            while (_table.Read())
-            {
-                IDataRecord dr = (IDataRecord)_table;
-                string columnName = dr["Field"].ToString().ToLower();
-                string columnType = dr["Type"].ToString().ToLower();
-                if (columnName != "id" && columnName.IndexOf("id_") == -1 && columnName.IndexOf("_id") == -1)
-                {
-                    if (_strFilter.Length > 0 && column_counter < counter)
-                        _strFilter = String.Format("{0} OR ", _strFilter);
-
-                    if (columnType.IndexOf("bool") > -1 || columnType.IndexOf("tinyint") > -1)
-                        _strFilter = String.Format("{0}CAST(`{1}` AS CHAR) LIKE '%{2}%'", _strFilter, columnName, _filtru);
-                    else if (columnType.IndexOf("int") > -1 || columnType.IndexOf("double") > -1 || columnType.IndexOf("decimal") > -1)
-                        _strFilter = String.Format("{0}CAST(`{1}` AS CHAR) LIKE '%{2}%'", _strFilter, columnName, _filtru);
-                    else if (columnType.IndexOf("date") > -1)
-                        _strFilter = String.Format("{0}CAST(`{1}` AS CHAR) LIKE '%{2}%'", _strFilter, columnName, _filtru);
-                    else if (columnType.IndexOf("char") > -1 || columnType.IndexOf("text") > -1)
-                        _strFilter = String.Format("{0}`{1}` LIKE '%{2}%'", _strFilter, columnName, _filtru);
-                }
-                column_counter++;
-            }
-            return _strFilter;
-        }
-
         public static int GetDbReaderRowCount(DbDataReader r)
         {
             int counter = 0;
@@ -364,113 +183,6 @@ namespace SOCISA
                 counter++;
             }
             return counter;
-        }
-
-        public static string GenerateFilterFromJson(string _filtru, DbDataReader _table)
-        {
-            Filtru[] filtru = JsonConvert.DeserializeObject<Filtru[]>(_filtru);
-            //DataTable dt = full_table_columns(_table_name);
-            string _strFilter = "";
-
-
-            for (int i = 0; i < filtru.Length; i++)
-            {
-                {
-                    string _col = filtru[i].Coloana;
-
-                    string columnType = "";
-
-                    if (_col == "EXTRA CONTRACT") _col = "D.EXTRACONTRACT";
-                    else _col = _col.Replace(' ', '_');
-
-                    while (_table.Read())
-                    {
-                        IDataRecord dr = (IDataRecord)_table;
-
-                        if (dr["Field"].ToString() == _col)
-                        {
-                            columnType = dr["Type"].ToString();
-                            break;
-                        }
-
-                        switch (_col)
-                        {
-                            case "ASIGURAT_CASCO":
-                                _col = "ASIGC.DENUMIRE";
-                                columnType = "VARCHAR";
-                                break;
-                            case "ASIGURAT_RCA":
-                                _col = "ASIGR.DENUMIRE";
-                                columnType = "VARCHAR";
-                                break;
-                            case "ASIGURATOR_CASCO":
-                                _col = "SC.DENUMIRE";
-                                columnType = "VARCHAR";
-                                break;
-                            case "ASIGURATOR_RCA":
-                                _col = "SR.DENUMIRE";
-                                columnType = "VARCHAR";
-                                break;
-                            case "INTERVENIENT":
-                                _col = "I.DENUMIRE";
-                                columnType = "VARCHAR";
-                                break;
-                            case "NR_AUTO_CASCO":
-                                _col = "AC.NR_AUTO";
-                                columnType = "VARCHAR";
-                                break;
-                            case "NR_AUTO_RCA":
-                                _col = "AR.NR_AUTO";
-                                columnType = "VARCHAR";
-                                break;
-                            case "TIP_DOSAR":
-                                _col = "TD.DENUMIRE";
-                                columnType = "VARCHAR";
-                                break;
-                            default:
-                                _col = "D." + _col;
-                                break;
-                        }
-                        string _tmpCond = getConditie(filtru[i].Conditie);
-                        string _tmpVal = filtru[i].Valoare;
-
-                        if (_tmpVal.ToLower() == "null" && (_tmpCond.Trim() == "=" || _tmpCond.Trim() == "!="))
-                        {
-                            _strFilter += (_col + (_tmpCond.Trim() == "=" ? " IS NULL " : " IS NOT NULL "));
-                        }
-                        else if (columnType.ToUpper().StartsWith("DATETIME"))
-                        {
-                            _tmpVal = ToMySqlFormatDate(SwitchBackFormatedDate(_tmpVal));
-                            _strFilter += (_col + _tmpCond + "'" + _tmpVal + "' ");
-                        }
-                        else if (columnType.ToUpper().StartsWith("VARCHAR") || columnType.ToUpper().StartsWith("TEXT"))
-                        {
-                            if (_tmpCond.Replace("<#VALUE#>", "") != _tmpCond)
-                            {
-                                string _tC = _tmpCond.Replace("%<#VALUE#>%", "'%" + _tmpVal + "%'");
-                                _tC = _tC.Replace("%<#VALUE#>", "'%" + _tmpVal + "'");
-                                _tC = _tC.Replace("<#VALUE#>%", "'" + _tmpVal + "%'");
-                                _tC = _tC.Replace("<#VALUE#>", "'" + _tmpVal + "'");
-                                _strFilter += (_col + _tC + " ");
-                            }
-                            else
-                                _strFilter += (_col + _tmpCond + " '" + _tmpVal + "' ");
-                        }
-                        else
-                        {
-                            if (_tmpCond.Replace("<#VALUE#>", "") != _tmpCond)
-                            {
-                                _strFilter += (_col + " = " + _tmpVal);
-                            }
-                            else
-                                _strFilter += (_col + _tmpCond + " " + _tmpVal + " ");
-                        }
-                        if (filtru[i].Operator != null && filtru[i].Operator.Trim() != "" && i < filtru.Length - 1)
-                            _strFilter += (filtru[i].Operator.Replace("SI", "AND").Replace("SAU", "OR") + " ");
-                    }
-                }
-            }
-            return _strFilter;
         }
 
         public static bool HasRight(object _dictionary, string _right)
@@ -515,14 +227,6 @@ namespace SOCISA
                 }
                 catch { return Double.NaN; }
             }
-        }
-
-        public static bool Like(this string str, string pattern)
-        {
-            return new Regex(
-                "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$",
-                RegexOptions.IgnoreCase | RegexOptions.Singleline
-            ).IsMatch(str);
         }
 
         public static string GetMd5Hash(MD5 md5Hash, string input)
@@ -581,66 +285,6 @@ namespace SOCISA
             catch (Exception exp) { throw exp; }
         }
 
-        /// <summary>
-        /// Proprietate care mapeaza tabela din fisierul .xml cu erori predefinite
-        /// </summary>
-        public static Dictionary<string, Error> ErrorMessages
-        {
-            get
-            {
-                Dictionary<string, Error> errorMessages = new Dictionary<string, Error>();
-                XmlReader r = XmlReader.Create("ErrorMessages.xml");
-
-                XmlDocument xdoc = new XmlDocument();//xml doc used for xml parsing
-
-                xdoc.Load(r);//loading XML in xml doc
-
-                XmlNodeList xNodelst = xdoc.DocumentElement.SelectNodes("ErrorMessages");//reading node so that we can traverse thorugh the XML
-
-                foreach (XmlNode xNode in xNodelst)//traversing XML 
-                {
-                    if (xNode.Name == "ErrorMessage" && xNode.HasChildNodes) {
-                        string errCode = "";
-                        Error err = new Error();
-                        foreach (XmlNode child in xNode.ChildNodes)
-                        {
-                            switch (child.Name)
-                            {
-                                case "ID":
-                                    err.ID = Convert.ToInt32(child.Value);
-                                    break;
-                                case "ERROR_CODE":
-                                    errCode = err.ERROR_CODE = child.Value.ToString();
-                                    break;
-                                case "ERROR_MESSAGE":
-                                    err.ERROR_MESSAGE = child.Value.ToString();
-                                    break;
-                                case "ERROR_OBJECT":
-                                    err.ERROR_OBJECT = child.Value.ToString();
-                                    break;
-                                case "ERROR_TYPE":
-                                    err.ERROR_TYPE = child.Value.ToString();
-                                    break;
-                            }
-                        }
-                        errorMessages.Add(errCode, err);
-                    }
-                }
-                return errorMessages;
-            }
-        }
-
-        public static Error ErrorMessage(string errorCode)
-        {
-            try
-            {
-                Error error = new Error();
-                ErrorMessages.TryGetValue(errorCode, out error);
-                return error;
-            }
-            catch { return null; }
-        }
-
 
         public static response ValidareColoane(object item, string fieldValueCollection)
         {
@@ -662,14 +306,14 @@ namespace SOCISA
                     }
                     if (!gasit)
                     {
-                        Error err = CommonFunctions.ErrorMessage("campInexistentInTabela");
+                        Error err = ErrorParser.ErrorMessage("campInexistentInTabela");
                         return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
                     }
                 }
             }
             catch
             {
-                Error err = CommonFunctions.ErrorMessage("cannotConvertStringToTableColumns");
+                Error err = ErrorParser.ErrorMessage("cannotConvertStringToTableColumns");
                 return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
             }
             return toReturn;
@@ -765,56 +409,6 @@ namespace SOCISA
                 }
             }
             return false;
-        }
-
-        public static string GenerateFilterFromJsonObject(object item)
-        {
-            string toReturn = "";
-
-            PropertyInfo[] props = item.GetType().GetProperties();
-            foreach (PropertyInfo prop in props)
-            {
-                string propName = prop.Name;
-                string propType = prop.PropertyType.ToString();
-                object propValue = prop.GetValue(item, null);
-                propValue = propValue == null ? DBNull.Value : propValue;
-                if (propType != null && propValue != null && propValue != DBNull.Value)
-                {
-                    try
-                    {
-                        //if (propName.ToUpper().IndexOf("ID") != 0) // nu cautam si dupa ID-uri
-                        {
-                            switch (propType)
-                            {
-                                case "SOCISA.AsiguratiJson":
-                                    toReturn += String.Format("{2}{0} like '%{1}%'", propName == "AsiguratCasco" ? "ASIGC.DENUMIRE" : "ASIGR.DENUMIRE", ((Models.Asigurat)propValue).DENUMIRE, (toReturn == "" ? "" : " AND "));
-                                    break;
-                                case "SOCISA.AutoJson":
-                                    toReturn += String.Format("{2}{0} like '%{1}%'", propName == "AutoCasco" ? "AC.NR_AUTO" : "AR.NR_AUTO", ((Models.Auto)propValue).NR_AUTO, (toReturn == "" ? "" : " AND "));
-                                    break;
-                                case "SOCISA.SocietatiAsigurareJson":
-                                    toReturn += String.Format("{2}{0} like '%{1}%'", propName == "SocietateCasco" ? "SC.DENUMIRE_SCURTA" : "SR.DENUMIRE_SCURTA", ((Models.SocietateAsigurare)propValue).DENUMIRE_SCURTA, (toReturn == "" ? "" : " AND "));
-                                    break;
-                                case "SOCISA.IntervenientiJson":
-                                    toReturn += String.Format("{2}{0} like '%{1}%'", "I.DENUMIRE", ((Models.Intervenient)propValue).DENUMIRE, (toReturn == "" ? "" : " AND "));
-                                    break;
-                                case "SOCISA.NomenclatorJson":
-                                    toReturn += String.Format("{2}{0} like '%{1}%'", "TD.DENUMIRE", ((Models.Nomenclator)propValue).DENUMIRE, (toReturn == "" ? "" : " AND "));
-                                    break;
-
-                                case "System.DateTime":
-                                    toReturn += String.Format("{2}{0} >= '{1}'", propName, propValue, (toReturn == "" ? "" : " AND "));
-                                    break;
-                                default:
-                                    toReturn += String.Format("{2}{0} like '{1}%'", propName, propValue, (toReturn == "" ? "" : " AND "));
-                                    break;
-                            }
-                        }
-                    }
-                    catch { }
-                }
-            }
-            return toReturn;
         }
 
         public static object GetChildrens(object item, string table_name)

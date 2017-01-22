@@ -108,6 +108,7 @@ namespace SOCISA
         {
             try
             {
+                ID_UTILIZATOR = Convert.ToInt32(_authenticated_user_id);
                 ConnectionString = _connectionString;
                 mySqlConnection.ConnectionString = _connectionString;
                 mySqlCommand.Connection = mySqlConnection;
@@ -131,6 +132,7 @@ namespace SOCISA
         {
             try
             {
+                ID_UTILIZATOR = Convert.ToInt32(_authenticated_user_id);
                 ConnectionString = _connectionString;
                 mySqlConnection.ConnectionString = _connectionString;
                 mySqlCommand.Connection = mySqlConnection;
@@ -183,7 +185,7 @@ namespace SOCISA
                     if (mySqlCommand.CommandText.ToLower().IndexOf("import") > 0) action = "IMPORT";
                     string table = action != "IMPORT" ? mySqlCommand.CommandText.ToUpper().Replace("SP_", "").Replace(action, "") : mySqlCommand.CommandText.ToUpper().Replace("SP", "").Replace("REGULARIMPORT", "");
                     string detalii_before = "";
-                    if (mySqlCommand.Parameters.Contains("_ID"))
+                    if (mySqlCommand.Parameters.Contains("_ID") && mySqlCommand.Parameters["_ID"].Direction == ParameterDirection.Input && (action == "UPDATE" || action == "DELETE")) // pt. Update / Delete
                     {
                         try
                         {
@@ -430,7 +432,9 @@ namespace SOCISA
             MySqlCommand m = new MySqlCommand();
             m.Connection = mySqlConnection;
             m.CommandType = CommandType.StoredProcedure;
-            m.CommandText = _tabela + "sp_GetById";
+            m.CommandText = _tabela.ToUpper() + "sp_GetById";
+            MySqlParameter _AUTHENTICATED_USER_ID = new MySqlParameter("_AUTHENTICATED_USER_ID", this.ID_UTILIZATOR);
+            m.Parameters.Add(_AUTHENTICATED_USER_ID);
             MySqlParameter _ID = new MySqlParameter("_ID", _id);
             m.Parameters.Add(_ID);
             mc.Open();
@@ -438,14 +442,15 @@ namespace SOCISA
             MySqlDataReader mdr = m.ExecuteReader();
             System.Collections.ObjectModel.ReadOnlyCollection<DbColumn> _columns = mdr.GetColumnSchema();
 
-            IDataRecord rcrd = (IDataRecord)mdr;
-
-            for (int i = 0; i < _columns.Count; i++)
+            while (mdr.Read())
             {
-                string dcName = _columns[i].ColumnName;
-                toReturn += (dcName.ToUpper() + " = " + rcrd[dcName].ToString());
+                for (int i = 0; i < _columns.Count; i++)
+                {
+                    string dcName = _columns[i].ColumnName;
+                    toReturn += (dcName.ToUpper() + " = " + mdr[dcName].ToString());
+                }
+                break;
             }
-
             mc.Close();
 
             return toReturn;
