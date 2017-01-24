@@ -221,24 +221,24 @@ namespace SOCISA.Models
             return Filtering.GenerateFilterFromJsonObject(this);
         }
 
-        public bool HasChildrens(string tableName)
+        public response HasChildrens(string tableName)
         {
             return CommonFunctions.HasChildrens(authenticatedUserId, connectionString, this, TableName, tableName);
         }
 
-        public bool HasChildren(string tableName, int childrenId)
+        public response HasChildren(string tableName, int childrenId)
         {
             return CommonFunctions.HasChildren(authenticatedUserId, connectionString, this, TableName, tableName, childrenId);
         }
 
-        public object[] GetChildrens(string tableName)
+        public response GetChildrens(string tableName)
         {
-            return null;
+            return CommonFunctions.GetChildrens(this, tableName);
         }
 
-        public object GetChildren(string tableName, int childrenId)
+        public response GetChildren(string tableName, int childrenId)
         {
-            return null;
+            return CommonFunctions.GetChildren(this, tableName, childrenId);
         }
 
         public int? GetIdByName(string _tableName, string _Name)

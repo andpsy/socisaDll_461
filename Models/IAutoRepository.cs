@@ -3,28 +3,31 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IAutoRepository
     {
-        Auto[] GetAll();
-        Auto[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        Auto Find(int _id);
-        Auto Find(string _nr_auto);
+        response GetAll();
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response Find(int _id);
+        response Find(string _nr_auto);
         response Insert(Auto item);
         response Update(Auto item);
         response Update(int id, string fieldValueCollection);
+        response Update(string fieldValueCollection);
+
         response Delete(Auto item);
-        bool HasChildrens(Auto item, string tableName);
-        bool HasChildren(Auto item, string tableName, int childrenId);
-        object[] GetChildrens(Auto item, string tableName);
-        object GetChildren(Auto item, string tableName, int childrenId);
+        response HasChildrens(Auto item, string tableName);
+        response HasChildren(Auto item, string tableName, int childrenId);
+        response GetChildrens(Auto item, string tableName);
+        response GetChildren(Auto item, string tableName, int childrenId);
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        response HasChildrens(int _id, string tableName);
+        response HasChildren(int _id, string tableName, int childrenId);
+        response GetChildrens(int _id, string tableName);
+        response GetChildren(int _id, string tableName, int childrenId);
     }
 
     public class AutoRepository : IAutoRepository
@@ -38,7 +41,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public Auto[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -57,12 +60,12 @@ namespace SOCISA.Models
                 Auto[] toReturn = new Auto[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Auto)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Auto[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -87,21 +90,29 @@ namespace SOCISA.Models
                 Auto[] toReturn = new Auto[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Auto)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Auto Find(int _id)
+        public response Find(int _id)
         {
-            Auto item = new Auto(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                Auto item = new Auto(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Auto Find(string _nr_auto)
+        public response Find(string _nr_auto)
         {
-            Auto item = new Auto(authenticatedUserId, connectionString, _nr_auto);
-            return item;
+            try
+            {
+                Auto item = new Auto(authenticatedUserId, connectionString, _nr_auto);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(Auto item)
@@ -116,8 +127,13 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Auto item = Find(id);
+            Auto item = JsonConvert.DeserializeObject<Auto>( Find(id).Message);
             return item.Update(fieldValueCollection);
+        }
+        public response Update(string fieldValueCollection)
+        {
+            Auto tmpItem = JsonConvert.DeserializeObject<Auto>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<Auto>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
         }
 
         public response Delete(Auto item)
@@ -125,50 +141,50 @@ namespace SOCISA.Models
             return item.Delete();
         }
 
-        public bool HasChildrens(Auto item, string tableName)
+        public response HasChildrens(Auto item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(Auto item, string tableName, int childrenId)
+        public response HasChildren(Auto item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(Auto item, string tableName)
+        public response GetChildrens(Auto item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(Auto item, string tableName, int childrenId)
+        public response GetChildren(Auto item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return obj.Delete();
+            return JsonConvert.DeserializeObject<Auto>(obj.Message).Delete();
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<Auto>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Auto>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<Auto>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Auto>(obj.Message).GetChildren(tableName, childrenId);
         }
     }
 }

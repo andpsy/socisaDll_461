@@ -136,7 +136,8 @@ namespace SOCISA.Models
                 if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
                 {
                     this.FILE_CONTENT = CommonFunctions.GetFileContentFromFile(this.CALE_FISIER);
-                    File.Delete(this.CALE_FISIER);
+                    this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
+                    //File.Delete(this.CALE_FISIER); // nu mai stergem, ca ne trebuie si in File Storage !
                 }
             }
             catch { }
@@ -202,7 +203,8 @@ namespace SOCISA.Models
                 if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
                 {
                     this.FILE_CONTENT = CommonFunctions.GetFileContentFromFile(this.CALE_FISIER);
-                    File.Delete(this.CALE_FISIER);
+                    this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
+                    //File.Delete(this.CALE_FISIER);
                 }
             }
             catch { }
@@ -358,22 +360,22 @@ namespace SOCISA.Models
             return GetFileCreationDate(this.DENUMIRE_FISIER);
         }
 
-        public bool HasChildrens(string tableName)
+        public response HasChildrens(string tableName)
         {
-            return CommonFunctions.HasChildrens(authenticatedUserId, connectionString, this, "documente_scanate", tableName);
+            return CommonFunctions.HasChildrens(authenticatedUserId, connectionString, this, "actions", tableName);
         }
 
-        public bool HasChildren(string tableName, int childrenId)
+        public response HasChildren(string tableName, int childrenId)
         {
-            return CommonFunctions.HasChildren(authenticatedUserId, connectionString, this, "documente_scanate", tableName, childrenId);
+            return CommonFunctions.HasChildren(authenticatedUserId, connectionString, this, "actions", tableName, childrenId);
         }
 
-        public object[] GetChildrens(string tableName)
+        public response GetChildrens(string tableName)
         {
-            return (object[])CommonFunctions.GetChildrens(this, tableName);
+            return CommonFunctions.GetChildrens(this, tableName);
         }
 
-        public object GetChildren(string tableName, int childrenId)
+        public response GetChildren(string tableName, int childrenId)
         {
             return CommonFunctions.GetChildren(this, tableName, childrenId);
         }

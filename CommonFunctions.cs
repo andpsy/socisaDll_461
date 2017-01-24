@@ -319,99 +319,106 @@ namespace SOCISA
             return toReturn;
         }
 
-        public static bool HasChildrens(int authenticatedUserId, string connectionString, object item, string parentTableName, string childTableName)
+        public static response HasChildrens(int authenticatedUserId, string connectionString, object item, string parentTableName, string childTableName)
         {
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", parentTableName), new MySqlParameter("_CHILD_TABLE", childTableName) });
-            DbDataReader r = da.ExecuteSelectQuery();
-            while (r.Read())
+            try
             {
-                if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == childTableName.ToUpper())
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", parentTableName), new MySqlParameter("_CHILD_TABLE", childTableName) });
+                DbDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
                 {
-                    PropertyInfo[] props = item.GetType().GetProperties();
-                    foreach (PropertyInfo prop in props)
+                    if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == childTableName.ToUpper())
                     {
-                        if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
+                        PropertyInfo[] props = item.GetType().GetProperties();
+                        foreach (PropertyInfo prop in props)
                         {
-                            da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()) });
-                            object counter = da.ExecuteScalarQuery();
-                            try
+                            if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
                             {
-                                if (Convert.ToInt32(counter) > 0)
-                                    return true;
+                                da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()) });
+                                object counter = da.ExecuteScalarQuery();
+                                try
+                                {
+                                    if (Convert.ToInt32(counter) > 0)
+                                        return new response(true, "true", null, null);
+                                }
+                                catch { }
+                                break;
                             }
-                            catch { }
-                            break;
                         }
                     }
-                }
-                else
-                {
-                    PropertyInfo pi = item.GetType().GetProperty("ID");
-                    da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["TABLE_NAME"].ToString()) });
-                    object counter = da.ExecuteScalarQuery();
-                    try
-                    {
-                        return Convert.ToInt32(counter) > 0;
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
-            }
-            return false;
-        }
-
-        public static bool HasChildren(int authenticatedUserId, string connectionString, object item, string parentTableName, string childTableName, int childrenId)
-        {
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", parentTableName), new MySqlParameter("_CHILD_TABLE", childTableName) });
-            DbDataReader r = da.ExecuteSelectQuery();
-            while (r.Read())
-            {
-                if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == childTableName.ToUpper())
-                {
-                    PropertyInfo[] props = item.GetType().GetProperties();
-                    foreach (PropertyInfo prop in props)
-                    {
-                        if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
-                        {
-                            da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", "1"), new MySqlParameter("_CHILDREN_ID_VALUE", "1") });
-                            object counter = da.ExecuteScalarQuery();
-                            try
-                            {
-                                if (Convert.ToInt32(counter) > 0)
-                                    return true;
-                            }
-                            catch { }
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILD_TABLE", childTableName) });
-                    DbDataReader rc = da.ExecuteSelectQuery();
-                    while (rc.Read())
+                    else
                     {
                         PropertyInfo pi = item.GetType().GetProperty("ID");
-                        //da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
-                        da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
+                        da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["TABLE_NAME"].ToString()) });
                         object counter = da.ExecuteScalarQuery();
                         try
                         {
-                            return Convert.ToInt32(counter) > 0;
+                            return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), null, null);
                         }
                         catch
                         {
-                            return false;
+                            return new response(true, "false", null, null);
                         }
                     }
                 }
-            }
-            return false;
+                return new response(true, "false", null, null);
+            }catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
         }
 
-        public static object GetChildrens(object item, string table_name)
+        public static response HasChildren(int authenticatedUserId, string connectionString, object item, string parentTableName, string childTableName, int childrenId)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", parentTableName), new MySqlParameter("_CHILD_TABLE", childTableName) });
+                DbDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == childTableName.ToUpper())
+                    {
+                        PropertyInfo[] props = item.GetType().GetProperties();
+                        foreach (PropertyInfo prop in props)
+                        {
+                            if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
+                            {
+                                da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", "1"), new MySqlParameter("_CHILDREN_ID_VALUE", "1") });
+                                object counter = da.ExecuteScalarQuery();
+                                try
+                                {
+                                    if (Convert.ToInt32(counter) > 0)
+                                        return new response(true, "true", null, null);
+                                }
+                                catch { }
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILD_TABLE", childTableName) });
+                        DbDataReader rc = da.ExecuteSelectQuery();
+                        while (rc.Read())
+                        {
+                            PropertyInfo pi = item.GetType().GetProperty("ID");
+                            //da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
+                            da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
+                            object counter = da.ExecuteScalarQuery();
+                            try
+                            {
+                                return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), null, null);
+                            }
+                            catch
+                            {
+                                return new response(true, "false", null, null);
+                            }
+                        }
+                    }
+                }
+                return new response(true, "false", null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public static response GetChildrens(object item, string table_name)
         {
             try
             {
@@ -426,11 +433,12 @@ namespace SOCISA
                     }
                 }
                 dynamic r = methodToRun.Invoke(item, null);
-                return r;
-            }catch { return null; }
+                return new response(true, JsonConvert.SerializeObject(r), null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
         }
 
-        public static object GetChildren(object item, string table_name, int childrenId)
+        public static response GetChildren(object item, string table_name, int childrenId)
         {
             try
             {
@@ -442,13 +450,13 @@ namespace SOCISA
                         PropertyInfo pi = it.GetType().GetProperty("ID");
                         if (Convert.ToInt32(pi.GetValue(it)) == childrenId)
                         {
-                            return it;
+                            return new response(true, JsonConvert.SerializeObject(it), null, null);
                         }
                     }
                 }
             }
-            catch { }
-            return null;
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+            return new response(true, null, null, null);
         }
 
         public static bool LoadTemplateFileIntoDb(int _authenticatedUserId, string _connectionString, string filePath, string _DETALII)

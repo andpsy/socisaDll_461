@@ -3,28 +3,31 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IAsiguratiRepository
     {
-        Asigurat[] GetAll();
-        Asigurat[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        Asigurat Find(int _id);
-        Asigurat Find(string _denumire);
+        response GetAll();
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response Find(int _id);
+        response Find(string _denumire);
         response Insert(Asigurat item);
         response Update(Asigurat item);
         response Update(int id, string fieldValueCollection);
+        response Update(string fieldValueCollection);
+
         response Delete(Asigurat item);
-        bool HasChildrens(Asigurat item, string tableName);
-        bool HasChildren(Asigurat item, string tableName, int childrenId);
-        object[] GetChildrens(Asigurat item, string tableName);
-        object GetChildren(Asigurat item, string tableName, int childrenId);
+        response HasChildrens(Asigurat item, string tableName);
+        response HasChildren(Asigurat item, string tableName, int childrenId);
+        response GetChildrens(Asigurat item, string tableName);
+        response GetChildren(Asigurat item, string tableName, int childrenId);
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        response HasChildrens(int _id, string tableName);
+        response HasChildren(int _id, string tableName, int childrenId);
+        response GetChildrens(int _id, string tableName);
+        response GetChildren(int _id, string tableName, int childrenId);
     }
 
     public class AsiguratiRepository : IAsiguratiRepository
@@ -38,7 +41,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public Asigurat[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -57,12 +60,12 @@ namespace SOCISA.Models
                 Asigurat[] toReturn = new Asigurat[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Asigurat)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Asigurat[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -87,21 +90,28 @@ namespace SOCISA.Models
                 Asigurat[] toReturn = new Asigurat[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Asigurat)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Asigurat Find(int _id)
+        public response Find(int _id)
         {
-            Asigurat item = new Asigurat(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                Asigurat item = new Asigurat(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
-
-        public Asigurat Find(string _nr_auto)
+        public response Find(string _denumire)
         {
-            Asigurat item = new Asigurat(authenticatedUserId, connectionString, _nr_auto);
-            return item;
+            try
+            {
+                Asigurat item = new Asigurat(authenticatedUserId, connectionString, _denumire);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(Asigurat item)
@@ -116,58 +126,64 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Asigurat item = Find(id);
+            Asigurat item = JsonConvert.DeserializeObject<Asigurat>(Find(id).Message);
             return item.Update(fieldValueCollection);
         }
+        public response Update(string fieldValueCollection)
+        {
+            Asigurat tmpItem = JsonConvert.DeserializeObject<Asigurat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<Asigurat>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+        }
+
         public response Delete(Asigurat item)
         {
             return item.Delete();
         }
 
-        public bool HasChildrens(Asigurat item, string tableName)
+        public response HasChildrens(Asigurat item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(Asigurat item, string tableName, int childrenId)
+        public response HasChildren(Asigurat item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(Asigurat item, string tableName)
+        public response GetChildrens(Asigurat item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(Asigurat item, string tableName, int childrenId)
+        public response GetChildren(Asigurat item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return obj.Delete();
+            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).Delete();
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).GetChildren(tableName, childrenId);
         }
     }
 }

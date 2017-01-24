@@ -35,6 +35,15 @@ namespace SOCISA
         /// Constructorul default
         /// </summary>
         public Error() { }
+
+        public Error(Exception exp)
+        {
+            ID = exp.HResult;
+            ERROR_CODE = exp.HResult.ToString();
+            ERROR_MESSAGE = exp.Message;
+            ERROR_OBJECT = exp.Source;
+            ERROR_TYPE = "Critical";
+        }
     }
     public static class ErrorParser
     {

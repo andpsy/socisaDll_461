@@ -57,6 +57,7 @@ namespace SOCISA.Models
         public DateTime? DATA_AVIZARE { get; set; }
         public DateTime? DATA_NOTIFICARE { get; set; }
         public DateTime? DATA_ULTIMEI_MODIFICARI { get; set; }
+        public bool? AVIZAT { get; set; }
         /*
         public DosareProceseJson[] DosareProcese { get; set; }
         public ProceseJson[] Procese { get; set; }
@@ -219,6 +220,8 @@ namespace SOCISA.Models
             try { this.DATA_NOTIFICARE = Convert.ToDateTime(_dosar["DATA_NOTIFICARE"]); }
             catch { }
             try { this.DATA_ULTIMEI_MODIFICARI = Convert.ToDateTime(_dosar["DATA_ULTIMEI_MODIFICARI"]); }
+            catch { }
+            try { this.AVIZAT= Convert.ToBoolean(_dosar["AVIZAT"]); }
             catch { }
             /*
             try { this.Procese = GetProcese(); }
@@ -881,7 +884,7 @@ namespace SOCISA.Models
                     {
                         //var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "actions");
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
-                        if (fieldName.ToUpper() == prop.Name.ToUpper())
+                        if (fieldName.ToUpper() == prop.Name.ToUpper() && fieldName.ToUpper() != "ID")
                         {
                             var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType);
                             prop.SetValue(this, tmpVal);
@@ -1201,57 +1204,48 @@ namespace SOCISA.Models
             return Filtering.GenerateFilterFromJsonObject(this);
         }
 
-        public bool HasChildrens(string tableName)
+        public response HasChildrens(string tableName)
         {
             return CommonFunctions.HasChildrens(authenticatedUserId, connectionString, this, "dosare", tableName);
         }
 
-        public bool HasChildren(string tableName, int childrenId)
+        public response HasChildren(string tableName, int childrenId)
         {
             return CommonFunctions.HasChildren(authenticatedUserId, connectionString, this, "dosare", tableName, childrenId);
         }
 
-        public object[] GetChildrens(string tableName)
+        public response GetChildrens(string tableName)
         {
-            /*
-            switch (tableName.ToLower())
-            {
-                case "stadii":
-                    return GetStadii();
-                case "documente_scanate":
-                    return GetDocumente();
-            }
-            return null;
-            */
-            return (object[])CommonFunctions.GetChildrens(this, tableName);
+            return CommonFunctions.GetChildrens(this, tableName);
         }
 
-        public object GetChildren(string tableName, int childrenId)
+        public response GetChildren(string tableName, int childrenId)
         {
-            /*
-            switch (tableName.ToLower())
-            {
-                case "stadii":
-                    return new Stadiu(authenticatedUserId, connectionString, childrenId);
-                case "documente_scanate":
-                    return new DocumentScanat(authenticatedUserId, connectionString, childrenId);
-            }
-            return null;
-            */
             return CommonFunctions.GetChildren(this, tableName, childrenId);
         }
 
-        public string ExportDocumenteDosarToPdf()
+        public response ExportDocumenteDosarToPdf()
         {
-            return PdfGenerator.ExportDocumenteDosarToPdf(this);
+            try
+            {
+                return new response(true, PdfGenerator.ExportDocumenteDosarToPdf(this), null, null);
+            } catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
         }
-        public string ExportDosarToPdf(string templateFileName)
+        public response ExportDosarToPdf(string templateFileName)
         {
-            return PdfGenerator.ExportDosarToPdf(templateFileName, this);
+            try
+            {
+                return new response(true, PdfGenerator.ExportDosarToPdf(templateFileName, this), null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
         }
-        public string ExportDosarCompletToPdf(string templateFileName)
+        public response ExportDosarCompletToPdf(string templateFileName)
         {
-            return PdfGenerator.ExportDosarCompletToPdf(templateFileName, this);
+            try
+            {
+                return new response(true, PdfGenerator.ExportDosarCompletToPdf(templateFileName, this), null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
         }
     }
 }

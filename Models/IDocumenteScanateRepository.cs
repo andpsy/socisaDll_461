@@ -3,14 +3,15 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IDocumenteScanateRepository
     {
-        DocumentScanat[] GetAll();
-        DocumentScanat[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        DocumentScanat Find(int _id);
+        response GetAll();
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response Find(int _id);
         response Insert(DocumentScanat item);
         response Insert(DocumentScanat item, object file);
         response Insert(DocumentScanat item, ThumbNailSizes[] tSizes);
@@ -21,18 +22,22 @@ namespace SOCISA.Models
         response Update(DocumentScanat item, ThumbNailSizes[] tSizes);
         response Update(DocumentScanat item, object file, ThumbNailSizes[] tSizes);
         response Update(int id, string fieldValueCollection);
+        response Update(string fieldValueCollection);
+
         response Update(int id, string fieldValueCollection, object file);
+        response Update(string fieldValueCollection, object file);
         response Update(int id, string fieldValueCollection, object file, ThumbNailSizes[] tSizes);
+        response Update(string fieldValueCollection, object file, ThumbNailSizes[] tSizes);
         response Delete(DocumentScanat item);
-        bool HasChildrens(DocumentScanat item, string tableName);
-        bool HasChildren(DocumentScanat item, string tableName, int childrenId);
-        object[] GetChildrens(DocumentScanat item, string tableName);
-        object GetChildren(DocumentScanat item, string tableName, int childrenId);
+        response HasChildrens(DocumentScanat item, string tableName);
+        response HasChildren(DocumentScanat item, string tableName, int childrenId);
+        response GetChildrens(DocumentScanat item, string tableName);
+        response GetChildren(DocumentScanat item, string tableName, int childrenId);
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        response HasChildrens(int _id, string tableName);
+        response HasChildren(int _id, string tableName, int childrenId);
+        response GetChildrens(int _id, string tableName);
+        response GetChildren(int _id, string tableName, int childrenId);
     }
 
     public class DocumenteScanateRepository : IDocumenteScanateRepository
@@ -46,7 +51,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public DocumentScanat[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -65,12 +70,12 @@ namespace SOCISA.Models
                 DocumentScanat[] toReturn = new DocumentScanat[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (DocumentScanat)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public DocumentScanat[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -95,15 +100,19 @@ namespace SOCISA.Models
                 DocumentScanat[] toReturn = new DocumentScanat[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (DocumentScanat)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public DocumentScanat Find(int _id)
+        public response Find(int _id)
         {
-            DocumentScanat item = new DocumentScanat(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                DocumentScanat item = new DocumentScanat(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(DocumentScanat item)
@@ -146,19 +155,32 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            DocumentScanat item = Find(id);
+            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
             return item.Update(fieldValueCollection);
+        }
+        public response Update(string fieldValueCollection)
+        {
+            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
         }
         public response Update(int id, string fieldValueCollection, object file)
         {
-            DocumentScanat item = Find(id);
+            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
+            byte[] f = GetBytesFromParameter(file);
+            item.FILE_CONTENT = f;
+            return item.Update(fieldValueCollection);
+        }
+        public response Update(string fieldValueCollection, object file)
+        {
+            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
             return item.Update(fieldValueCollection);
         }
         public response Update(int id, string fieldValueCollection, object file, ThumbNailSizes[] tSizes)
         {
-            DocumentScanat item = Find(id);
+            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
             response r = item.Update(fieldValueCollection);
@@ -169,56 +191,69 @@ namespace SOCISA.Models
             }
             else return r;
         }
-
+        public response Update(string fieldValueCollection, object file, ThumbNailSizes[] tSizes)
+        {
+            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
+            byte[] f = GetBytesFromParameter(file);
+            item.FILE_CONTENT = f;
+            response r = item.Update(fieldValueCollection);
+            if (r.Status)
+            {
+                r = item.Update(tSizes);
+                return r;
+            }
+            else return r;
+        }
         public response Delete(DocumentScanat item)
         {
             return item.Delete();
         }
         public response Delete(int _id)
         {
-            var obj = Find(_id);
-            return obj.Delete();
+            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(_id).Message);
+            return item.Delete();
         }
 
-        public bool HasChildrens(DocumentScanat item, string tableName)
+        public response HasChildrens(DocumentScanat item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(DocumentScanat item, string tableName, int childrenId)
+        public response HasChildren(DocumentScanat item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(DocumentScanat item, string tableName)
+        public response GetChildrens(DocumentScanat item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(DocumentScanat item, string tableName, int childrenId)
+        public response GetChildren(DocumentScanat item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).GetChildren(tableName, childrenId);
         }
         public response GenerateThumbNails(DocumentScanat item, ThumbNailSizes[] tSizes)
         {

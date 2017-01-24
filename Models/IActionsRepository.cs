@@ -4,28 +4,42 @@ using System.Collections;
 using System.Data;
 using System.Data.Common;
 //using System.Reflection;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IActionsRepository
     {
-        Action[] GetAll();
-        Action[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        Action Find(int _id);
+        //Action[] GetAll();
+        response GetAll();
+        //Action[] GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        //Action Find(int _id);
+        response Find(int _id);
         response Insert(Action item);
         response Update(Action item);
         response Update(int id, string fieldValueCollection);
+        response Update(string fieldValueCollection);
+
         response Delete(Action item);
-        bool HasChildrens(Action item, string tableName);
-        bool HasChildren(Action item, string tableName, int childrenId);
-        object[] GetChildrens(Action item, string tableName);
-        object GetChildren(Action item, string tableName, int childrenId);
+        //bool HasChildrens(Action item, string tableName);
+        response HasChildrens(Action item, string tableName);
+        //bool HasChildren(Action item, string tableName, int childrenId);
+        response HasChildren(Action item, string tableName, int childrenId);
+        //object[] GetChildrens(Action item, string tableName);
+        response GetChildrens(Action item, string tableName);
+        //object GetChildren(Action item, string tableName, int childrenId);
+        response GetChildren(Action item, string tableName, int childrenId);
 
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        //bool HasChildrens(int _id, string tableName);
+        response HasChildrens(int _id, string tableName);
+        //bool HasChildren(int _id, string tableName, int childrenId);
+        response HasChildren(int _id, string tableName, int childrenId);
+        //object[] GetChildrens(int _id, string tableName);
+        response GetChildrens(int _id, string tableName);
+        //object GetChildren(int _id, string tableName, int childrenId);
+        response GetChildren(int _id, string tableName, int childrenId);
     }
 
     public class ActionsRepository : IActionsRepository
@@ -39,7 +53,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public Action[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -58,12 +72,12 @@ namespace SOCISA.Models
                 Action[] toReturn = new Action[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Action)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); throw exp; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Action[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -126,15 +140,19 @@ namespace SOCISA.Models
                 Action[] toReturn = new Action[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Action)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch(Exception exp) { LogWriter.Log(exp); throw exp; }
+            catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Action Find(int _id)
+        public response Find(int _id)
         {
-            Action item = new Action(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                Action item = new Action(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(Action item)
@@ -149,60 +167,64 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Action item = Find(id);
+            Action item = JsonConvert.DeserializeObject<Action>(Find(id).Message);
             return item.Update(fieldValueCollection);
         }
-
+        public response Update(string fieldValueCollection)
+        {
+            Action tmpItem = JsonConvert.DeserializeObject<Action>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<Action>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+        }
         public response Delete(Action item)
         {
             return item.Delete();
         }
 
-        public bool HasChildrens(Action item, string tableName)
+        public response HasChildrens(Action item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(Action item, string tableName, int childrenId)
+        public response HasChildren(Action item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(Action item, string tableName)
+        public response GetChildrens(Action item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(Action item, string tableName, int childrenId)
+        public response GetChildren(Action item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
 
         public response Delete(int _id)
         {
-            var obj = Find(_id);
-            return obj.Delete();
+            response obj = Find(_id);
+            return JsonConvert.DeserializeObject<Action>(obj.Message).Delete();
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildren(tableName, childrenId);
         }
     }
 }

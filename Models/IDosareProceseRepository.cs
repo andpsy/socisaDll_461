@@ -3,27 +3,30 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IDosareProceseRepository
     {
-        DosarProces[] GetAll();
-        DosarProces[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        DosarProces Find(int _id);
+        response GetAll();
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response Find(int _id);
         response Insert(DosarProces item);
         response Update(DosarProces item);
         response Update(int id, string fieldValueCollection);
+        response Update(string fieldValueCollection);
+
         response Delete(DosarProces item);
-        bool HasChildrens(DosarProces item, string tableName);
-        bool HasChildren(DosarProces item, string tableName, int childrenId);
-        object[] GetChildrens(DosarProces item, string tableName);
-        object GetChildren(DosarProces item, string tableName, int childrenId);
+        response HasChildrens(DosarProces item, string tableName);
+        response HasChildren(DosarProces item, string tableName, int childrenId);
+        response GetChildrens(DosarProces item, string tableName);
+        response GetChildren(DosarProces item, string tableName, int childrenId);
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        response HasChildrens(int _id, string tableName);
+        response HasChildren(int _id, string tableName, int childrenId);
+        response GetChildrens(int _id, string tableName);
+        response GetChildren(int _id, string tableName, int childrenId);
     }
 
     public class DosareProceseRepository : IDosareProceseRepository
@@ -37,7 +40,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public DosarProces[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -56,12 +59,12 @@ namespace SOCISA.Models
                 DosarProces[] toReturn = new DosarProces[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (DosarProces)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public DosarProces[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -86,15 +89,19 @@ namespace SOCISA.Models
                 DosarProces[] toReturn = new DosarProces[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (DosarProces)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public DosarProces Find(int _id)
+        public response Find(int _id)
         {
-            DosarProces item = new DosarProces(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                DosarProces item = new DosarProces(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(DosarProces item)
@@ -109,8 +116,13 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            DosarProces item = Find(id);
+            DosarProces item = JsonConvert.DeserializeObject<DosarProces>(Find(id).Message);
             return item.Update(fieldValueCollection);
+        }
+        public response Update(string fieldValueCollection)
+        {
+            DosarProces tmpItem = JsonConvert.DeserializeObject<DosarProces>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<DosarProces>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
         }
 
         public response Delete(DosarProces item)
@@ -118,50 +130,50 @@ namespace SOCISA.Models
             return item.Delete();
         }
 
-        public bool HasChildrens(DosarProces item, string tableName)
+        public response HasChildrens(DosarProces item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(DosarProces item, string tableName, int childrenId)
+        public response HasChildren(DosarProces item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(DosarProces item, string tableName)
+        public response GetChildrens(DosarProces item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(DosarProces item, string tableName, int childrenId)
+        public response GetChildren(DosarProces item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return obj.Delete();
+            return JsonConvert.DeserializeObject<DosarProces>(obj.Message).Delete();
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<DosarProces>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<DosarProces>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<DosarProces>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<DosarProces>(obj.Message).GetChildren(tableName, childrenId);
         }
     }
 }

@@ -210,103 +210,24 @@ namespace SOCISA.Models
             return Filtering.GenerateFilterFromJsonObject(this);
         }
 
-        public bool HasChildrens(string tableName)
+        public response HasChildrens(string tableName)
         {
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", "drepturi"), new MySqlParameter("_CHILD_TABLE", tableName) });
-            DbDataReader r = da.ExecuteSelectQuery();
-            while (r.Read())
-            {
-                if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == tableName.ToUpper())
-                {
-                    PropertyInfo[] props = this.GetType().GetProperties();
-                    foreach (PropertyInfo prop in props)
-                    {
-                        if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
-                        {
-                            da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(this)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()) });
-                            object counter = da.ExecuteScalarQuery();
-                            try
-                            {
-                                if (Convert.ToInt32(counter) > 0)
-                                    return true;
-                            }
-                            catch { }
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", this.ID), new MySqlParameter("_EXTERNAL_ID", r["COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["TABLE_NAME"].ToString()) });
-                    object counter = da.ExecuteScalarQuery();
-                    try
-                    {
-                        return Convert.ToInt32(counter) > 0;
-                    }
-                    catch
-                    {
-                        return false;
-                    }
-                }
-            }
-            return false;
+            return CommonFunctions.HasChildrens(authenticatedUserId, connectionString, this, "drepturi", tableName);
         }
 
-        public bool HasChildren(string tableName, int childrenId)
+        public response HasChildren(string tableName, int childrenId)
         {
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", "drepturi"), new MySqlParameter("_CHILD_TABLE", tableName) });
-            DbDataReader r = da.ExecuteSelectQuery();
-            while (r.Read())
-            {
-                if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == tableName.ToUpper())
-                {
-                    PropertyInfo[] props = this.GetType().GetProperties();
-                    foreach (PropertyInfo prop in props)
-                    {
-                        if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
-                        {
-                            da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(this)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", "1"), new MySqlParameter("_CHILDREN_ID_VALUE", "1") });
-                            object counter = da.ExecuteScalarQuery();
-                            try
-                            {
-                                if (Convert.ToInt32(counter) > 0)
-                                    return true;
-                            }
-                            catch { }
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILD_TABLE", tableName) });
-                    DbDataReader rc = da.ExecuteSelectQuery();
-                    while (rc.Read())
-                    {
-                        da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", this.ID), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
-                        object counter = da.ExecuteScalarQuery();
-                        try
-                        {
-                            return Convert.ToInt32(counter) > 0;
-                        }
-                        catch
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return false;
+            return CommonFunctions.HasChildren(authenticatedUserId, connectionString, this, "drepturi", tableName, childrenId);
         }
 
-        public object[] GetChildrens(string tableName)
+        public response GetChildrens(string tableName)
         {
-            return null;
+            return CommonFunctions.GetChildrens(this, tableName);
         }
 
-        public object GetChildren(string tableName, int childrenId)
+        public response GetChildren(string tableName, int childrenId)
         {
-            return null;
+            return CommonFunctions.GetChildren(this, tableName, childrenId);
         }
     }
 }

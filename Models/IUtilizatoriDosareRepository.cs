@@ -3,27 +3,30 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IUtilizatoriDosareRepository
     {
-        UtilizatorDosar[] GetAll();
-        UtilizatorDosar[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        UtilizatorDosar Find(int _id);
+        response GetAll();
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response Find(int _id);
+        response Update(string fieldValueCollection);
+
         response Insert(UtilizatorDosar item);
         response Update(UtilizatorDosar item);
         response Update(int id, string fieldValueCollection);
         response Delete(UtilizatorDosar item);
-        bool HasChildrens(UtilizatorDosar item, string tableName);
-        bool HasChildren(UtilizatorDosar item, string tableName, int childrenId);
-        object[] GetChildrens(UtilizatorDosar item, string tableName);
-        object GetChildren(UtilizatorDosar item, string tableName, int childrenId);
+        response HasChildrens(UtilizatorDosar item, string tableName);
+        response HasChildren(UtilizatorDosar item, string tableName, int childrenId);
+        response GetChildrens(UtilizatorDosar item, string tableName);
+        response GetChildren(UtilizatorDosar item, string tableName, int childrenId);
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        response HasChildrens(int _id, string tableName);
+        response HasChildren(int _id, string tableName, int childrenId);
+        response GetChildrens(int _id, string tableName);
+        response GetChildren(int _id, string tableName, int childrenId);
     }
 
     public class UtilizatoriDosareRepository : IUtilizatoriDosareRepository
@@ -37,7 +40,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public UtilizatorDosar[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -56,12 +59,12 @@ namespace SOCISA.Models
                 UtilizatorDosar[] toReturn = new UtilizatorDosar[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (UtilizatorDosar)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public UtilizatorDosar[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -86,15 +89,19 @@ namespace SOCISA.Models
                 UtilizatorDosar[] toReturn = new UtilizatorDosar[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (UtilizatorDosar)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public UtilizatorDosar Find(int _id)
+        public response Find(int _id)
         {
-            UtilizatorDosar item = new UtilizatorDosar(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                UtilizatorDosar item = new UtilizatorDosar(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(UtilizatorDosar item)
@@ -109,8 +116,13 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            UtilizatorDosar item = Find(id);
+            UtilizatorDosar item = JsonConvert.DeserializeObject<UtilizatorDosar>(Find(id).Message);
             return item.Update(fieldValueCollection);
+        }
+        public response Update(string fieldValueCollection)
+        {
+            UtilizatorDosar tmpItem = JsonConvert.DeserializeObject<UtilizatorDosar>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<UtilizatorDosar>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
         }
 
         public response Delete(UtilizatorDosar item)
@@ -118,50 +130,50 @@ namespace SOCISA.Models
             return item.Delete();
         }
 
-        public bool HasChildrens(UtilizatorDosar item, string tableName)
+        public response HasChildrens(UtilizatorDosar item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(UtilizatorDosar item, string tableName, int childrenId)
+        public response HasChildren(UtilizatorDosar item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(UtilizatorDosar item, string tableName)
+        public response GetChildrens(UtilizatorDosar item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(UtilizatorDosar item, string tableName, int childrenId)
+        public response GetChildren(UtilizatorDosar item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return obj.Delete();
+            return JsonConvert.DeserializeObject<UtilizatorDosar>(obj.Message).Delete();
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<UtilizatorDosar>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<UtilizatorDosar>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<UtilizatorDosar>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<UtilizatorDosar>(obj.Message).GetChildren(tableName, childrenId);
         }
     }
 }

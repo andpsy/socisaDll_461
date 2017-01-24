@@ -42,5 +42,15 @@ namespace SOCISA
             fs.Dispose();
             return toReturn;
         }
+
+        public static byte[] UploadFile(string filePath, string fileName)
+        {
+            byte[] toReturn = null;
+            FileStream fs = File.Open(Path.Combine(filePath,fileName), FileMode.Open, FileAccess.Read);
+            fs.Read(toReturn, 0, (int)fs.Length);
+            fs.Flush();
+            fs.Dispose();
+            return toReturn;
+        }
     }
 }

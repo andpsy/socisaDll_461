@@ -3,27 +3,30 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IMesajeUtilizatoriRepository
     {
-        MesajUtilizator[] GetAll();
-        MesajUtilizator[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        MesajUtilizator Find(int _id);
+        response GetAll();
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response Find(int _id);
         response Insert(MesajUtilizator item);
         response Update(MesajUtilizator item);
         response Update(int id, string fieldValueCollection);
+        response Update(string fieldValueCollection);
+
         response Delete(MesajUtilizator item);
-        bool HasChildrens(MesajUtilizator item, string tableName);
-        bool HasChildren(MesajUtilizator item, string tableName, int childrenId);
-        object[] GetChildrens(MesajUtilizator item, string tableName);
-        object GetChildren(MesajUtilizator item, string tableName, int childrenId);
+        response HasChildrens(MesajUtilizator item, string tableName);
+        response HasChildren(MesajUtilizator item, string tableName, int childrenId);
+        response GetChildrens(MesajUtilizator item, string tableName);
+        response GetChildren(MesajUtilizator item, string tableName, int childrenId);
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        response HasChildrens(int _id, string tableName);
+        response HasChildren(int _id, string tableName, int childrenId);
+        response GetChildrens(int _id, string tableName);
+        response GetChildren(int _id, string tableName, int childrenId);
     }
 
     public class MesajeUtilizatoriRepository : IMesajeUtilizatoriRepository
@@ -37,7 +40,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public MesajUtilizator[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -56,12 +59,12 @@ namespace SOCISA.Models
                 MesajUtilizator[] toReturn = new MesajUtilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (MesajUtilizator)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public MesajUtilizator[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -86,15 +89,19 @@ namespace SOCISA.Models
                 MesajUtilizator[] toReturn = new MesajUtilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (MesajUtilizator)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public MesajUtilizator Find(int _id)
+        public response Find(int _id)
         {
-            MesajUtilizator item = new MesajUtilizator(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                MesajUtilizator item = new MesajUtilizator(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(MesajUtilizator item)
@@ -109,8 +116,13 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            MesajUtilizator item = Find(id);
+            MesajUtilizator item = JsonConvert.DeserializeObject<MesajUtilizator>(Find(id).Message);
             return item.Update(fieldValueCollection);
+        }
+        public response Update(string fieldValueCollection)
+        {
+            MesajUtilizator tmpItem = JsonConvert.DeserializeObject<MesajUtilizator>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<MesajUtilizator>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
         }
 
         public response Delete(MesajUtilizator item)
@@ -118,50 +130,50 @@ namespace SOCISA.Models
             return item.Delete();
         }
 
-        public bool HasChildrens(MesajUtilizator item, string tableName)
+        public response HasChildrens(MesajUtilizator item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(MesajUtilizator item, string tableName, int childrenId)
+        public response HasChildren(MesajUtilizator item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(MesajUtilizator item, string tableName)
+        public response GetChildrens(MesajUtilizator item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(MesajUtilizator item, string tableName, int childrenId)
+        public response GetChildren(MesajUtilizator item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return obj.Delete();
+            return JsonConvert.DeserializeObject<MesajUtilizator>(obj.Message).Delete();
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<MesajUtilizator>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<MesajUtilizator>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<MesajUtilizator>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<MesajUtilizator>(obj.Message).GetChildren(tableName, childrenId);
         }
     }
 }

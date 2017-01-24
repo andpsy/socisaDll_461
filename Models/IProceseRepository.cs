@@ -3,30 +3,33 @@ using System;
 using System.Collections;
 using System.Data;
 using System.Data.Common;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
     public interface IProceseRepository
     {
-        Proces[] GetAll();
-        Proces[] GetFiltered(string _sort, string _order, string _filter, string _limit);
-        Proces Find(int _id);
+        response GetAll();
+        response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response Find(int _id);
         response Insert(Proces item);
         response Insert(Proces item, int _ID_DOSAR);
         response Update(Proces item);
         response Update(Proces item, int _ID_DOSAR);
         response Update(int id, string fieldValueCollection);
+        response Update(string fieldValueCollection);
+
         response Delete(Proces item);
         response Delete(Proces item, int _ID_DOSAR);
-        bool HasChildrens(Proces item, string tableName);
-        bool HasChildren(Proces item, string tableName, int childrenId);
-        object[] GetChildrens(Proces item, string tableName);
-        object GetChildren(Proces item, string tableName, int childrenId);
+        response HasChildrens(Proces item, string tableName);
+        response HasChildren(Proces item, string tableName, int childrenId);
+        response GetChildrens(Proces item, string tableName);
+        response GetChildren(Proces item, string tableName, int childrenId);
         response Delete(int _id);
-        bool HasChildrens(int _id, string tableName);
-        bool HasChildren(int _id, string tableName, int childrenId);
-        object[] GetChildrens(int _id, string tableName);
-        object GetChildren(int _id, string tableName, int childrenId);
+        response HasChildrens(int _id, string tableName);
+        response HasChildren(int _id, string tableName, int childrenId);
+        response GetChildrens(int _id, string tableName);
+        response GetChildren(int _id, string tableName, int childrenId);
         Nomenclator GetInstanta(Proces item);
         Nomenclator GetComplet(Proces item);
         Nomenclator GetTipProces(Proces item);
@@ -43,7 +46,7 @@ namespace SOCISA.Models
             connectionString = _connectionString;
         }
 
-        public Proces[] GetAll()
+        public response GetAll()
         {
             try
             {
@@ -62,12 +65,12 @@ namespace SOCISA.Models
                 Proces[] toReturn = new Proces[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Proces)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Proces[] GetFiltered(string _sort, string _order, string _filter, string _limit)
+        public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
@@ -92,15 +95,19 @@ namespace SOCISA.Models
                 Proces[] toReturn = new Proces[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Proces)aList[i];
-                return toReturn;
+                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public Proces Find(int _id)
+        public response Find(int _id)
         {
-            Proces item = new Proces(authenticatedUserId, connectionString, _id);
-            return item;
+            try
+            {
+                Proces item = new Proces(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(Proces item)
@@ -125,8 +132,13 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Proces item = Find(id);
+            Proces item = JsonConvert.DeserializeObject<Proces>(Find(id).Message);
             return item.Update(fieldValueCollection);
+        }
+        public response Update(string fieldValueCollection)
+        {
+            Proces tmpItem = JsonConvert.DeserializeObject<Proces>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            return JsonConvert.DeserializeObject<Proces>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
         }
 
         public response Delete(Proces item)
@@ -139,22 +151,22 @@ namespace SOCISA.Models
             return item.Delete(_ID_DOSAR);
         }
 
-        public bool HasChildrens(Proces item, string tableName)
+        public response HasChildrens(Proces item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public bool HasChildren(Proces item, string tableName, int childrenId)
+        public response HasChildren(Proces item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public object[] GetChildrens(Proces item, string tableName)
+        public response GetChildrens(Proces item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public object GetChildren(Proces item, string tableName, int childrenId)
+        public response GetChildren(Proces item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
@@ -174,28 +186,28 @@ namespace SOCISA.Models
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return obj.Delete();
+            return JsonConvert.DeserializeObject<Proces>(obj.Message).Delete();
         }
 
-        public bool HasChildrens(int _id, string tableName)
+        public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.HasChildrens(tableName);
+            return JsonConvert.DeserializeObject<Proces>(obj.Message).HasChildrens(tableName);
         }
-        public bool HasChildren(int _id, string tableName, int childrenId)
+        public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.HasChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Proces>(obj.Message).HasChildren(tableName, childrenId);
         }
-        public object[] GetChildrens(int _id, string tableName)
+        public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return obj.GetChildrens(tableName);
+            return JsonConvert.DeserializeObject<Proces>(obj.Message).GetChildrens(tableName);
         }
-        public object GetChildren(int _id, string tableName, int childrenId)
+        public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return obj.GetChildren(tableName, childrenId);
+            return JsonConvert.DeserializeObject<Proces>(obj.Message).GetChildren(tableName, childrenId);
         }
     }
 }
