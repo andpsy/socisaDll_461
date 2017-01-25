@@ -119,7 +119,7 @@ namespace SOCISA.Models
 
         public virtual response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, TableName.ToUpper() + "sp_delete", _parameters.ToArray());
@@ -129,13 +129,13 @@ namespace SOCISA.Models
 
         public virtual response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>()); ;
+            response toReturn = new response(true, "", null, null, new List<Error>()); ;
             return toReturn;
         }
 
         public virtual response ValidareColoane(string fieldValueCollection)
         {
-            response toReturn = new response(true, null, null, new List<Error>());
+            response toReturn = new response(true, null, null, null, new List<Error>());
             try
             {
                 Dictionary<string, string> changes = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(fieldValueCollection);
@@ -154,14 +154,14 @@ namespace SOCISA.Models
                     if (!gasit)
                     {
                         Error err = ErrorParser.ErrorMessage("campInexistentInTabela");
-                        return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
+                        return new response(false, err.ERROR_MESSAGE, null, null, new List<Error>() { err });
                     }
                 }
             }
             catch
             {
                 Error err = ErrorParser.ErrorMessage("cannotConvertStringToTableColumns");
-                return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
+                return new response(false, err.ERROR_MESSAGE, null, null, new List<Error>() { err });
             }
             return toReturn;
         }

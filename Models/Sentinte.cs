@@ -193,7 +193,7 @@ namespace SOCISA.Models
 
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SENTINTEsp_delete", _parameters.ToArray());
@@ -203,7 +203,7 @@ namespace SOCISA.Models
 
         public response Delete(int _ID_DOSAR_STADIU)
         {
-            response toReturn = new response(true, "", null, new List<Error>()); ;
+            response toReturn = new response(true, "", null, null, new List<Error>()); ;
 
             DosarStadiuSentinta dssj = new DosarStadiuSentinta();
             dssj.ID_DOSAR_STADIU = _ID_DOSAR_STADIU;
@@ -220,7 +220,7 @@ namespace SOCISA.Models
 
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>()); ;
+            response toReturn = new response(true, "", null, null, new List<Error>()); ;
             Error err = new Error();
             if (this.NR_SENTINTA == null || this.NR_SENTINTA.Trim() == "")
             {

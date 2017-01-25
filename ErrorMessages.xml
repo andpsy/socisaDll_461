@@ -337,4 +337,11 @@
     <ERROR_OBJECT>MySqlException</ERROR_OBJECT>
     <ERROR_TYPE>Critical</ERROR_TYPE>
   </ErrorMessage>
+  <ErrorMessage>
+    <ID>4</ID>
+    <ERROR_CODE>unsupportedFormat</ERROR_CODE>
+    <ERROR_MESSAGE>Format fisier invalid!</ERROR_MESSAGE>
+    <ERROR_OBJECT>ThumbNail</ERROR_OBJECT>
+    <ERROR_TYPE>Critical</ERROR_TYPE>
+  </ErrorMessage>
 </ErrorMessages>

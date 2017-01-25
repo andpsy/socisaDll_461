@@ -193,7 +193,7 @@ namespace SOCISA.Models
 
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_delete", _parameters.ToArray());
@@ -203,7 +203,7 @@ namespace SOCISA.Models
 
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>()); ;
+            response toReturn = new response(true, "", null, null, new List<Error>()); ;
             Error err = new Error();
             if (this.ID_SENDER <= 0)
             {
@@ -345,7 +345,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response SetMessageReadDate(int idUtilizator, DateTime ReadDate)
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJE_UTILIZATORIsp_GetByIdMesajIdUtilizator", new object[] { new MySqlParameter("_ID_MESAJ", this.ID), new MySqlParameter("_ID_UTILIZATOR", idUtilizator) });

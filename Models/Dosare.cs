@@ -743,7 +743,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response InsertWithErrors()
         {
-            response toReturn = new response(true, "", null, new List<Error>());
+            response toReturn = new response(true, "", null, null, new List<Error>());
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
             var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "dosare");
@@ -903,7 +903,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response UpdateWithErrors()
         {
-            response toReturn = new response(true, "", null, new List<Error>());
+            response toReturn = new response(true, "", null, null, new List<Error>());
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
             var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "dosare");
@@ -933,7 +933,7 @@ namespace SOCISA.Models
         public response Delete()
         {
             //lasam nomenclatoarele asociate
-            response toReturn = new response(false, "", null, new List<Error>());;
+            response toReturn = new response(false, "", null, null, new List<Error>());;
             /*
             foreach (UtilizatoriDosareJson udj in this.UtilizatoriDosare)
             {
@@ -985,7 +985,7 @@ namespace SOCISA.Models
         public response DeleteWithErrors()
         {
             //lasam nomenclatoarele asociate
-            response toReturn = new response(true, "", null, new List<Error>()); ;
+            response toReturn = new response(true, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "PENDING_IMPORT_ERRORSsp_delete", _parameters.ToArray());
@@ -1033,7 +1033,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>());
+            response toReturn = new response(true, "", null, null, new List<Error>());
             Error err = new Error();
             if (this.ID_ASIGURAT_CASCO == null || this.ID_ASIGURAT_CASCO <= 0)
             {
@@ -1149,7 +1149,7 @@ namespace SOCISA.Models
 
         public response SetDataUltimeiModificari(DateTime _DATA_ULTIMEI_MODIFICARI)
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_SetDataUltimeiModificari", new object[] { new MySqlParameter("_ID_DOSAR", ID), new MySqlParameter("_DATA_ULTIMEI_MODIFICARI", _DATA_ULTIMEI_MODIFICARI) });
@@ -1228,24 +1228,27 @@ namespace SOCISA.Models
         {
             try
             {
-                return new response(true, PdfGenerator.ExportDocumenteDosarToPdf(this), null, null);
-            } catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+                string p = PdfGenerator.ExportDocumenteDosarToPdf(this);
+                return new response(true, p, p, null, null);
+            } catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
         public response ExportDosarToPdf(string templateFileName)
         {
             try
             {
-                return new response(true, PdfGenerator.ExportDosarToPdf(templateFileName, this), null, null);
+                string p = PdfGenerator.ExportDosarToPdf(templateFileName, this);
+                return new response(true, p, p, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
         public response ExportDosarCompletToPdf(string templateFileName)
         {
             try
             {
-                return new response(true, PdfGenerator.ExportDosarCompletToPdf(templateFileName, this), null, null);
+                string p = PdfGenerator.ExportDosarCompletToPdf(templateFileName, this);
+                return new response(true, p, p, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
     }
 }

@@ -60,9 +60,9 @@ namespace SOCISA.Models
                 Auto[] toReturn = new Auto[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Auto)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
+                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response GetFiltered(string _sort, string _order, string _filter, string _limit)
@@ -90,9 +90,9 @@ namespace SOCISA.Models
                 Auto[] toReturn = new Auto[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Auto)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
+                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null); 
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Find(int _id)
@@ -100,9 +100,9 @@ namespace SOCISA.Models
             try
             {
                 Auto item = new Auto(authenticatedUserId, connectionString, _id);
-                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+                return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Find(string _nr_auto)
@@ -110,9 +110,9 @@ namespace SOCISA.Models
             try
             {
                 Auto item = new Auto(authenticatedUserId, connectionString, _nr_auto);
-                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+                return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(Auto item)

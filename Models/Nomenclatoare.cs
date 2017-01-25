@@ -178,7 +178,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>());;
+            response toReturn = new response(false, "", null, null, new List<Error>());;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, String.Format("{0}sp_delete", this.TableName), _parameters.ToArray());
@@ -192,7 +192,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>());;
+            response toReturn = new response(true, "", null, null, new List<Error>());;
             Error err = new Error();
             if (this.DENUMIRE == null || this.DENUMIRE.Trim() == "")
             {

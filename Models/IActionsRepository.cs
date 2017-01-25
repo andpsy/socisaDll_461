@@ -72,9 +72,9 @@ namespace SOCISA.Models
                 Action[] toReturn = new Action[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Action)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response GetFiltered(string _sort, string _order, string _filter, string _limit)
@@ -140,9 +140,9 @@ namespace SOCISA.Models
                 Action[] toReturn = new Action[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Action)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), null, null); 
+                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null); 
             }
-            catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Find(int _id)
@@ -150,9 +150,9 @@ namespace SOCISA.Models
             try
             {
                 Action item = new Action(authenticatedUserId, connectionString, _id);
-                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+                return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Insert(Action item)
@@ -167,13 +167,15 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Action item = JsonConvert.DeserializeObject<Action>(Find(id).Message);
+            //Action item = JsonConvert.DeserializeObject<Action>(Find(id).Message);
+            Action item = (Action)(Find(id).Result);
             return item.Update(fieldValueCollection);
         }
         public response Update(string fieldValueCollection)
         {
             Action tmpItem = JsonConvert.DeserializeObject<Action>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            return JsonConvert.DeserializeObject<Action>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            //return JsonConvert.DeserializeObject<Action>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            return ((Action)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
         public response Delete(Action item)
         {
@@ -203,28 +205,33 @@ namespace SOCISA.Models
         public response Delete(int _id)
         {
             response obj = Find(_id);
-            return JsonConvert.DeserializeObject<Action>(obj.Message).Delete();
+            //return JsonConvert.DeserializeObject<Action>(obj.Message).Delete();
+            return ((Action)obj.Result).Delete();
         }
 
         public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildrens(tableName);
+            //return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildrens(tableName);
+            return ((Action)obj.Result).HasChildrens(tableName);
         }
         public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildren(tableName, childrenId);
+            //return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildren(tableName, childrenId);
+            return ((Action)obj.Result).HasChildren(tableName, childrenId);
         }
         public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildrens(tableName);
+            //return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildrens(tableName);
+            return ((Action)obj.Result).GetChildrens(tableName);
         }
         public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildren(tableName, childrenId);
+            //return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildren(tableName, childrenId);
+            return ((Action)obj.Result).GetChildren(tableName, childrenId);
         }
     }
 }

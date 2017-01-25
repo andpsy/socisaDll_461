@@ -20,6 +20,7 @@ namespace SOCISA
         {
             Status = true;
             Message = "";
+            Result = null;
             InsertedId = null;
             Error = null;
         }
@@ -31,10 +32,11 @@ namespace SOCISA
         /// <param name="_message">Mesajul rezultat in urma operatiei: "" pentru Succes, Mesaj pentru Eroare</param>
         /// <param name="_inserted_id">ID-ul unic rezultat in cazul operatiilor de insert, null pentru celelalte</param>
         /// <param name="_error">SOCISA.Error in caz de eroare, null pentru Succes</param>
-        public response(bool _status, string _message, int? _inserted_id, List<Error> _error)
+        public response(bool _status, string _message, object _result, int? _inserted_id, List<Error> _error)
         {
             Status = _status;
             Message = _message;
+            Result = _result;
             InsertedId = _inserted_id;
             Error = _error;
         }
@@ -49,6 +51,7 @@ namespace SOCISA
         /// </summary>
         public string Message { get; set; }
 
+        public object Result { get; set; }
         /// <summary>
         /// ID-ul unic rezultat in cazul operatiilor de insert, null pentru celelalte
         /// </summary>
@@ -205,13 +208,13 @@ namespace SOCISA
                 }
                 catch (Exception exp) { throw exp; }
                 // END LOG ---
-                return new response(true, "", null, new List<Error>());;
+                return new response(true, "", null, null, new List<Error>());;
             }
             catch (Exception exp)
             {
                 //mySqlConnection.Close();
                 //return new response(false, SOCISA.CommonFunctions.MySqlErrorParser(mySqlException), null, null);
-                return new response(false, exp.ToString(), null, null);
+                return new response(false, exp.ToString(), null, null, new List<Error>() {new Error(exp) });
                 //throw exp;
             }
         }
@@ -256,14 +259,14 @@ namespace SOCISA
                 }
                 catch (Exception exp) { throw exp; }
                 // END LOG ---
-                return new response(true, "", Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), null);
+                return new response(true, "", Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), null);
             }
             catch (Exception exp)
             {
                 //mySqlConnection.Close();
                 //return new response(false, SOCISA.CommonFunctions.MySqlErrorParser(mySqlException), null, null);
                 //throw exp;
-                return new response(false, exp.ToString(), null, null);
+                return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) });
             }
         }
 
@@ -312,14 +315,14 @@ namespace SOCISA
                 }
                 catch (Exception exp) { throw exp; }
                 // END LOG ---
-                return new response(true, "", Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), null);
+                return new response(true, "", Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), null);
             }
             catch (Exception exp)
             {
                 //mySqlConnection.Close();
                 //return new response(false, SOCISA.CommonFunctions.MySqlErrorParser(mySqlException), null, null);
                 //throw exp;
-                return new response(false, exp.ToString(), null, null);
+                return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) });
             }
         }
 

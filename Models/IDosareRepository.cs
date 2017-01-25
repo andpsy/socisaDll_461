@@ -91,9 +91,9 @@ namespace SOCISA.Models
                 Dosar[] toReturn = new Dosar[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Dosar)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public response GetFiltered(string _sort, string _order, string _filter, string _limit)
@@ -121,9 +121,9 @@ namespace SOCISA.Models
                 Dosar[] toReturn = new Dosar[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Dosar)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public response Find(int _id)
@@ -131,9 +131,9 @@ namespace SOCISA.Models
             try
             {
                 Dosar item = new Dosar(authenticatedUserId, connectionString, _id);
-                return new response(true, JsonConvert.SerializeObject(item), null, null); ;
+                return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, new List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
 
         }
 
@@ -346,7 +346,7 @@ namespace SOCISA.Models
             {
                 try
                 {
-                    response toReturn = new response(true, "", null, new List<Error>()); ;
+                    response toReturn = new response(true, "", null, null, new List<Error>()); ;
                     response r = new response();
 
                     Asigurat asigCasco = new Asigurat(authenticatedUserId, connectionString);
@@ -387,7 +387,7 @@ namespace SOCISA.Models
                         Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratCasco");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
-                        r = new response(false, err.ERROR_MESSAGE, null, errs);
+                        r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                         toReturn.AddResponse(r);
                     }
 
@@ -419,7 +419,7 @@ namespace SOCISA.Models
                         Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratRca");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
-                        r = new response(false, err.ERROR_MESSAGE, null, errs);
+                        r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                         toReturn.AddResponse(r);
                     }
 
@@ -451,7 +451,7 @@ namespace SOCISA.Models
                         Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratorCasco");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
-                        r = new response(false, err.ERROR_MESSAGE, null, errs);
+                        r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                         toReturn.AddResponse(r);
                     }
 
@@ -483,7 +483,7 @@ namespace SOCISA.Models
                         Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratorRca");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
-                        r = new response(false, err.ERROR_MESSAGE, null, errs);
+                        r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                         toReturn.AddResponse(r);
                     }
 
@@ -516,7 +516,7 @@ namespace SOCISA.Models
                         Error err = ErrorParser.ErrorMessage("couldNotInsertAutoCasco");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
-                        r = new response(false, err.ERROR_MESSAGE, null, errs);
+                        r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                         toReturn.AddResponse(r);
                     }
 
@@ -549,7 +549,7 @@ namespace SOCISA.Models
                         Error err = ErrorParser.ErrorMessage("couldNotInsertAutoRca");
                         List<Error> errs = new List<Error>();
                         errs.Add(err);
-                        r = new response(false, err.ERROR_MESSAGE, null, errs);
+                        r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                         toReturn.AddResponse(r);
                     }
 

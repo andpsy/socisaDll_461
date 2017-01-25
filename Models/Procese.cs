@@ -427,7 +427,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "PROCESEsp_delete", _parameters.ToArray());
@@ -437,7 +437,7 @@ namespace SOCISA.Models
 
         public response Delete(int _ID_DOSAR)
         {
-            response toReturn = new response(false, "", null, new List<Error>());
+            response toReturn = new response(false, "", null, null, new List<Error>());
             DosarProces dp = new DosarProces(authenticatedUserId, connectionString);
             dp.ID_DOSAR = _ID_DOSAR;
             dp.ID_PROCES = Convert.ToInt32(this.ID);
@@ -455,7 +455,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>()); ;
+            response toReturn = new response(true, "", null, null, new List<Error>()); ;
 
 
             return toReturn;

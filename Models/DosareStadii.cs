@@ -280,7 +280,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>());;
+            response toReturn = new response(false, "", null, null, new List<Error>());;
             Sentinta[] sentinte = this.GetSentinte();
             try
             {
@@ -308,7 +308,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>());;
+            response toReturn = new response(true, "", null, null, new List<Error>());;
 
 
             return toReturn;

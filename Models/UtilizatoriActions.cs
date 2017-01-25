@@ -151,7 +151,7 @@ namespace SOCISA.Models
 
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess();
@@ -172,7 +172,7 @@ namespace SOCISA.Models
 
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>());
+            response toReturn = new response(true, "", null, null, new List<Error>());
             return toReturn;
         }
 

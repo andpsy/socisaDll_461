@@ -135,7 +135,8 @@ namespace SOCISA.Models
             {
                 if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
                 {
-                    this.FILE_CONTENT = CommonFunctions.GetFileContentFromFile(this.CALE_FISIER);
+                    //this.FILE_CONTENT = FileManager.GetFileContentFromFile(this.CALE_FISIER);
+                    this.FILE_CONTENT = FileManager.UploadFile(this.CALE_FISIER);
                     this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
                     //File.Delete(this.CALE_FISIER); // nu mai stergem, ca ne trebuie si in File Storage !
                 }
@@ -202,7 +203,8 @@ namespace SOCISA.Models
             {
                 if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
                 {
-                    this.FILE_CONTENT = CommonFunctions.GetFileContentFromFile(this.CALE_FISIER);
+                    //this.FILE_CONTENT = FileManager.GetFileContentFromFile(this.CALE_FISIER);
+                    this.FILE_CONTENT = FileManager.UploadFile(this.CALE_FISIER);
                     this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
                     //File.Delete(this.CALE_FISIER);
                 }
@@ -287,7 +289,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>());;
+            response toReturn = new response(false, "", null, null, new List<Error>());;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOCUMENTE_SCANATEsp_delete", _parameters.ToArray());
@@ -316,7 +318,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>());;
+            response toReturn = new response(true, "", null, null, new List<Error>());;
             Error err = new Error();
             if (this.DENUMIRE_FISIER == null || this.DENUMIRE_FISIER.Trim() == "")
             {
@@ -382,7 +384,7 @@ namespace SOCISA.Models
 
         public response GenerateImgThumbNails(ThumbNailSizes[] tSizes)
         {
-            response toReturn = new response(true, "", null, new List<Error>());
+            response toReturn = new response(true, "", null, null, new List<Error>());
             foreach(ThumbNailSizes tSize in tSizes)
             {
                 if (tSize.thumbNailType == ThumbNailType.Small)

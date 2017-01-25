@@ -288,7 +288,7 @@ namespace SOCISA
 
         public static response ValidareColoane(object item, string fieldValueCollection)
         {
-            response toReturn = new response(true, null, null, new List<Error>());
+            response toReturn = new response(true, null, null, null, new List<Error>());
             try
             {
                 Dictionary<string, string> changes = JsonConvert.DeserializeObject<Dictionary<string, string>>(fieldValueCollection);
@@ -307,14 +307,14 @@ namespace SOCISA
                     if (!gasit)
                     {
                         Error err = ErrorParser.ErrorMessage("campInexistentInTabela");
-                        return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
+                        return new response(false, err.ERROR_MESSAGE, null, null, new List<Error>() { err });
                     }
                 }
             }
             catch
             {
                 Error err = ErrorParser.ErrorMessage("cannotConvertStringToTableColumns");
-                return new response(false, err.ERROR_MESSAGE, null, new List<Error>() { err });
+                return new response(false, err.ERROR_MESSAGE, null, null, new List<Error>() { err });
             }
             return toReturn;
         }
@@ -339,7 +339,7 @@ namespace SOCISA
                                 try
                                 {
                                     if (Convert.ToInt32(counter) > 0)
-                                        return new response(true, "true", null, null);
+                                        return new response(true, "true", true, null, null);
                                 }
                                 catch { }
                                 break;
@@ -353,16 +353,16 @@ namespace SOCISA
                         object counter = da.ExecuteScalarQuery();
                         try
                         {
-                            return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), null, null);
+                            return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), Convert.ToInt32(counter) > 0, null, null);
                         }
                         catch
                         {
-                            return new response(true, "false", null, null);
+                            return new response(true, "false", false, null, null);
                         }
                     }
                 }
-                return new response(true, "false", null, null);
-            }catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+                return new response(true, "false", false, null, null);
+            }catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public static response HasChildren(int authenticatedUserId, string connectionString, object item, string parentTableName, string childTableName, int childrenId)
@@ -385,7 +385,7 @@ namespace SOCISA
                                 try
                                 {
                                     if (Convert.ToInt32(counter) > 0)
-                                        return new response(true, "true", null, null);
+                                        return new response(true, "true", true, null, null);
                                 }
                                 catch { }
                                 break;
@@ -404,18 +404,18 @@ namespace SOCISA
                             object counter = da.ExecuteScalarQuery();
                             try
                             {
-                                return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), null, null);
+                                return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), Convert.ToInt32(counter) > 0, null, null);
                             }
                             catch
                             {
-                                return new response(true, "false", null, null);
+                                return new response(true, "false", false, null, null);
                             }
                         }
                     }
                 }
-                return new response(true, "false", null, null);
+                return new response(true, "false", false, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public static response GetChildrens(object item, string table_name)
@@ -433,9 +433,9 @@ namespace SOCISA
                     }
                 }
                 dynamic r = methodToRun.Invoke(item, null);
-                return new response(true, JsonConvert.SerializeObject(r), null, null);
+                return new response(true, JsonConvert.SerializeObject(r), r, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public static response GetChildren(object item, string table_name, int childrenId)
@@ -450,101 +450,52 @@ namespace SOCISA
                         PropertyInfo pi = it.GetType().GetProperty("ID");
                         if (Convert.ToInt32(pi.GetValue(it)) == childrenId)
                         {
-                            return new response(true, JsonConvert.SerializeObject(it), null, null);
+                            return new response(true, JsonConvert.SerializeObject(it), it, null, null);
                         }
                     }
                 }
+                return new response(true, null, null, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, new List<Error>() { new Error(exp) }); }
-            return new response(true, null, null, null);
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }            
         }
 
-        public static bool LoadTemplateFileIntoDb(int _authenticatedUserId, string _connectionString, string filePath, string _DETALII)
+        public static string GetScansFolder()
         {
-            try
-            {
-                FileInfo fi = new FileInfo(filePath);
-                int FileSize;
-                byte[] rawData;
-                FileStream fs;
-                fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                FileSize = (int)fs.Length;
-
-                rawData = new byte[FileSize];
-                fs.Read(rawData, 0, FileSize);
-                DataAccess da = new DataAccess(_authenticatedUserId, _connectionString, CommandType.StoredProcedure, "TEMPLATESsp_insert", new object[]
-                {
-                    new MySqlParameter("_DENUMIRE_FISIER", fi.Name),
-                    new MySqlParameter("_EXTENSIE_FISIER", fi.Extension),
-                    new MySqlParameter("_DIMENSIUNE_FISIER", FileSize),
-                    new MySqlParameter("_FILE_CONTENT", rawData),
-                    new MySqlParameter("_DETALII", _DETALII)
-                });
-                response r = da.ExecuteInsertQuery();
-                return r.Status;
-            }catch { return false; }
+            string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+            string settings = File.ReadAllText(settingsFile);
+            dynamic result = JsonConvert.DeserializeObject(settings);
+            return Path.Combine(AppContext.BaseDirectory, result.ScansFolder);
         }
 
-        public static byte[] GetTemplateFileIntoDb(int _authenticatedUserId, string _connectionString, string fileName)
+        public static string GetPdfsFolder()
         {
-            try
+            string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+            string settings = File.ReadAllText(settingsFile);
+            dynamic result = JsonConvert.DeserializeObject(settings);
+            return Path.Combine(AppContext.BaseDirectory, result.PdfsFolder);
+        }
+
+        public static ThumbNailSizes[] GetThumbNailSizes()
+        {
+            string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+            string settings = File.ReadAllText(settingsFile);
+            dynamic result = JsonConvert.DeserializeObject(settings);
+            ThumbNailSizes[] tSizes = JsonConvert.DeserializeObject<ThumbNailSizes[]>(result.ThumbNailSizes.ToString());
+            return tSizes;
+        }
+
+        public static ThumbNailSizes GetThumbNailSizes(ThumbNailType thType)
+        {
+            string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+            string settings = File.ReadAllText(settingsFile);
+            dynamic result = JsonConvert.DeserializeObject(settings);
+            ThumbNailSizes[] tSizes = JsonConvert.DeserializeObject<ThumbNailSizes[]>(result.ThumbNailSizes.ToString());
+            foreach(ThumbNailSizes ts in tSizes)
             {
-                byte[] rawData;
-                DataAccess da = new DataAccess(_authenticatedUserId, _connectionString, CommandType.StoredProcedure, "TEMPLATESsp_GetByName", new object[]
-                {
-                    new MySqlParameter("_DENUMIRE_FISIER", fileName)
-                });
-                IDataReader r = da.ExecuteSelectQuery();
-                r.Read();
-                rawData = (byte[])r["FILE_CONTENT"];
-                return rawData;
+                if (ts.thumbNailType == thType)
+                    return ts;
             }
-            catch { return null; }
-        }
-
-        public static byte[] GetTemplateFileFromDb(int _authenticatedUserId, string _connectionString, int templateId)
-        {
-            try
-            {
-                byte[] rawData;
-                DataAccess da = new DataAccess(_authenticatedUserId, _connectionString, CommandType.StoredProcedure, "TEMPLATESsp_GetById", new object[]
-                {
-                    new MySqlParameter("_ID", templateId)
-                });
-                IDataReader r = da.ExecuteSelectQuery();
-                r.Read();
-                rawData = (byte[])r["FILE_CONTENT"];
-                return rawData;
-            }
-            catch { return null; }
-        }
-
-        public static byte[] GetFileContentFromFile(string fileName)
-        {
-            try
-            {
-                FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                byte[] toReturn = new byte[fs.Length];
-                fs.Read(toReturn, 0, (int)fs.Length);
-                return toReturn;
-            }catch { return null; }
-        }
-
-        public static byte[] GetFileContentFromDb(int _authenticatedUserId, string _connectionString, int documentScanatId)
-        {
-            try
-            {
-                byte[] rawData;
-                DataAccess da = new DataAccess(_authenticatedUserId, _connectionString, CommandType.StoredProcedure, "DOCUMENTE_SCANATEsp_GetById", new object[]
-                {
-                    new MySqlParameter("_ID", documentScanatId)
-                });
-                IDataReader r = da.ExecuteSelectQuery();
-                r.Read();
-                rawData = (byte[])r["FILE_CONTENT"];
-                return rawData;
-            }
-            catch { return null; }
+            return tSizes[2];
         }
     }
 }

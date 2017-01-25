@@ -177,7 +177,7 @@ namespace SOCISA.Models
 
         public response Delete()
         {
-            response toReturn = new response(false, "", null, new List<Error>()); ;
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "AUTOsp_delete", _parameters.ToArray());
@@ -187,7 +187,7 @@ namespace SOCISA.Models
 
         public response Validare()
         {
-            response toReturn = new response(true, "", null, new List<Error>()); ;
+            response toReturn = new response(true, "", null, null, new List<Error>()); ;
             Error err = new Error();
             if (this.NR_AUTO == null || this.NR_AUTO.Trim() == "")
             {
