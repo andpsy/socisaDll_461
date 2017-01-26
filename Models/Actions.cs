@@ -10,6 +10,7 @@ namespace SOCISA.Models
 {
     public class Action
     {
+        const string _TABLE_NAME = "actions";
         int authenticatedUserId { get; set; }
         string connectionString { get; set; }
 

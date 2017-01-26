@@ -126,13 +126,15 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Asigurat item = JsonConvert.DeserializeObject<Asigurat>(Find(id).Message);
+            //Asigurat item = JsonConvert.DeserializeObject<Asigurat>(Find(id).Message);
+            Asigurat item = (Asigurat)(Find(id).Result);
             return item.Update(fieldValueCollection);
         }
         public response Update(string fieldValueCollection)
         {
             Asigurat tmpItem = JsonConvert.DeserializeObject<Asigurat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            return JsonConvert.DeserializeObject<Asigurat>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            //return JsonConvert.DeserializeObject<Asigurat>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            return ((Asigurat)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
 
         public response Delete(Asigurat item)
@@ -162,28 +164,28 @@ namespace SOCISA.Models
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).Delete();
+            return ((Asigurat)obj.Result).Delete();
         }
 
         public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).HasChildrens(tableName);
+            return ((Asigurat)obj.Result).HasChildrens(tableName);
         }
         public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).HasChildren(tableName, childrenId);
+            return ((Asigurat)obj.Result).HasChildren(tableName, childrenId);
         }
         public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).GetChildrens(tableName);
+            return ((Asigurat)obj.Result).GetChildrens(tableName);
         }
         public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Asigurat>(obj.Message).GetChildren(tableName, childrenId);
+            return ((Asigurat)obj.Result).GetChildren(tableName, childrenId);
         }
     }
 }

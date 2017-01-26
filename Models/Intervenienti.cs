@@ -10,6 +10,7 @@ namespace SOCISA.Models
 {
     public class Intervenient
     {
+        const string _TABLE_NAME = "intervenienti";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 

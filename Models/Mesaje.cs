@@ -10,6 +10,7 @@ namespace SOCISA.Models
 {
     public class Mesaj
     {
+        const string _TABLE_NAME = "mesaje";
         public enum Importanta { Low = 0, Medium, High };
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }

@@ -13,6 +13,7 @@ namespace SOCISA.Models
     /// </summary>
     public class Proces
     {
+        const string _TABLE_NAME = "procese";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 

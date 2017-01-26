@@ -127,13 +127,15 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Auto item = JsonConvert.DeserializeObject<Auto>( Find(id).Message);
+            //Auto item = JsonConvert.DeserializeObject<Auto>( Find(id).Message);
+            Auto item = (Auto)(Find(id).Result);
             return item.Update(fieldValueCollection);
         }
         public response Update(string fieldValueCollection)
         {
             Auto tmpItem = JsonConvert.DeserializeObject<Auto>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            return JsonConvert.DeserializeObject<Auto>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            //return JsonConvert.DeserializeObject<Auto>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            return ((Auto)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
 
         public response Delete(Auto item)
@@ -163,28 +165,28 @@ namespace SOCISA.Models
         public response Delete(int _id)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Auto>(obj.Message).Delete();
+            return ((Auto)obj.Result).Delete();
         }
 
         public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Auto>(obj.Message).HasChildrens(tableName);
+            return ((Auto)obj.Result).HasChildrens(tableName);
         }
         public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Auto>(obj.Message).HasChildren(tableName, childrenId);
+            return ((Auto)obj.Result).HasChildren(tableName, childrenId);
         }
         public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Auto>(obj.Message).GetChildrens(tableName);
+            return ((Auto)obj.Result).GetChildrens(tableName);
         }
         public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Auto>(obj.Message).GetChildren(tableName, childrenId);
+            return ((Auto)obj.Result).GetChildren(tableName, childrenId);
         }
     }
 }

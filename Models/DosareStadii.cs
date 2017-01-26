@@ -13,6 +13,7 @@ namespace SOCISA.Models
     /// </summary>
     public class DosarStadiu
     {
+        const string _TABLE_NAME = "dosare_stadii";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 

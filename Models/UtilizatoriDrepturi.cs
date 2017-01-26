@@ -10,6 +10,7 @@ namespace SOCISA.Models
 {
     public class UtilizatorDrept
     {
+        const string _TABLE_NAME = "utilizatori_drepturi";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 

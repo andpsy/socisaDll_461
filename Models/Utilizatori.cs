@@ -14,6 +14,7 @@ namespace SOCISA.Models
     /// </summary>
     public class Utilizator
     {
+        const string _TABLE_NAME = "utilizatori";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
         public int? ID {get;set;}

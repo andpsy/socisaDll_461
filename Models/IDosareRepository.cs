@@ -159,14 +159,16 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Dosar item = JsonConvert.DeserializeObject<Dosar>(Find(id).Message);
+            //Dosar item = JsonConvert.DeserializeObject<Dosar>(Find(id).Message);
+            Dosar item = (Dosar)(Find(id).Result);
             return item.Update(fieldValueCollection);
         }
 
         public response Update(string fieldValueCollection)
         {
             Dosar tmpItem = JsonConvert.DeserializeObject<Dosar>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            return JsonConvert.DeserializeObject<Dosar>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            //return JsonConvert.DeserializeObject<Dosar>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            return ((Dosar)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
 
         public response Delete(Dosar item)
@@ -200,29 +202,34 @@ namespace SOCISA.Models
 
         public response Delete(int _id)
         {
-            var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Dosar>(obj.Message).Delete();
+            response obj = Find(_id);
+            //return JsonConvert.DeserializeObject<Dosar>(obj.Message).Delete();
+            return ((Dosar)obj.Result).Delete();
         }
 
         public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Dosar>(obj.Message).HasChildrens(tableName);
+            //return JsonConvert.DeserializeObject<Dosar>(obj.Message).HasChildrens(tableName);
+            return ((Dosar)obj.Result).HasChildrens(tableName);
         }
         public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Dosar>(obj.Message).HasChildren(tableName, childrenId);
+            //return JsonConvert.DeserializeObject<Dosar>(obj.Message).HasChildren(tableName, childrenId);
+            return ((Dosar)obj.Result).HasChildren(tableName, childrenId);
         }
         public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Dosar>(obj.Message).GetChildrens(tableName);
+            //return JsonConvert.DeserializeObject<Dosar>(obj.Message).GetChildrens(tableName);
+            return ((Dosar)obj.Result).GetChildrens(tableName);
         }
         public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Dosar>(obj.Message).GetChildren(tableName, childrenId);
+            //return JsonConvert.DeserializeObject<Dosar>(obj.Message).GetChildren(tableName, childrenId);
+            return ((Dosar)obj.Result).GetChildren(tableName, childrenId);
         }
 
         public Utilizator[] GetUtilizatori(Dosar item)
@@ -278,7 +285,8 @@ namespace SOCISA.Models
         }
         public response ExportDocumenteDosarToPdf(int _id)
         {
-            return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDocumenteDosarToPdf();
+            //return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDocumenteDosarToPdf();
+            return ((Dosar)(Find(_id).Result)).ExportDocumenteDosarToPdf();
         }
         public response ExportDosarToPdf(string templateFileName, Dosar item)
         {
@@ -286,7 +294,8 @@ namespace SOCISA.Models
         }
         public response ExportDosarToPdf(string templateFileName, int _id)
         {
-            return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarToPdf(templateFileName);
+            //return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarToPdf(templateFileName);
+            return ((Dosar)(Find(_id).Result)).ExportDosarToPdf(templateFileName);
         }
         public response ExportDosarCompletToPdf(string templateFileName, Dosar item)
         {
@@ -298,11 +307,13 @@ namespace SOCISA.Models
         }
         public response ExportDosarCompletToPdf(string templateFileName, int _id)
         {
-            return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarCompletToPdf(templateFileName);
+            //return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarCompletToPdf(templateFileName);
+            return ((Dosar)(Find(_id).Result)).ExportDosarCompletToPdf(templateFileName);
         }
         public response ExportDosarCompletToPdf(int _id)
         {
-            return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarCompletToPdf(_TEMPLATE_CERERE_DESPAGUBIRE);
+            //return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarCompletToPdf(_TEMPLATE_CERERE_DESPAGUBIRE);
+            return ((Dosar)(Find(_id).Result)).ExportDosarCompletToPdf(_TEMPLATE_CERERE_DESPAGUBIRE);
         }
         public void Import(Dosar item)
         {

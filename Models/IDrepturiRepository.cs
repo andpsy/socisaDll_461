@@ -119,13 +119,15 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            Drept item = JsonConvert.DeserializeObject<Drept>(Find(id).Message);
+            //Drept item = JsonConvert.DeserializeObject<Drept>(Find(id).Message);
+            Drept item = (Drept)(Find(id).Result);
             return item.Update(fieldValueCollection);
         }
         public response Update(string fieldValueCollection)
         {
             Drept tmpItem = JsonConvert.DeserializeObject<Drept>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            return JsonConvert.DeserializeObject<Drept>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            //return JsonConvert.DeserializeObject<Drept>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            return ((Drept)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
 
         public response Delete(Drept item)
@@ -154,29 +156,34 @@ namespace SOCISA.Models
         }
         public response Delete(int _id)
         {
-            var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Drept>(obj.Message).Delete();
+            response obj = Find(_id);
+            //return JsonConvert.DeserializeObject<Drept>(obj.Message).Delete();
+            return ((Drept)obj.Result).Delete();
         }
 
         public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Drept>(obj.Message).HasChildrens(tableName);
+            //return JsonConvert.DeserializeObject<Drept>(obj.Message).HasChildrens(tableName);
+            return ((Drept)obj.Result).HasChildrens(tableName);
         }
         public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Drept>(obj.Message).HasChildren(tableName, childrenId);
+            //return JsonConvert.DeserializeObject<Drept>(obj.Message).HasChildren(tableName, childrenId);
+            return ((Drept)obj.Result).HasChildren(tableName, childrenId);
         }
         public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Drept>(obj.Message).GetChildrens(tableName);
+            //return JsonConvert.DeserializeObject<Drept>(obj.Message).GetChildrens(tableName);
+            return ((Drept)obj.Result).GetChildrens(tableName);
         }
         public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<Drept>(obj.Message).GetChildren(tableName, childrenId);
+            //return JsonConvert.DeserializeObject<Drept>(obj.Message).GetChildren(tableName, childrenId);
+            return ((Drept)obj.Result).GetChildren(tableName, childrenId);
         }
     }
 }

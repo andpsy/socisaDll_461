@@ -13,6 +13,7 @@ namespace SOCISA.Models
     /// </summary>
     public class Stadiu
     {
+        const string _TABLE_NAME = "stadii";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 

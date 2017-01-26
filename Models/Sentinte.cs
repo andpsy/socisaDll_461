@@ -10,6 +10,7 @@ namespace SOCISA.Models
 {
     public class Sentinta
     {
+        const string _TABLE_NAME = "sentinte";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 

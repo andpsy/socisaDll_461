@@ -154,13 +154,15 @@ namespace SOCISA.Models
 
         public response Update(int id, string fieldValueCollection)
         {
-            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
+            //DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
+            DocumentScanat item = (DocumentScanat)(Find(id).Result);
             return item.Update(fieldValueCollection);
         }
         public response Update(string fieldValueCollection)
         {
             DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            return JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            //return JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            return ((DocumentScanat)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
         public response Update(int id, string fieldValueCollection, object file)
         {
@@ -172,14 +174,16 @@ namespace SOCISA.Models
         public response Update(string fieldValueCollection, object file)
         {
             DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
+            //DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
+            DocumentScanat item = (DocumentScanat)(Find(Convert.ToInt32(tmpItem.ID)).Result);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
             return item.Update(fieldValueCollection);
         }
         public response Update(int id, string fieldValueCollection, object file, ThumbNailSizes[] tSizes)
         {
-            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
+            //DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
+            DocumentScanat item = (DocumentScanat)(Find(id).Result);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
             response r = item.Update(fieldValueCollection);
@@ -193,7 +197,8 @@ namespace SOCISA.Models
         public response Update(string fieldValueCollection, object file, ThumbNailSizes[] tSizes)
         {
             DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
+            //DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
+            DocumentScanat item = (DocumentScanat)(Find(Convert.ToInt32(tmpItem.ID)).Result);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
             response r = item.Update(fieldValueCollection);
@@ -210,7 +215,8 @@ namespace SOCISA.Models
         }
         public response Delete(int _id)
         {
-            DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(_id).Message);
+            //DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(_id).Message);
+            DocumentScanat item = (DocumentScanat)(Find(_id).Result);
             return item.Delete();
         }
 
@@ -237,22 +243,22 @@ namespace SOCISA.Models
         public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).HasChildrens(tableName);
+            return ((DocumentScanat)obj.Result).HasChildrens(tableName);
         }
         public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).HasChildren(tableName, childrenId);
+            return ((DocumentScanat)obj.Result).HasChildren(tableName, childrenId);
         }
         public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).GetChildrens(tableName);
+            return ((DocumentScanat)obj.Result).GetChildrens(tableName);
         }
         public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            return JsonConvert.DeserializeObject<DocumentScanat>(obj.Message).GetChildren(tableName, childrenId);
+            return ((DocumentScanat)obj.Result).GetChildren(tableName, childrenId);
         }
         public response GenerateThumbNails(DocumentScanat item, ThumbNailSizes[] tSizes)
         {

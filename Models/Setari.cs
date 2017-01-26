@@ -10,6 +10,7 @@ namespace SOCISA.Models
 {
     public class Setare
     {
+        const string _TABLE_NAME = "setari";
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 
