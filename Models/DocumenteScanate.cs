@@ -130,7 +130,8 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Insert()
         {
-            try { if (this.DATA_INCARCARE == new DateTime()) this.DATA_INCARCARE = GetFileCreationDate(); }
+            //try { if (this.DATA_INCARCARE == new DateTime() || this.DATA_INCARCARE == null) this.DATA_INCARCARE = GetFileCreationDate(); }
+            try { if (this.DATA_INCARCARE == new DateTime() || this.DATA_INCARCARE == null) this.DATA_INCARCARE = DateTime.Now; }
             catch { }
             try
             {
@@ -198,7 +199,8 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Update()
         {
-            try { this.DATA_INCARCARE = GetFileCreationDate(); }
+            //try { if (this.DATA_INCARCARE == new DateTime() || this.DATA_INCARCARE == null) this.DATA_INCARCARE = GetFileCreationDate(); }
+            try { if (this.DATA_INCARCARE == new DateTime() || this.DATA_INCARCARE == null) this.DATA_INCARCARE = DateTime.Now; }
             catch { }
             try
             {

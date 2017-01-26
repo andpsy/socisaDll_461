@@ -125,6 +125,7 @@ namespace SOCISA.Models
         public response Insert(DocumentScanat item, object file)
         {
             item.FILE_CONTENT = GetBytesFromParameter(file);
+            item.DIMENSIUNE_FISIER = item.FILE_CONTENT.Length;
             return item.Insert();
         }
         public response Insert(DocumentScanat item, object file, ThumbNailSizes[] tSizes)
@@ -144,11 +145,13 @@ namespace SOCISA.Models
         public response Update(DocumentScanat item, object file)
         {
             item.FILE_CONTENT = GetBytesFromParameter(file);
+            item.DIMENSIUNE_FISIER = item.FILE_CONTENT.Length;
             return item.Update();
         }
         public response Update(DocumentScanat item, object file, ThumbNailSizes[] tSizes)
         {
             item.FILE_CONTENT = GetBytesFromParameter(file);
+            item.DIMENSIUNE_FISIER = item.FILE_CONTENT.Length;
             return item.Update(tSizes);
         }
 
@@ -160,7 +163,7 @@ namespace SOCISA.Models
         }
         public response Update(string fieldValueCollection)
         {
-            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection);
             //return JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
             return ((DocumentScanat)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
@@ -169,15 +172,17 @@ namespace SOCISA.Models
             DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(id).Message);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
+            item.DIMENSIUNE_FISIER = item.FILE_CONTENT.Length;
             return item.Update(fieldValueCollection);
         }
         public response Update(string fieldValueCollection, object file)
         {
-            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection);
             //DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
             DocumentScanat item = (DocumentScanat)(Find(Convert.ToInt32(tmpItem.ID)).Result);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
+            item.DIMENSIUNE_FISIER = item.FILE_CONTENT.Length;
             return item.Update(fieldValueCollection);
         }
         public response Update(int id, string fieldValueCollection, object file, ThumbNailSizes[] tSizes)
@@ -186,6 +191,7 @@ namespace SOCISA.Models
             DocumentScanat item = (DocumentScanat)(Find(id).Result);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
+            item.DIMENSIUNE_FISIER = item.FILE_CONTENT.Length;
             response r = item.Update(fieldValueCollection);
             if (r.Status)
             {
@@ -196,11 +202,12 @@ namespace SOCISA.Models
         }
         public response Update(string fieldValueCollection, object file, ThumbNailSizes[] tSizes)
         {
-            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            DocumentScanat tmpItem = JsonConvert.DeserializeObject<DocumentScanat>(fieldValueCollection);
             //DocumentScanat item = JsonConvert.DeserializeObject<DocumentScanat>(Find(Convert.ToInt32(tmpItem.ID)).Message);
             DocumentScanat item = (DocumentScanat)(Find(Convert.ToInt32(tmpItem.ID)).Result);
             byte[] f = GetBytesFromParameter(file);
             item.FILE_CONTENT = f;
+            item.DIMENSIUNE_FISIER = item.FILE_CONTENT.Length;
             response r = item.Update(fieldValueCollection);
             if (r.Status)
             {

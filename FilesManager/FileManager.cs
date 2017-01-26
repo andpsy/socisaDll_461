@@ -27,18 +27,16 @@ namespace SOCISA
 
         public static byte[] UploadFile(IFormFile file)
         {
-            byte[] toReturn = null;
             BinaryReader reader = new BinaryReader(file.OpenReadStream());
-            toReturn = reader.ReadBytes((int)file.Length);
+            byte[]  toReturn = reader.ReadBytes((int)file.Length);
             return toReturn;
         }
 
         public static byte[] UploadFile(string filePath)
         {
             string newFilePath = File.Exists(filePath) ? filePath : Path.Combine(CommonFunctions.GetScansFolder(), filePath);
-
-            byte[] toReturn = null;
             FileStream fs = File.Open(filePath, FileMode.Open, FileAccess.Read);
+            byte[] toReturn = new byte[fs.Length];
             fs.Read(toReturn, 0, (int)fs.Length);
             fs.Flush();
             fs.Dispose();
@@ -48,8 +46,8 @@ namespace SOCISA
 
         public static byte[] UploadFile(string filePath, string fileName)
         {
-            byte[] toReturn = null;
             FileStream fs = File.Open(Path.Combine(filePath,fileName), FileMode.Open, FileAccess.Read);
+            byte[] toReturn = new byte[fs.Length];
             fs.Read(toReturn, 0, (int)fs.Length);
             fs.Flush();
             fs.Dispose();
