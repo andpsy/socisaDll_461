@@ -605,7 +605,7 @@ namespace SOCISA.Models
             try
             {
                 DataAccess da = new DataAccess( authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_GetLastRefresh", new object[] { new MySqlParameter("_ID_UTILIZATOR", Convert.ToInt32(ID)) });
-                toReturn = Convert.ToDateTime(da.ExecuteScalarQuery());
+                toReturn = Convert.ToDateTime(da.ExecuteScalarQuery().Result);
             }
             catch { }
             return toReturn;

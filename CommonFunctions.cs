@@ -335,7 +335,7 @@ namespace SOCISA
                             if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
                             {
                                 da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()) });
-                                object counter = da.ExecuteScalarQuery();
+                                object counter = da.ExecuteScalarQuery().Result;
                                 try
                                 {
                                     if (Convert.ToInt32(counter) > 0)
@@ -350,7 +350,7 @@ namespace SOCISA
                     {
                         PropertyInfo pi = item.GetType().GetProperty("ID");
                         da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENSsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["TABLE_NAME"].ToString()) });
-                        object counter = da.ExecuteScalarQuery();
+                        object counter = da.ExecuteScalarQuery().Result;
                         try
                         {
                             return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), Convert.ToInt32(counter) > 0, null, null);
@@ -381,7 +381,7 @@ namespace SOCISA
                             if (prop.Name.ToUpper() == r["COLUMN_NAME"].ToString().ToUpper())
                             {
                                 da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", prop.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", "1"), new MySqlParameter("_CHILDREN_ID_VALUE", "1") });
-                                object counter = da.ExecuteScalarQuery();
+                                object counter = da.ExecuteScalarQuery().Result;
                                 try
                                 {
                                     if (Convert.ToInt32(counter) > 0)
@@ -401,7 +401,7 @@ namespace SOCISA
                             PropertyInfo pi = item.GetType().GetProperty("ID");
                             //da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
                             da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", pi.GetValue(item)), new MySqlParameter("_EXTERNAL_ID", r["COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
-                            object counter = da.ExecuteScalarQuery();
+                            object counter = da.ExecuteScalarQuery().Result;
                             try
                             {
                                 return new response(true, Convert.ToString(Convert.ToInt32(counter) > 0), Convert.ToInt32(counter) > 0, null, null);

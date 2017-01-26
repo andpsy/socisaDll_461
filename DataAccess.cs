@@ -259,7 +259,7 @@ namespace SOCISA
                 }
                 catch (Exception exp) { throw exp; }
                 // END LOG ---
-                return new response(true, "", Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value), null);
+                return new response(true, "", null, null, null);
             }
             catch (Exception exp)
             {
@@ -330,19 +330,21 @@ namespace SOCISA
         /// Metoda pentru executarea operatiilor de selectie a unui scalar din baza de date
         /// </summary>
         /// <returns>obiect scalar rezultat din selectie</returns>
-        public object ExecuteScalarQuery()
+        public response ExecuteScalarQuery()
         {
-            object toReturn = new object();
+            response toReturn = new response();
             try
             {
-                toReturn = mySqlCommand.ExecuteScalar();
+                object ret = mySqlCommand.ExecuteScalar();
+                toReturn = new response(true, "", ret, null, null);
                 mySqlConnection.Close();
             }
             catch (Exception exp)
             {
                 //mySqlException.ToString();
                 //toReturn = null;
-                throw exp;
+                //throw exp;
+                toReturn = new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
             return toReturn;
         }

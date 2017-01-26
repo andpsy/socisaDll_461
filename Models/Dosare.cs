@@ -1166,7 +1166,7 @@ namespace SOCISA.Models
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetDataUltimeiModificari", new object[] { new MySqlParameter("_ID_DOSAR", ID) });
-                toReturn = Convert.ToDateTime(da.ExecuteScalarQuery());
+                toReturn = Convert.ToDateTime(da.ExecuteScalarQuery().Result);
             }
             catch { }
             return toReturn;

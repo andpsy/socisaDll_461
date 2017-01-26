@@ -246,7 +246,7 @@ namespace SOCISA.Models
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, String.Format("{0}sp_GetIdByName", _tableName.ToUpper()), new object[] { new MySqlParameter("_DENUMIRE", _Name) });
-                return Convert.ToInt32(da.ExecuteScalarQuery());
+                return Convert.ToInt32(da.ExecuteScalarQuery().Result);
             }
             catch { return null; }
         }
