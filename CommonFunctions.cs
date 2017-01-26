@@ -464,7 +464,7 @@ namespace SOCISA
             string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
             string settings = File.ReadAllText(settingsFile);
             dynamic result = JsonConvert.DeserializeObject(settings);
-            return Path.Combine(AppContext.BaseDirectory, result.ScansFolder);
+            return System.IO.Path.Combine(AppContext.BaseDirectory, Convert.ToString(result.ScansFolder));
         }
 
         public static string GetPdfsFolder()
@@ -472,7 +472,7 @@ namespace SOCISA
             string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
             string settings = File.ReadAllText(settingsFile);
             dynamic result = JsonConvert.DeserializeObject(settings);
-            return Path.Combine(AppContext.BaseDirectory, result.PdfsFolder);
+            return System.IO.Path.Combine(AppContext.BaseDirectory, Convert.ToString(result.PdfsFolder));
         }
 
         public static ThumbNailSizes[] GetThumbNailSizes()

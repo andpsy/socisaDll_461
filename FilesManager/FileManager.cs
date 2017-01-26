@@ -35,7 +35,7 @@ namespace SOCISA
         public static byte[] UploadFile(string filePath)
         {
             string newFilePath = File.Exists(filePath) ? filePath : Path.Combine(CommonFunctions.GetScansFolder(), filePath);
-            FileStream fs = File.Open(filePath, FileMode.Open, FileAccess.Read);
+            FileStream fs = File.Open(newFilePath, FileMode.Open, FileAccess.Read);
             byte[] toReturn = new byte[fs.Length];
             fs.Read(toReturn, 0, (int)fs.Length);
             fs.Flush();
@@ -46,7 +46,7 @@ namespace SOCISA
 
         public static byte[] UploadFile(string filePath, string fileName)
         {
-            FileStream fs = File.Open(Path.Combine(filePath,fileName), FileMode.Open, FileAccess.Read);
+            FileStream fs = File.Open(Path.Combine(filePath, fileName), FileMode.Open, FileAccess.Read);
             byte[] toReturn = new byte[fs.Length];
             fs.Read(toReturn, 0, (int)fs.Length);
             fs.Flush();
