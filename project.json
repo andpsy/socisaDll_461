@@ -3,18 +3,17 @@
   "copyright": "AndPsy",
   "description": "socisa Db Layer",
   "language": "en",
-  "version": "1.1.0-beta4",
+  "version": "1.1.0-beta6",
   "authors": [ "Andpsy" ],
 
   "dependencies": {
-    "Magick.NET.Core-Q16": "7.0.4.400",
-    "Magick.NET.Core-Q16.Native": "7.0.4.400",
-    "Microsoft.AspNetCore.Http": "1.0.1",
+    "CoreCompat.System.Drawing": "1.0.0-beta006",
+    "EPPlus.Core": "1.2.0",
+    "Microsoft.AspNetCore.Http": "1.1.0",
     "MySql.Data": "7.0.6-IR31",
-    "NETStandard.Library": "1.6.0",
+    "NETStandard.Library": "1.6.1",
     "Newtonsoft.Json": "9.0.2-beta2",
     "OfficeOpenXml.Core.ExcelPackage": "1.0.0",
-    "Shaman.EPPlus": "1.0.1.1",
     "Xfinium.Pdf.NetCore": "6.6.0.2",
     "Xfinium.Pdf.Render.NetCore": "6.6.0.2"
   },
