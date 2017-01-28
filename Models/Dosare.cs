@@ -1227,29 +1227,15 @@ namespace SOCISA.Models
 
         public response ExportDocumenteDosarToPdf()
         {
-            try
-            {
-                string p = PdfGenerator.ExportDocumenteDosarToPdf(this);
-                return new response(true, p, p, null, null);
-            } catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
+            return PdfGenerator.ExportDocumenteDosarToPdf(this);
         }
         public response ExportDosarToPdf(string templateFileName)
         {
-            try
-            {
-                string p = PdfGenerator.ExportDosarToPdf(templateFileName, this);
-                return new response(true, p, p, null, null);
-            }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
+            return PdfGenerator.ExportDosarToPdf(authenticatedUserId, connectionString, templateFileName, this);
         }
         public response ExportDosarCompletToPdf(string templateFileName)
         {
-            try
-            {
-                string p = PdfGenerator.ExportDosarCompletToPdf(templateFileName, this);
-                return new response(true, p, p, null, null);
-            }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
+            return PdfGenerator.ExportDosarCompletToPdf(authenticatedUserId, connectionString, templateFileName, this);
         }
     }
 }

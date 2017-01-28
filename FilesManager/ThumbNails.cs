@@ -34,7 +34,11 @@ namespace SOCISA
             byte[] b = new byte[fs.Length];
             fs.Read(b, 0, (int)fs.Length);
             fs.Dispose();
-            File.Delete(Path.Combine(AppContext.BaseDirectory, "scans", tmp_file));
+            try
+            {
+                File.Delete(Path.Combine(AppContext.BaseDirectory, "scans", tmp_file));
+            }
+            catch { }
             return b;
         }
 
@@ -89,8 +93,11 @@ namespace SOCISA
                         pngStream.Dispose();
 
                         response r = SaveThumbNail(sType, path, fileName.Replace(".pdf", ".png"), null, width, height);
-
-                        File.Delete(Path.Combine(path, fileName.Replace(".pdf", ".png")));
+                        try
+                        {
+                            File.Delete(Path.Combine(path, fileName.Replace(".pdf", ".png")));
+                        }
+                        catch { }
                         return r;
                     }
                     catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
@@ -116,7 +123,19 @@ namespace SOCISA
                 //string outputFile = fileName.Replace(fi.Extension, sType == "s" ? "_s.gif" : "_m.gif");
                 string outputFile = originalFilename.Replace(fi.Extension, "_" + sType + ".jpg");
 
-                Image image = img == null && originalFilename != null ? Image.FromFile(Path.Combine(path, originalFilename)) : img;
+                Image image;
+                if (img == null && originalFilename != null)
+                {
+                    //image = Image.FromFile(Path.Combine(path, originalFilename)); // -- locks the file and can not delete temp png!
+                    using (var bmpTemp = new Bitmap(Path.Combine(path, originalFilename)))
+                    {
+                        image = new Bitmap(bmpTemp);
+                    }
+                }
+                else
+                {
+                    image = img;
+                }
 
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
@@ -154,6 +173,19 @@ namespace SOCISA
                 return new response(true, outputFile, outputFile, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+        }
+
+        public static ThumbNailSize ScaleImage(Image image, double width, double height)
+        {
+            double ratioX = width / (double)image.Width;
+            double ratioY = height / (double)image.Height;
+            double sz = (double)Math.Max(image.Width, image.Height);
+            double ratio = (double)Math.Min(width, height) / sz;
+            ratio = ratio > 1 ? 1 : ratio;
+
+            var newWidth = (int)(image.Width * ratio);
+            var newHeight = (int)(image.Height * ratio);
+            return new ThumbNailSize(newWidth, newHeight);
         }
 
         #region -- Magick.NET --

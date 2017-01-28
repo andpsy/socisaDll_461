@@ -82,7 +82,7 @@ namespace SOCISA
             catch { return false; }
         }
 
-        public static byte[] GetTemplateFileIntoDb(int _authenticatedUserId, string _connectionString, string fileName)
+        public static byte[] GetTemplateFileFromDb(int _authenticatedUserId, string _connectionString, string fileName)
         {
             try
             {

@@ -140,6 +140,7 @@ namespace SOCISA.Models
                     //this.FILE_CONTENT = FileManager.GetFileContentFromFile(this.CALE_FISIER);
                     this.FILE_CONTENT = FileManager.UploadFile(this.CALE_FISIER);
                     this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
+                    this.EXTENSIE_FISIER = this.CALE_FISIER.Substring(this.CALE_FISIER.LastIndexOf('.'));
                     //File.Delete(this.CALE_FISIER); // nu mai stergem, ca ne trebuie si in File Storage !
                 }
             }
@@ -209,6 +210,7 @@ namespace SOCISA.Models
                     //this.FILE_CONTENT = FileManager.GetFileContentFromFile(this.CALE_FISIER);
                     this.FILE_CONTENT = FileManager.UploadFile(this.CALE_FISIER);
                     this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
+                    this.EXTENSIE_FISIER = this.CALE_FISIER.Substring(this.CALE_FISIER.LastIndexOf('.'));
                     //File.Delete(this.CALE_FISIER);
                 }
             }
