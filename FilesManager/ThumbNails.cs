@@ -116,7 +116,7 @@ namespace SOCISA
                 //string outputFile = fileName.Replace(fi.Extension, sType == "s" ? "_s.gif" : "_m.gif");
                 string outputFile = originalFilename.Replace(fi.Extension, "_" + sType + ".jpg");
 
-                Image image = img == null && originalFilename != null ? Image.FromFile(path + originalFilename) : img;
+                Image image = img == null && originalFilename != null ? Image.FromFile(Path.Combine(path, originalFilename)) : img;
 
                 int originalWidth = image.Width;
                 int originalHeight = image.Height;
@@ -147,6 +147,10 @@ namespace SOCISA
                 encoderParameters = new EncoderParameters(1);
                 encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
                 thumbnail.Save(Path.Combine(path, outputFile), info[1], encoderParameters);
+
+                graphic.Dispose();
+                thumbnail.Dispose();
+                image.Dispose();
                 return new response(true, outputFile, outputFile, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
