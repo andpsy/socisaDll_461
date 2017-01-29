@@ -9,9 +9,9 @@ namespace SOCISA
         {
             try
             {
-                using (StreamWriter w = File.AppendText("ErrorLog.txt"))
+                using (StreamWriter w = File.AppendText(Path.Combine(CommonFunctions.GetLogsFolder(), "ErrorLog.txt")))
                 {
-                    w.Write(exp.ToString() + "\r\n=====================================================\r\n");
+                    w.Write(DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + "\r\n" + exp.ToString() + "\r\n=====================================================\r\n");
                 }
             }
             catch { }

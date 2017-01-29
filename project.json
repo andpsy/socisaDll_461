@@ -3,11 +3,10 @@
   "copyright": "AndPsy",
   "description": "socisa Db Layer",
   "language": "en",
-  "version": "1.1.0-beta12",
+  "version": "1.1.0-beta18",
   "authors": [ "Andpsy" ],
 
   "dependencies": {
-    "CoreCompat.System.Drawing": "1.0.0-beta006",
     "EPPlus.Core": "1.2.0",
     "Microsoft.AspNetCore.Http": "1.1.0",
     "MySql.Data": "7.0.6-IR31",
@@ -21,6 +20,25 @@
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50"
+    }
+  },
+
+
+  "runtimes": {
+    "win10-x64": {
+      "dependencies": {
+        "CoreCompat.System.Drawing": "1.0.0-beta006"
+      }
+    },
+    "debian.8-x64": {
+      "dependencies": {
+        "runtime.linux-x64.CoreCompat.System.Drawing": "1.0.0-beta009"
+      }
+    },
+    "linux-x64": {
+      "dependencies": {
+        "runtime.linux-x64.CoreCompat.System.Drawing": "1.0.0-beta009"
+      }
     }
   }
 }
