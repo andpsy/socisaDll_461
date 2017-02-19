@@ -4,6 +4,8 @@ using System.Collections;
 using System.Data;
 using System.Data.Common;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace SOCISA.Models
 {
@@ -11,6 +13,8 @@ namespace SOCISA.Models
     {
         response GetAll();
         response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response GetFiltered(string _json);
+        response GetFiltered(JObject _json);
         response Find(int _id);
         response Insert(Proces item);
         response Insert(Proces item, int _ID_DOSAR);
@@ -30,9 +34,9 @@ namespace SOCISA.Models
         response HasChildren(int _id, string tableName, int childrenId);
         response GetChildrens(int _id, string tableName);
         response GetChildren(int _id, string tableName, int childrenId);
-        Nomenclator GetInstanta(Proces item);
-        Nomenclator GetComplet(Proces item);
-        Nomenclator GetTipProces(Proces item);
+        response GetInstanta(Proces item);
+        response GetComplet(Proces item);
+        response GetTipProces(Proces item);
     }
 
     public class ProceseRepository : IProceseRepository
@@ -56,12 +60,13 @@ namespace SOCISA.Models
                 new MySqlParameter("_FILTER", null),
                 new MySqlParameter("_LIMIT", null) });
                 ArrayList aList = new ArrayList();
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
                     Proces a = new Proces(authenticatedUserId, connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Proces[] toReturn = new Proces[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Proces)aList[i];
@@ -70,6 +75,40 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
+        public response GetFiltered(string _json)
+        {
+            JObject jObj = JObject.Parse(_json);
+            return GetFiltered(jObj);
+        }
+
+        public response GetFiltered(JObject _json)
+        {
+            try
+            {
+                Filter f = new Filter();
+                foreach (var t in _json)
+                {
+                    JToken j = t.Value;
+                    switch (t.Key.ToLower())
+                    {
+                        case "sort":
+                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "order":
+                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "filter":
+                            f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "limit":
+                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                    }
+                }
+                return GetFiltered(f.Sort, f.Order, f.Filtru, f.Limit);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
         public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
@@ -86,12 +125,13 @@ namespace SOCISA.Models
                 new MySqlParameter("_FILTER", _filter),
                 new MySqlParameter("_LIMIT", _limit) });
                 ArrayList aList = new ArrayList();
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
                     Proces a = new Proces(authenticatedUserId, connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Proces[] toReturn = new Proces[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Proces)aList[i];
@@ -173,15 +213,15 @@ namespace SOCISA.Models
             return item.GetChildren(tableName, childrenId);
         }
 
-        public Nomenclator GetInstanta(Proces item)
+        public response GetInstanta(Proces item)
         {
             return item.GetInstanta();
         }
-        public Nomenclator GetComplet(Proces item)
+        public response GetComplet(Proces item)
         {
             return item.GetComplet();
         }
-        public Nomenclator GetTipProces(Proces item)
+        public response GetTipProces(Proces item)
         {
             return item.GetTipProces();
         }

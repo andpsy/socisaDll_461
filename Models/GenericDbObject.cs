@@ -203,7 +203,7 @@ namespace SOCISA.Models
         public virtual bool HasChildrens(string tableName)
         {
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", "actions"), new MySqlParameter("_CHILD_TABLE", tableName) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == tableName.ToUpper())
@@ -239,13 +239,14 @@ namespace SOCISA.Models
                     }
                 }
             }
+            r.Close(); r.Dispose();
             return false;
         }
 
         public virtual bool HasChildren(string tableName, int childrenId)
         {
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", "actions"), new MySqlParameter("_CHILD_TABLE", tableName) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == tableName.ToUpper())
@@ -270,7 +271,7 @@ namespace SOCISA.Models
                 else
                 {
                     da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILD_TABLE", tableName) });
-                    DbDataReader rc = da.ExecuteSelectQuery();
+                    MySqlDataReader rc = da.ExecuteSelectQuery();
                     while (rc.Read())
                     {
                         da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "CHILDRENsp_Get", new object[] { new MySqlParameter("_PRIMARY_KEY_VALUE", this.ID), new MySqlParameter("_EXTERNAL_ID", r["REFERENCED_COLUMN_NAME"].ToString()), new MySqlParameter("_EXTERNAL_TABLE", r["REFERENCED_TABLE_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_FIELD", rc["COLUMN_NAME"].ToString()), new MySqlParameter("_CHILDREN_ID_VALUE", childrenId) });
@@ -284,8 +285,10 @@ namespace SOCISA.Models
                             return false;
                         }
                     }
+                    rc.Close(); rc.Dispose();
                 }
             }
+            r.Close(); r.Dispose();
             return false;
         }
 

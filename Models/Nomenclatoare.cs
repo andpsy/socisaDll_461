@@ -48,13 +48,14 @@ namespace SOCISA.Models
             connectionString = _connectionString;
             TableName = _TableName;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, String.Format( "{0}sp_GetById", TableName.ToUpper()), new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 NomenclatorConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public Nomenclator(int _authenticatedUserId, string _connectionString, string tableName, IDataRecord item)

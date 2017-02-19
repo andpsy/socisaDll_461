@@ -55,7 +55,7 @@ namespace SOCISA
             {"UtilizatorSocietateAdministrata", "utilizatori_societati" },
             {"UtilizatorSocietate", "utilizatori_societati" }
         };
-        public static IEnumerable<Dictionary<string, object>> Serialize(DbDataReader reader)
+        public static IEnumerable<Dictionary<string, object>> Serialize(MySqlDataReader reader)
         {
             var results = new List<Dictionary<string, object>>();
             var cols = new List<string>();
@@ -67,7 +67,7 @@ namespace SOCISA
 
             return results;
         }
-        private static Dictionary<string, object> SerializeRow(IEnumerable<string> cols, DbDataReader reader)
+        private static Dictionary<string, object> SerializeRow(IEnumerable<string> cols, MySqlDataReader reader)
         {
             var result = new Dictionary<string, object>();
             foreach (var col in cols)
@@ -75,7 +75,7 @@ namespace SOCISA
             return result;
         }
 
-        public static string DbReaderToJson(DbDataReader r)
+        public static string DbReaderToJson(MySqlDataReader r)
         {
             var dict = Serialize(r);
             string json = JsonConvert.SerializeObject(dict, Formatting.Indented);
@@ -175,7 +175,7 @@ namespace SOCISA
             return _newParam;
         }
 
-        public static int GetDbReaderRowCount(DbDataReader r)
+        public static int GetDbReaderRowCount(MySqlDataReader r)
         {
             int counter = 0;
             while (r.Read())
@@ -274,12 +274,13 @@ namespace SOCISA
             try
             {
                 DataAccess da = new DataAccess(_authenticatedUserId, _connectionString, CommandType.Text, String.Format("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'socisa' AND TABLE_NAME = '{0}';", _table));
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 string toReturn = "";
                 while (r.Read())
                 {
                     toReturn += (((IDataRecord)r)["COLUMN_NAME"].ToString() + ",");
                 }
+                r.Close(); r.Dispose();
                 return toReturn;
             }
             catch (Exception exp) { throw exp; }
@@ -324,7 +325,7 @@ namespace SOCISA
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", parentTableName), new MySqlParameter("_CHILD_TABLE", childTableName) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
                     if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == childTableName.ToUpper())
@@ -361,8 +362,10 @@ namespace SOCISA
                         }
                     }
                 }
+                r.Close(); r.Dispose();
                 return new response(true, "false", false, null, null);
-            }catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public static response HasChildren(int authenticatedUserId, string connectionString, object item, string parentTableName, string childTableName, int childrenId)
@@ -370,7 +373,7 @@ namespace SOCISA
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", parentTableName), new MySqlParameter("_CHILD_TABLE", childTableName) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
                     if (r["REFERENCED_TABLE_NAME"].ToString().ToUpper() == childTableName.ToUpper())
@@ -395,7 +398,7 @@ namespace SOCISA
                     else
                     {
                         da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TABLEsp_GetReferences", new object[] { new MySqlParameter("_PARENT_TABLE", r["TABLE_NAME"].ToString()), new MySqlParameter("_CHILD_TABLE", childTableName) });
-                        DbDataReader rc = da.ExecuteSelectQuery();
+                        MySqlDataReader rc = da.ExecuteSelectQuery();
                         while (rc.Read())
                         {
                             PropertyInfo pi = item.GetType().GetProperty("ID");
@@ -411,8 +414,10 @@ namespace SOCISA
                                 return new response(true, "false", false, null, null);
                             }
                         }
+                        rc.Close(); rc.Dispose();
                     }
                 }
+                r.Close(); r.Dispose();
                 return new response(true, "false", false, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
@@ -432,8 +437,9 @@ namespace SOCISA
                         break;
                     }
                 }
-                dynamic r = methodToRun.Invoke(item, null);
-                return new response(true, JsonConvert.SerializeObject(r), r, null, null);
+                //dynamic r = methodToRun.Invoke(item, null);
+                //return new response(true, JsonConvert.SerializeObject(r), r, null, null);
+                return (response)methodToRun.Invoke(item, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -442,7 +448,8 @@ namespace SOCISA
         {
             try
             {
-                object childrens = GetChildrens(item, table_name);
+                //object childrens = GetChildrens(item, table_name);
+                object childrens = GetChildrens(item, table_name).Result;
                 if (childrens is Array)
                 {
                     foreach (object it in (Array)childrens)
@@ -454,9 +461,9 @@ namespace SOCISA
                         }
                     }
                 }
-                return new response(true, null, null, null, null);
+                return new response(true, "", null, null, null);
             }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }            
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public static string GetScansFolder()
@@ -483,6 +490,14 @@ namespace SOCISA
             return System.IO.Path.Combine(AppContext.BaseDirectory, Convert.ToString(result.LogsFolder));
         }
 
+        public static string GetImportsFolder()
+        {
+            string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+            string settings = File.ReadAllText(settingsFile);
+            dynamic result = JsonConvert.DeserializeObject(settings);
+            return System.IO.Path.Combine(AppContext.BaseDirectory, Convert.ToString(result.ImportsFolder));
+        }
+
         public static ThumbNailSizes[] GetThumbNailSizes()
         {
             string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
@@ -498,12 +513,22 @@ namespace SOCISA
             string settings = File.ReadAllText(settingsFile);
             dynamic result = JsonConvert.DeserializeObject(settings);
             ThumbNailSizes[] tSizes = JsonConvert.DeserializeObject<ThumbNailSizes[]>(result.ThumbNailSizes.ToString());
-            foreach(ThumbNailSizes ts in tSizes)
+            foreach (ThumbNailSizes ts in tSizes)
             {
                 if (ts.thumbNailType == thType)
                     return ts;
             }
             return tSizes[2];
         }
+
+        public static bool IsNullOrEmpty(Newtonsoft.Json.Linq.JToken token)
+        {
+            return (token == null) ||
+                   (token.Type == Newtonsoft.Json.Linq.JTokenType.Array && !token.HasValues) ||
+                   (token.Type == Newtonsoft.Json.Linq.JTokenType.Object && !token.HasValues) ||
+                   (token.Type == Newtonsoft.Json.Linq.JTokenType.String && token.ToString() == String.Empty) ||
+                   (token.Type == Newtonsoft.Json.Linq.JTokenType.Null);
+        }
+
     }
 }

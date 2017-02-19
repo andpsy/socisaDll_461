@@ -56,16 +56,16 @@ namespace SOCISA
             try
             {
                 MemoryStream ms = new MemoryStream(template_file_content);
-                string fileName = dosar.NR_DOSAR_CASCO + "_cerere.pdf";
+                string fileName = dosar.NR_DOSAR_CASCO.Replace('/','_').Replace(' ','_') + "_cerere.pdf";
                 FileStream fs = File.Open(Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), FileMode.Create, FileAccess.ReadWrite);
                 PdfFixedDocument poDocument = new PdfFixedDocument(ms);
 
-                Models.SocietateAsigurare sCasco = dosar.GetSocietateCasco();
-                Models.SocietateAsigurare sRca = dosar.GetSocietateRca();
-                Models.Asigurat aCasco = dosar.GetAsiguratCasco();
-                Models.Asigurat aRca = dosar.GetAsiguratRca();
-                Models.Auto autoCasco = dosar.GetAutoCasco();
-                Models.Auto autoRca = dosar.GetAutoRca();
+                Models.SocietateAsigurare sCasco = (Models.SocietateAsigurare)dosar.GetSocietateCasco().Result;
+                Models.SocietateAsigurare sRca = (Models.SocietateAsigurare)dosar.GetSocietateRca().Result;
+                Models.Asigurat aCasco = (Models.Asigurat)dosar.GetAsiguratCasco().Result;
+                Models.Asigurat aRca = (Models.Asigurat)dosar.GetAsiguratRca().Result;
+                Models.Auto autoCasco = (Models.Auto) dosar.GetAutoCasco().Result;
+                Models.Auto autoRca = (Models.Auto)dosar.GetAutoRca().Result;
 
                 poDocument.Form.Fields["FieldSocietateCasco"].Value = sCasco.DENUMIRE;
                 poDocument.Form.Fields["FieldAdresaSocietateCasco"].Value = sCasco.ADRESA;
@@ -86,7 +86,7 @@ namespace SOCISA
                 poDocument.Form.Fields["FieldSuma"].Value = dosar.VALOARE_DAUNA.ToString();
 
                 string docs = "";
-                Models.DocumentScanat[] dsj = dosar.GetDocumente();
+                Models.DocumentScanat[] dsj = (Models.DocumentScanat[])dosar.GetDocumente().Result;
                 foreach (Models.DocumentScanat doc in dsj)
                 {
                     docs = String.Format("- {1}\r\n{0}", docs, (doc.DETALII != "" && doc.DETALII != null ? doc.DETALII : doc.DENUMIRE_FISIER));
@@ -109,7 +109,7 @@ namespace SOCISA
             try
             {
                 PdfFixedDocument poDocument = new PdfFixedDocument();
-                Models.DocumentScanat[] ds = dosar.GetDocumente();
+                Models.DocumentScanat[] ds = (Models.DocumentScanat[])dosar.GetDocumente().Result;
                 foreach (Models.DocumentScanat dsj in ds)
                 {
                     try
@@ -146,7 +146,7 @@ namespace SOCISA
                     }
                     catch(Exception exp) { LogWriter.Log(exp); }
                 }
-                string fileName = dosar.NR_DOSAR_CASCO + "_documente.pdf";
+                string fileName = dosar.NR_DOSAR_CASCO.Replace('/', '_').Replace(' ', '_') + "_documente.pdf";
                 FileStream fs = File.Open(Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), FileMode.Create, FileAccess.ReadWrite);
                 poDocument.Save(fs);
                 fs.Flush();
@@ -180,7 +180,7 @@ namespace SOCISA
                     {
                         p1.Pages.Add(p2.Pages[i]);
                     }
-                    string fileNameToReturn = Dosar.NR_DOSAR_CASCO + ".pdf";
+                    string fileNameToReturn = Dosar.NR_DOSAR_CASCO.Replace('/', '_').Replace(' ', '_') + ".pdf";
                     FileStream fs = File.Open(Path.Combine(CommonFunctions.GetPdfsFolder(), fileNameToReturn), FileMode.Create, FileAccess.ReadWrite);
                     p1.Save(fs);
                     fs.Flush();
@@ -217,7 +217,7 @@ namespace SOCISA
                     {
                         p1.Pages.Add(p2.Pages[i]);
                     }
-                    string fileNameToReturn = Dosar.NR_DOSAR_CASCO + ".pdf";
+                    string fileNameToReturn = Dosar.NR_DOSAR_CASCO.Replace('/', '_').Replace(' ', '_') + ".pdf";
                     FileStream fs = File.Open(Path.Combine(CommonFunctions.GetPdfsFolder(), fileNameToReturn), FileMode.Create, FileAccess.ReadWrite);
                     p1.Save(fs);
                     fs.Flush();

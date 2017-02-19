@@ -48,13 +48,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADIIsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 DosarStadiuConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public DosarStadiu(int _authenticatedUserId, string _connectionString, IDataRecord item)
@@ -100,40 +101,41 @@ namespace SOCISA.Models
         /// Metoda pt. popularea Stadiului curent
         /// </summary>
         /// <returns>SOCISA.StadiiJson</returns>
-        public Stadiu GetStadiu()
+        public response GetStadiu()
         {
             try
             {
                 Stadiu toReturn = new Stadiu(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_STADIU));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Sentintelor dosarului
         /// </summary>
         /// <returns>vector de SOCISA.SentinteJson</returns>
-        public Sentinta[] GetSentinte()
+        public response GetSentinte()
         {
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADII_SENTINTEsp_GetByIdDosarStadiu", new object[] { new MySqlParameter("_ID_DOSAR_STADIU", this.ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
                     Sentinta a = new Sentinta(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_SENTINTA"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Sentinta[] toReturn = new Sentinta[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (Sentinta)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
@@ -282,7 +284,7 @@ namespace SOCISA.Models
         public response Delete()
         {
             response toReturn = new response(false, "", null, null, new List<Error>());;
-            Sentinta[] sentinte = this.GetSentinte();
+            Sentinta[] sentinte = (Sentinta[])this.GetSentinte().Result;
             try
             {
                 foreach (Sentinta sj in sentinte)

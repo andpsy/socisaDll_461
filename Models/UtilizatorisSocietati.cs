@@ -31,13 +31,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORI_SOCIETATIsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 UtilizatorSocietateConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public UtilizatorSocietate(int _authenticatedUserId, string _connectionString, IDataRecord item)

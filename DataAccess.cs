@@ -119,7 +119,7 @@ namespace SOCISA
                 mySqlCommand.CommandText = _commandText;
                 MySqlParameter _AUTHENTICATED_USER_ID = new MySqlParameter("_AUTHENTICATED_USER_ID", _authenticated_user_id);
                 mySqlCommand.Parameters.Add(_AUTHENTICATED_USER_ID);
-                mySqlConnection.Open();
+                //mySqlConnection.Open();
             }catch(Exception exp) { throw exp; }
         }
 
@@ -147,7 +147,7 @@ namespace SOCISA
                 {
                     mySqlCommand.Parameters.Add(mySqlParameter);
                 }
-                mySqlConnection.Open();
+                //mySqlConnection.Open();
             }
             catch (Exception exp) { throw exp; }
         }
@@ -155,13 +155,15 @@ namespace SOCISA
         /// <summary>
         /// Metoda pt. selectia inregistrarilor din BD
         /// </summary>
-        /// <returns>DbDataREader</returns>
-        public DbDataReader ExecuteSelectQuery()
+        /// <returns>MySqlDataReader</returns>
+        public MySqlDataReader ExecuteSelectQuery()
         {
-            DbDataReader ds;
+            MySqlDataReader ds;
             try
             {
+                mySqlConnection.Open();
                 ds = mySqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
+                //mySqlConnection.Close();
             }
             catch (Exception exp) { throw exp; }
 
@@ -176,6 +178,7 @@ namespace SOCISA
         {
             try
             {
+                mySqlConnection.Open();
                 mySqlCommand.ExecuteNonQuery();
                 mySqlConnection.Close();
                 // LOG INFO --
@@ -227,6 +230,7 @@ namespace SOCISA
         {
             try
             {
+                mySqlConnection.Open();
                 mySqlCommand.ExecuteNonQuery();
                 mySqlConnection.Close();
                 // LOG INFO --
@@ -283,6 +287,7 @@ namespace SOCISA
                 _ID.DbType = DbType.Int32;
                 _ID.Direction = ParameterDirection.Output;
                 mySqlCommand.Parameters.Add(_ID);
+                mySqlConnection.Open();
                 mySqlCommand.ExecuteNonQuery();
                 mySqlConnection.Close();
                 // LOG INFO --
@@ -335,6 +340,7 @@ namespace SOCISA
             response toReturn = new response();
             try
             {
+                mySqlConnection.Open();
                 object ret = mySqlCommand.ExecuteScalar();
                 toReturn = new response(true, "", ret, null, null);
                 mySqlConnection.Close();
@@ -355,7 +361,7 @@ namespace SOCISA
         /// <param name="_dt">Tabela in care se efectueaza operatia</param>
         /// <param name="_object">obiect cu valorile ce vor fi updatate</param>
         /// <returns>vector de MySqlParameters</returns>
-        public object[] GenerateMySqlParameters(DbDataReader _dt, object[] _object)
+        public object[] GenerateMySqlParameters(MySqlDataReader _dt, object[] _object)
         {
             ArrayList _alist = new ArrayList();
             System.Collections.ObjectModel.ReadOnlyCollection<DbColumn> _columns = _dt.GetColumnSchema();

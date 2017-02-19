@@ -38,13 +38,14 @@ namespace SOCISA.Models
                 authenticatedUserId = _authenticatedUserId;
                 connectionString = _connectionString;
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
                     IDataRecord item = (IDataRecord)r;
                     ActionConstructor(item);
                     break;
                 }
+                r.Close(); r.Dispose();
             }
             catch (Exception exp) { throw exp; }
         }

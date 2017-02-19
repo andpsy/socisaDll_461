@@ -31,13 +31,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "INTERVENIENTIsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 IntervenientConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public Intervenient(int _authenticatedUserId, string _connectionString, string _DENUMIRE)
@@ -45,13 +46,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "INTERVENIENTIsp_GetByDenumire", new object[] { new MySqlParameter("_DENUMIRE", _DENUMIRE) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 IntervenientConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public Intervenient(int _authenticatedUserId, string _connectionString, IDataRecord item)

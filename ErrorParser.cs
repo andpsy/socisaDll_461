@@ -49,15 +49,17 @@ namespace SOCISA
     {
         private static Dictionary<int, string> definedErrors = new Dictionary<int, string>();
 
-        public static Dictionary<int, string> DefinedErrors{
-            get{
+        public static Dictionary<int, string> DefinedErrors
+        {
+            get
+            {
                 try
                 {
                     definedErrors.Add(1451, "Inregistrarea selectata are referinte in alte tabele si nu poate fi stearsa!");
-                }catch{}
+                }
+                catch { }
                 return definedErrors;
-    
-               }
+            }
         }
 
         public static string ParseError(MySqlException mySqlException){
@@ -87,7 +89,7 @@ namespace SOCISA
 
                 xdoc.Load(r);//loading XML in xml doc
 
-                XmlNodeList xNodelst = xdoc.DocumentElement.SelectNodes("ErrorMessages");//reading node so that we can traverse thorugh the XML
+                XmlNodeList xNodelst = xdoc.DocumentElement.SelectNodes("ErrorMessage");//reading node so that we can traverse thorugh the XML
 
                 foreach (XmlNode xNode in xNodelst)//traversing XML 
                 {
@@ -100,19 +102,19 @@ namespace SOCISA
                             switch (child.Name)
                             {
                                 case "ID":
-                                    err.ID = Convert.ToInt32(child.Value);
+                                    err.ID = Convert.ToInt32(child.InnerText);
                                     break;
                                 case "ERROR_CODE":
-                                    errCode = err.ERROR_CODE = child.Value.ToString();
+                                    errCode = err.ERROR_CODE = child.InnerText;
                                     break;
                                 case "ERROR_MESSAGE":
-                                    err.ERROR_MESSAGE = child.Value.ToString();
+                                    err.ERROR_MESSAGE = child.InnerText;
                                     break;
                                 case "ERROR_OBJECT":
-                                    err.ERROR_OBJECT = child.Value.ToString();
+                                    err.ERROR_OBJECT = child.InnerText;
                                     break;
                                 case "ERROR_TYPE":
-                                    err.ERROR_TYPE = child.Value.ToString();
+                                    err.ERROR_TYPE = child.InnerText;
                                     break;
                             }
                         }
@@ -129,6 +131,25 @@ namespace SOCISA
             {
                 Error error = new Error();
                 ErrorMessages.TryGetValue(errorCode, out error);
+                return error;
+            }
+            catch { return null; }
+        }
+
+        public static Error ErrorMessage(string errorCode, string[] args)
+        {
+            try
+            {
+                Error error = new Error();
+                ErrorMessages.TryGetValue(errorCode, out error);
+                if(args != null && args.Length > 0)
+                {
+                    error.ERROR_OBJECT = error.ERROR_OBJECT.Replace("{1}", args[0]);
+                    for(int i = 0; i < args.Length; i++)
+                    {
+                        error.ERROR_MESSAGE = error.ERROR_MESSAGE.Replace("{" + Convert.ToString(i + 1) + "}", args[i]);
+                    }
+                }
                 return error;
             }
             catch { return null; }

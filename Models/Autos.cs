@@ -37,13 +37,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "AUTOsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord auto = (IDataRecord)r;
                 AutoConstructor(auto);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public Auto(int _authenticatedUserId, string _connectionString, string _NR_AUTO)
@@ -51,13 +52,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "AUTOsp_GetByNrAuto", new object[] { new MySqlParameter("_NR_AUTO", _NR_AUTO) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord auto = (IDataRecord)r;
                 AutoConstructor(auto);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public Auto(int _authenticatedUserId, string _connectionString, IDataRecord auto)

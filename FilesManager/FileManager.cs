@@ -94,6 +94,7 @@ namespace SOCISA
                 IDataReader r = da.ExecuteSelectQuery();
                 r.Read();
                 rawData = (byte[])r["FILE_CONTENT"];
+                r.Close(); r.Dispose();
                 return rawData;
             }
             catch { return null; }
@@ -111,6 +112,7 @@ namespace SOCISA
                 IDataReader r = da.ExecuteSelectQuery();
                 r.Read();
                 rawData = (byte[])r["FILE_CONTENT"];
+                r.Close(); r.Dispose();
                 return rawData;
             }
             catch { return null; }
@@ -140,6 +142,7 @@ namespace SOCISA
                 IDataReader r = da.ExecuteSelectQuery();
                 r.Read();
                 rawData = (byte[])r["FILE_CONTENT"];
+                r.Close(); r.Dispose();
                 return rawData;
             }
             catch { return null; }

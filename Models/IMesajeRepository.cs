@@ -4,6 +4,8 @@ using System.Collections;
 using System.Data;
 using System.Data.Common;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace SOCISA.Models
 {
@@ -11,6 +13,9 @@ namespace SOCISA.Models
     {
         response GetAll();
         response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response GetFiltered(string _json);
+        response GetFiltered(JObject _json);
+
         response Find(int _id);
         response Insert(Mesaj item);
         response Update(Mesaj item);
@@ -23,14 +28,14 @@ namespace SOCISA.Models
         response GetChildrens(Mesaj item, string tableName);
         response GetChildren(Mesaj item, string tableName, int childrenId);
 
-        void GenerateAndSendMessage(int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta);
-        Utilizator[] GetReceiversByIdDosar(Mesaj item);
-        void SendToInvolvedParties(Mesaj item);
-        Dosar GetDosar(Mesaj item);
-        Nomenclator GetTipMesaj(Mesaj item);
+        response GenerateAndSendMessage(int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta);
+        response GetReceiversByIdDosar(Mesaj item);
+        response SendToInvolvedParties(Mesaj item);
+        response GetDosar(Mesaj item);
+        response GetTipMesaj(Mesaj item);
         response SetMessageReadDate(Mesaj item, int idUtilizator, DateTime ReadDate);
-        Utilizator[] GetReceivers(Mesaj item);
-        Utilizator GetSender(Mesaj item);
+        response GetReceivers(Mesaj item);
+        response GetSender(Mesaj item);
 
         response Delete(int _id);
         response HasChildrens(int _id, string tableName);
@@ -61,12 +66,13 @@ namespace SOCISA.Models
                 new MySqlParameter("_FILTER", null),
                 new MySqlParameter("_LIMIT", null) });
                 ArrayList aList = new ArrayList();
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
                     Mesaj a = new Mesaj(authenticatedUserId, connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Mesaj[] toReturn = new Mesaj[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Mesaj)aList[i];
@@ -75,6 +81,40 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
+        public response GetFiltered(string _json)
+        {
+            JObject jObj = JObject.Parse(_json);
+            return GetFiltered(jObj);
+        }
+
+        public response GetFiltered(JObject _json)
+        {
+            try
+            {
+                Filter f = new Filter();
+                foreach (var t in _json)
+                {
+                    JToken j = t.Value;
+                    switch (t.Key.ToLower())
+                    {
+                        case "sort":
+                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "order":
+                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "filter":
+                            f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "limit":
+                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                    }
+                }
+                return GetFiltered(f.Sort, f.Order, f.Filtru, f.Limit);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
         public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
@@ -91,12 +131,13 @@ namespace SOCISA.Models
                 new MySqlParameter("_FILTER", _filter),
                 new MySqlParameter("_LIMIT", _limit) });
                 ArrayList aList = new ArrayList();
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
                     Mesaj a = new Mesaj(authenticatedUserId, connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Mesaj[] toReturn = new Mesaj[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Mesaj)aList[i];
@@ -163,29 +204,30 @@ namespace SOCISA.Models
             return item.GetChildren(tableName, childrenId);
         }
 
-        public void GenerateAndSendMessage(int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta)
+        public response GenerateAndSendMessage(int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta)
         {
             Mesaj mesaj = new Mesaj(authenticatedUserId, connectionString, IdDosar, Data, TipMesaj, IdSender, Importanta);
             response r = mesaj.Insert();
             if(r.Status && r.InsertedId != null)
-                mesaj.SendToInvolvedParties();
+                r.AddResponse( mesaj.SendToInvolvedParties());
+            return r;
         }
 
-        public Utilizator[] GetReceiversByIdDosar(Mesaj item)
+        public response GetReceiversByIdDosar(Mesaj item)
         {
             return item.GetReceiversByIdDosar();
         }
 
-        public void SendToInvolvedParties(Mesaj item)
+        public response SendToInvolvedParties(Mesaj item)
         {
-            item.SendToInvolvedParties();
+            return item.SendToInvolvedParties();
         }
 
-        public Dosar GetDosar(Mesaj item)
+        public response GetDosar(Mesaj item)
         {
             return item.GetDosar();
         }
-        public Nomenclator GetTipMesaj(Mesaj item)
+        public response GetTipMesaj(Mesaj item)
         {
             return item.GetTipMesaj();
         }
@@ -193,11 +235,11 @@ namespace SOCISA.Models
         {
             return item.SetMessageReadDate(idUtilizator, ReadDate);
         }
-        public Utilizator[] GetReceivers(Mesaj item)
+        public response GetReceivers(Mesaj item)
         {
             return item.GetReceivers();
         }
-        public Utilizator GetSender(Mesaj item)
+        public response GetSender(Mesaj item)
         {
             return item.GetSender();
         }

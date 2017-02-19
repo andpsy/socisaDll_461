@@ -45,13 +45,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 MesajConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public Mesaj(int _authenticatedUserId, string _connectionString, IDataRecord item)
@@ -214,7 +215,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
-            if (this.GetReceiversByIdDosar().Length == 0)
+            if (((Utilizator[])this.GetReceiversByIdDosar().Result).Length == 0)
             {
                 toReturn.Status = false;
                 err = ErrorParser.ErrorMessage("emptyMessageReceiver");
@@ -276,21 +277,21 @@ namespace SOCISA.Models
         /// Metoda pt. popularea Senderului din dosar
         /// </summary>
         /// <returns>SOCISA.UtilizatoriJson</returns>
-        public Utilizator GetSender()
+        public response GetSender()
         {
             try
             {
                 Utilizator toReturn = new Utilizator(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_SENDER));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Destinatarilor mesajului
         /// </summary>
         /// <returns>vector de SOCISA.UtilizatoriJson</returns>
-        public Utilizator[] GetReceivers()
+        public response GetReceivers()
         {
             try
             {
@@ -302,21 +303,22 @@ namespace SOCISA.Models
                     Utilizator a = new Utilizator(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_UTILIZATOR"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Utilizator[] toReturn = new Utilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (Utilizator)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Destinatarilor mesajului
         /// </summary>
         /// <returns>vector de SOCISA.UtilizatoriJson</returns>
-        public Utilizator[] GetReceiversByIdDosar()
+        public response GetReceiversByIdDosar()
         {
             try
             {
@@ -328,14 +330,15 @@ namespace SOCISA.Models
                     Utilizator a = new Utilizator(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_UTILIZATOR"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Utilizator[] toReturn = new Utilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (Utilizator)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
@@ -346,7 +349,6 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response SetMessageReadDate(int idUtilizator, DateTime ReadDate)
         {
-            response toReturn = new response(false, "", null, null, new List<Error>()); ;
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJE_UTILIZATORIsp_GetByIdMesajIdUtilizator", new object[] { new MySqlParameter("_ID_MESAJ", this.ID), new MySqlParameter("_ID_UTILIZATOR", idUtilizator) });
@@ -355,40 +357,40 @@ namespace SOCISA.Models
                 {
                     MesajUtilizator mesajUtilizator = new MesajUtilizator(authenticatedUserId, connectionString, (IDataRecord)r);
                     mesajUtilizator.DATA_CITIRE = ReadDate;
-                    toReturn = mesajUtilizator.Update();
-                    break;
+                    return mesajUtilizator.Update();
                 }
+                r.Close(); r.Dispose();
+                return new response(true, null, null, null, null);
             }
-            catch { }
-            return toReturn;
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Tipului mesajului
         /// </summary>
         /// <returns>SOCISA.NomenclatorJson</returns>
-        public Nomenclator GetTipMesaj()
+        public response GetTipMesaj()
         {
             try
             {
                 Nomenclator toReturn = new Nomenclator(authenticatedUserId, connectionString, "tip_mesaje", (Convert.ToInt32(this.ID_TIP_MESAJ)));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Dosarului la care este atasat mesajul
         /// </summary>
         /// <returns>SOCISA.DosareJson</returns>
-        public Dosar GetDosar()
+        public response GetDosar()
         {
             try
             {
                 Dosar toReturn = new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_DOSAR));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         public Mesaj(int _authenticatedUserId, string _connectionString, int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta)
@@ -404,15 +406,22 @@ namespace SOCISA.Models
             IMPORTANTA = Importanta;
         }
 
-        public void SendToInvolvedParties()
+        public response SendToInvolvedParties()
         {
-            Dosar d = this.GetDosar();
-            Utilizator[] utilizatori = d.GetInvolvedParties();
-            foreach (Utilizator utilizator in utilizatori)
+            try
             {
-                MesajUtilizator mesajUtilizator = new MesajUtilizator(authenticatedUserId, connectionString) { ID_UTILIZATOR = Convert.ToInt32(utilizator.ID), ID_MESAJ = Convert.ToInt32(this.ID) };
-                mesajUtilizator.Insert();
+                response toReturn = new response(true, "", null, null, new List<Error>());
+                Dosar d = (Dosar)this.GetDosar().Result;
+                Utilizator[] utilizatori = (Utilizator[])d.GetInvolvedParties().Result;
+                foreach (Utilizator utilizator in utilizatori)
+                {
+                    MesajUtilizator mesajUtilizator = new MesajUtilizator(authenticatedUserId, connectionString) { ID_UTILIZATOR = Convert.ToInt32(utilizator.ID), ID_MESAJ = Convert.ToInt32(this.ID) };
+                    response r = mesajUtilizator.Insert();
+                    toReturn.AddResponse(r);
+                }
+                return toReturn;
             }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
     }
 }

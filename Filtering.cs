@@ -38,6 +38,7 @@ namespace SOCISA
         public string Filtru { get; set; }
         public string Limit { get; set; }
 
+        public Filter() { }
         public Filter(string _sort, string _order, string _filtru, string _limit)
         {
             Sort = _sort; Order = _order; Filtru = _filtru; Limit = _limit;
@@ -91,6 +92,18 @@ namespace SOCISA
                         //switch (piJObj.Name.ToLower().Replace("_", "").Replace(" ", ""))
                         switch (key.ToLower().Replace("_", "").Replace(" ", ""))
                         {
+                            case "nrsca":
+                                if(j.ToString().IndexOf('*') == j.ToString().Length-1)
+                                    toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_SCA", j.ToString().Remove(j.ToString().Length-1), (toReturn == "" ? "" : " AND "));
+                                else
+                                    toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_SCA", j.ToString(), (toReturn == "" ? "" : " AND "));
+                                break;
+                            case "nrdosarcasco":
+                                if (j.ToString().IndexOf('*') == j.ToString().Length - 1)
+                                    toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_DOSAR_CASCO", j.ToString().Remove(j.ToString().Length - 1), (toReturn == "" ? "" : " AND "));
+                                else
+                                    toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_DOSAR_CASCO", j.ToString(), (toReturn == "" ? "" : " AND "));
+                                break;
                             case "asiguratcasco":
                                 //toReturn += String.Format("{2}ASIGC.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
                                 toReturn += String.Format("{2}ASIGC.`{0}` LIKE '{1}%'", "DENUMIRE", j.ToString(), (toReturn == "" ? "" : " AND "));
@@ -234,7 +247,7 @@ namespace SOCISA
             return null;
         }
 
-        public static string GenerateSimpleFilter(string _filtru, DbDataReader _table)
+        public static string GenerateSimpleFilter(string _filtru, MySqlDataReader _table)
         {
             string _strFilter = "";
             int column_counter = 0;
@@ -264,7 +277,7 @@ namespace SOCISA
             return _strFilter;
         }
 
-        public static string GenerateFilterFromJson(string _filtru, DbDataReader _table)
+        public static string GenerateFilterFromJson(string _filtru, MySqlDataReader _table)
         {
             Filtru[] filtru = JsonConvert.DeserializeObject<Filtru[]>(_filtru);
             //DataTable dt = full_table_columns(_table_name);

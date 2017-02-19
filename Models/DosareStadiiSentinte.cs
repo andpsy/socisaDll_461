@@ -37,13 +37,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADII_SENTINTEsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 DosarStadiuSentintaConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public DosarStadiuSentinta(int _authenticatedUserId, string _connectionString, IDataRecord item)

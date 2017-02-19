@@ -4,6 +4,9 @@ using System.Collections;
 using System.Data;
 using System.Data.Common;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace SOCISA.Models
 {
@@ -11,6 +14,9 @@ namespace SOCISA.Models
     {
         response GetAll();
         response GetFiltered(string _sort, string _order, string _filter, string _limit);
+        response GetFiltered(string _json);
+        response GetFiltered(JObject _json);
+
         response Find(int _id);
         response Insert(Utilizator action);
         response Update(Utilizator item);
@@ -27,14 +33,16 @@ namespace SOCISA.Models
         response HasChildren(int _id, string tableName, int childrenId);
         response GetChildrens(int _id, string tableName);
         response GetChildren(int _id, string tableName, int childrenId);
+        response Login(string user_name, string password);
+        response Login(string user_name, string password, string ip);
     }
 
     public class UtilizatoriRepository : IUtilizatoriRepository
     {
         private string connectionString;
-        private int authenticatedUserId;
+        private int? authenticatedUserId;
 
-        public UtilizatoriRepository(int _authenticatedUserId, string _connectionString)
+        public UtilizatoriRepository(int? _authenticatedUserId, string _connectionString)
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
@@ -50,12 +58,13 @@ namespace SOCISA.Models
                 new MySqlParameter("_FILTER", null),
                 new MySqlParameter("_LIMIT", null) });
                 ArrayList aList = new ArrayList();
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
-                    Utilizator a = new Utilizator(authenticatedUserId, connectionString, (IDataRecord)r);
+                    Utilizator a = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Utilizator[] toReturn = new Utilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Utilizator)aList[i];
@@ -64,13 +73,47 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
+        public response GetFiltered(string _json)
+        {
+            JObject jObj = JObject.Parse(_json);
+            return GetFiltered(jObj);
+        }
+
+        public response GetFiltered(JObject _json)
+        {
+            try
+            {
+                Filter f = new Filter();
+                foreach (var t in _json)
+                {
+                    JToken j = t.Value;
+                    switch (t.Key.ToLower())
+                    {
+                        case "sort":
+                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "order":
+                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "filter":
+                            f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                        case "limit":
+                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            break;
+                    }
+                }
+                return GetFiltered(f.Sort, f.Order, f.Filtru, f.Limit);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
         public response GetFiltered(string _sort, string _order, string _filter, string _limit)
         {
             try
             {
                 try
                 {
-                    string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(Utilizator), _filter, authenticatedUserId, connectionString);
+                    string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(Utilizator), _filter, Convert.ToInt32(authenticatedUserId), connectionString);
                     _filter = newFilter == null ? _filter : newFilter;
                 }
                 catch { }
@@ -80,12 +123,13 @@ namespace SOCISA.Models
                 new MySqlParameter("_FILTER", _filter),
                 new MySqlParameter("_LIMIT", _limit) });
                 ArrayList aList = new ArrayList();
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
-                    Utilizator a = new Utilizator(authenticatedUserId, connectionString, (IDataRecord)r);
+                    Utilizator a = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Utilizator[] toReturn = new Utilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Utilizator)aList[i];
@@ -99,7 +143,7 @@ namespace SOCISA.Models
         {
             try
             {
-                Utilizator item = new Utilizator(authenticatedUserId, connectionString, _id);
+                Utilizator item = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, _id);
                 return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
@@ -182,6 +226,40 @@ namespace SOCISA.Models
             var obj = Find(_id);
             //return JsonConvert.DeserializeObject<Utilizator>(obj.Message).GetChildren(tableName, childrenId);
             return ((Utilizator)obj.Result).GetChildren(tableName, childrenId);
+        }
+
+        public response Login(string user_name, string password, string ip)
+        {
+            try
+            {
+                // singura metoda care nu foloseste DataAccess pt. ca nu avem authenticatedUserId
+                MD5 md5h = MD5.Create();
+                string md5p = CommonFunctions.GetMd5Hash(md5h, password);
+                MySqlConnection con = new MySqlConnection(connectionString);
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = con;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "LOGINsp";
+                cmd.Parameters.Add(new MySqlParameter("_username", user_name));
+                cmd.Parameters.Add(new MySqlParameter("_password", md5p));
+                cmd.Parameters.Add(new MySqlParameter("_ip", ip));
+                con.Open();
+                MySqlDataReader r = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                while (r.Read())
+                {
+                    authenticatedUserId = Convert.ToInt32(r["ID"]);
+                    Utilizator u = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, r);
+                    return new response(true, JsonConvert.SerializeObject(u), u, null, null);
+                }
+                Error err = ErrorParser.ErrorMessage("unauthorisedUser");
+                return new response(true, err.ERROR_MESSAGE, null, null, new System.Collections.Generic.List<Error>() { err });
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+        }
+
+        public response Login(string user_name, string password)
+        {
+            return Login(user_name, password, null);
         }
     }
 }

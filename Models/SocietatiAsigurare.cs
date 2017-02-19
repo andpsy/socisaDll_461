@@ -41,27 +41,29 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SOCIETATI_ASIGURAREsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 SocietateAsigurareConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public SocietateAsigurare(int _authenticatedUserId, string _connectionString, string _DENUMIRE)
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SOCIETATI_ASIGURAREsp_GetByDenumire", new object[] { new MySqlParameter("_DENUMIRE", _DENUMIRE) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SOCIETATI_ASIGURAREsp_GetByDenumireScurta", new object[] { new MySqlParameter("_DENUMIRE_SCURTA", _DENUMIRE) });
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 SocietateAsigurareConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public SocietateAsigurare(int _authenticatedUserId, string _connectionString, IDataRecord item)

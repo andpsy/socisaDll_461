@@ -189,6 +189,26 @@ namespace SOCISA
             return new ThumbNailSize(newWidth, newHeight);
         }
 
+        public static void DeleteThumbNail(Models.DocumentScanat d)
+        {
+            try {
+                if(File.Exists(Path.Combine(AppContext.BaseDirectory, "scans", d.DENUMIRE_FISIER.Replace(d.EXTENSIE_FISIER, "_Custom.jpg"))))
+                    File.Delete(Path.Combine(AppContext.BaseDirectory, "scans", d.DENUMIRE_FISIER.Replace(d.EXTENSIE_FISIER, "_Custom.jpg")));
+            } catch { }
+            try
+            {
+                if (File.Exists(Path.Combine(AppContext.BaseDirectory, "scans", d.DENUMIRE_FISIER.Replace(d.EXTENSIE_FISIER, "_Medium.jpg"))))
+                    File.Delete(Path.Combine(AppContext.BaseDirectory, "scans", d.DENUMIRE_FISIER.Replace(d.EXTENSIE_FISIER, "_Medium.jpg")));
+            }
+            catch { }
+            try
+            {
+                if (File.Exists(Path.Combine(AppContext.BaseDirectory, "scans", d.DENUMIRE_FISIER.Replace(d.EXTENSIE_FISIER, "_Small.jpg"))))
+                    File.Delete(Path.Combine(AppContext.BaseDirectory, "scans", d.DENUMIRE_FISIER.Replace(d.EXTENSIE_FISIER, "_Small.jpg")));
+            }
+            catch { }
+        }
+
         #region -- Magick.NET --
         /*
         public static byte[] GenerateImgThumbNail(Models.DocumentScanat _documentScanat, ThumbNailSizes s)

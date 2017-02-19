@@ -51,13 +51,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOCUMENTE_SCANATEsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord document_scanat = (IDataRecord)r;
                 DocumentScanatConstructor(document_scanat);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         /// <summary>
@@ -294,6 +295,9 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Delete()
         {
+
+            DocumentScanat tmp = new DocumentScanat(authenticatedUserId, connectionString, Convert.ToInt32(this.ID));
+
             response toReturn = new response(false, "", null, null, new List<Error>());;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
@@ -303,6 +307,15 @@ namespace SOCISA.Models
             if (toReturn.Status && _deleteFile)
                 FileManager.DeleteFile(this.CALE_FISIER, this.DENUMIRE_FISIER, this.EXTENSIE_FISIER);
             */
+            if (toReturn.Status)
+            {
+                try
+                {
+                    ThumbNails.DeleteThumbNail(tmp);
+                    tmp = null;
+                }
+                catch { }
+            }
             if (toReturn.Status)
             {
                 /*

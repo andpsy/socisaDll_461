@@ -338,10 +338,24 @@
     <ERROR_TYPE>Critical</ERROR_TYPE>
   </ErrorMessage>
   <ErrorMessage>
-    <ID>4</ID>
+    <ID>48</ID>
     <ERROR_CODE>unsupportedFormat</ERROR_CODE>
     <ERROR_MESSAGE>Format fisier invalid!</ERROR_MESSAGE>
     <ERROR_OBJECT>ThumbNail</ERROR_OBJECT>
     <ERROR_TYPE>Critical</ERROR_TYPE>
   </ErrorMessage>
+  <ErrorMessage>
+    <ID>49</ID>
+    <ERROR_CODE>unauthorisedUser</ERROR_CODE>
+    <ERROR_MESSAGE>Utilizator neautorizat!</ERROR_MESSAGE>
+    <ERROR_OBJECT>Main</ERROR_OBJECT>
+    <ERROR_TYPE>Critical</ERROR_TYPE>
+  </ErrorMessage>
+  <ErrorMessage>
+    <ID>50</ID>
+    <ERROR_CODE>1169</ERROR_CODE>
+    <ERROR_MESSAGE>Exista un {1} cu aceeasi denumire in baza de date!</ERROR_MESSAGE>
+    <ERROR_OBJECT>{1}</ERROR_OBJECT>
+    <ERROR_TYPE>Critical</ERROR_TYPE>
+  </ErrorMessage>  
 </ErrorMessages>

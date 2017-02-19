@@ -70,13 +70,14 @@ namespace SOCISA.Models
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 ProcesConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         public Proces(int _authenticatedUserId, string _connectionString, IDataRecord item)
@@ -166,42 +167,42 @@ namespace SOCISA.Models
         /// Metoda pt. popularea Instantei din dosar
         /// </summary>
         /// <returns>SOCISA.NomenclatorJson</returns>
-        public Nomenclator GetInstanta()
+        public response GetInstanta()
         {
             try
             {
                 Nomenclator toReturn = new Nomenclator(authenticatedUserId, connectionString, "instante", Convert.ToInt32(this.ID_INSTANTA));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Completului din dosar
         /// </summary>
         /// <returns>SOCISA.NomenclatorJson</returns>
-        public Nomenclator GetComplet()
+        public response GetComplet()
         {
             try
             {
                 Nomenclator toReturn = new Nomenclator(authenticatedUserId, connectionString, "complete", Convert.ToInt32(this.ID_COMPLET));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Tipului de proces
         /// </summary>
         /// <returns>SOCISA.NomenclatorJson</returns>
-        public Nomenclator GetTipProces()
+        public response GetTipProces()
         {
             try
             {
                 Nomenclator toReturn = new Nomenclator(authenticatedUserId, connectionString, "tip_procese", Convert.ToInt32(this.ID_TIP_PROCES));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /*
@@ -209,21 +210,21 @@ namespace SOCISA.Models
         /// Metoda pt. popularea Contractului de asistenta juridica atasat procesului curent
         /// </summary>
         /// <returns>SOCISA.ContracteJson</returns>
-        public ContracteJson GetContract()
+        public response GetContract()
         {
             try
             {
                 ContracteJson toReturn = new ContracteJson(Convert.ToInt32(this.ID_CONTRACT));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea platilor pentru taxa de timbru
         /// </summary>
         /// <returns>SOCISA.PlatiTaxaTimbruJson</returns>
-        public PlatiTaxaTimbruJson[] GetPlatiTaxaTimbru()
+        public response GetPlatiTaxaTimbru()
         {
             try
             {
@@ -236,9 +237,9 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = new PlatiTaxaTimbruJson(Convert.ToInt32(procesePlatiTaxaTimbru.Rows[i]["ID_PLATA_TAXA_TIMBRU"]));
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
         */
 

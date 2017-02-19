@@ -92,13 +92,14 @@ namespace SOCISA.Models
             authenticatedUserId = _auhenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 DosarConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         /// <summary>
@@ -111,13 +112,14 @@ namespace SOCISA.Models
             authenticatedUserId = _auhenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, _hasErrors ? "PENDING_IMPORT_ERRORSsp_GetById" : "DOSAREsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 DosarConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         /// <summary>
@@ -129,13 +131,14 @@ namespace SOCISA.Models
             authenticatedUserId = _auhenticatedUserId;
             connectionString = _connectionString;
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetByNrCasco", new object[] { new MySqlParameter("_NR_CASCO", _NR_CASCO) });
-            DbDataReader r = da.ExecuteSelectQuery();
+            MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
                 IDataRecord item = (IDataRecord)r;
                 DosarConstructor(item);
                 break;
             }
+            r.Close(); r.Dispose();
         }
 
         /// <summary>
@@ -248,78 +251,81 @@ namespace SOCISA.Models
         /// Metoda pt. popularea Stadiilor Dosarului
         /// </summary>
         /// <returns>vector de SOCISA.StadiiJson</returns>
-        public Stadiu[] GetStadii()
+        public response GetStadii()
         {
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADIIsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
                     Stadiu a = new Stadiu(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_STADIU"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Stadiu[] toReturn = new Stadiu[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (Stadiu)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Stadiilor Dosarului
         /// </summary>
         /// <returns>vector de SOCISA.DosareStadiiJson</returns>
-        public DosarStadiu[] GetDosareStadii()
+        public response GetDosareStadii()
         {
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADIIsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
                     DosarStadiu a = new DosarStadiu(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 DosarStadiu[] toReturn = new DosarStadiu[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (DosarStadiu)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Proceselor asociate Dosarului
         /// </summary>
         /// <returns>vector de SOCISA.Procese</returns>
-        public Proces[] GetProcese()
+        public response GetProcese()
         {
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_PROCESEsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
                     Proces p = new Proces(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
                     aList.Add(p);
                 }
+                r.Close(); r.Dispose();
                 Proces[] toReturn = new Proces[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (Proces)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /*
@@ -327,7 +333,7 @@ namespace SOCISA.Models
         /// Metoda pt. popularea Platilor asociate Dosarului
         /// </summary>
         /// <returns>vector de SOCISA.PlatiJson</returns>
-        public PlatiJson[] GetPlati()
+        public response GetPlati()
         {
             try
             {
@@ -340,16 +346,16 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = new PlatiJson(Convert.ToInt32(dosarePlati.Rows[i]["ID_PLATA"]));
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Platilor pe contract asociate Dosarului
         /// </summary>
         /// <returns>vector de SOCISA.PlatiContracteJson</returns>
-        public PlatiContracteJson[] GetPlatiContracte()
+        public response GetPlatiContracte()
         {
             try
             {
@@ -362,16 +368,16 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = new PlatiContracteJson(Convert.ToInt32(dosarePlatiContracte.Rows[i]["ID_PLATA_CONTRACT"]));
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
         
         /// <summary>
         /// Metoda pt. popularea Mesajelor carora le este asociat Dosarul
         /// </summary>
         /// <returns>vector de SOCISA.MesajeJson</returns>
-        public MesajeJson[] GetMesaje()
+        public response GetMesaje()
         {
             try
             {
@@ -383,9 +389,9 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = new MesajeJson(Convert.ToInt32(dosareMesaje.Rows[i]["ID_MESAJ"]));
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
         */
 
@@ -393,160 +399,162 @@ namespace SOCISA.Models
         /// Metoda pt. popularea Autoturismului CASCO din Dosar
         /// </summary>
         /// <returns>SOCISA.AutoJson</returns>
-        public Auto GetAutoCasco()
+        public response GetAutoCasco()
         {
             try
             {
                 Auto toReturn = new Auto(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_AUTO_CASCO));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Autoturismului RCA din Dosar
         /// </summary>
         /// <returns>SOCISA.AutoJson</returns>
-        public Auto GetAutoRca()
+        public response GetAutoRca()
         {
             try
             {
                 Auto toReturn = new Auto(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_AUTO_RCA));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Asiguratului CASCO din Dosar
         /// </summary>
         /// <returns>SOCISA.AsiguratiJson</returns>
-        public Asigurat GetAsiguratCasco()
+        public response GetAsiguratCasco()
         {
             try
             {
                 Asigurat toReturn = new Asigurat(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_ASIGURAT_CASCO));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Asiguratului RCA din Dosar
         /// </summary>
         /// <returns>SOCISA.AsiguratiJson</returns>
-        public Asigurat GetAsiguratRca()
+        public response GetAsiguratRca()
         {
             try
             {
                 Asigurat toReturn = new Asigurat(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_ASIGURAT_RCA));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Societatii CASCO din Dosar
         /// </summary>
         /// <returns>SOCISA.SocietatiAsigurareJson</returns>
-        public SocietateAsigurare GetSocietateCasco()
+        public response GetSocietateCasco()
         {
             try
             {
                 SocietateAsigurare toReturn = new SocietateAsigurare(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_SOCIETATE_CASCO));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Societatii RCA din Dosar
         /// </summary>
         /// <returns>SOCISA.SocietatiAsigurareJson</returns>
-        public SocietateAsigurare GetSocietateRca()
+        public response GetSocietateRca()
         {
             try
             {
                 SocietateAsigurare toReturn = new SocietateAsigurare(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_SOCIETATE_RCA));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Intervenientului din Dosar
         /// </summary>
         /// <returns>SOCISA.IntervenientiJson</returns>
-        public Intervenient GetIntervenient()
+        public response GetIntervenient()
         {
             try
             {
                 Intervenient toReturn = new Intervenient(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_INTERVENIENT));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Tipului Dosarului
         /// </summary>
         /// <returns>SOCISA.NomenclatorJson</returns>
-        public Nomenclator GetTipDosar()
+        public response GetTipDosar()
         {
             try
             {
                 Nomenclator toReturn = new Nomenclator(authenticatedUserId, connectionString, "tip_dosare", (Convert.ToInt32(this.ID_TIP_DOSAR)));
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
         /// Metoda pt. popularea Utilizatorilor carora le este assignat Dosarul
         /// </summary>
         /// <returns>vector de SOCISA.UtilizatoriJson</returns>
-        public Utilizator[] GetUtilizatori()
+        public response GetUtilizatori()
         {
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORI_DOSAREsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
                     Utilizator a = new Utilizator(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_UTILIZATOR"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 Utilizator[] toReturn = new Utilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (Utilizator)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
-        public DocumentScanat[] GetDocumente()
+        public response GetDocumente()
         {
             try
             {
                 DataAccess da = new DataAccess( authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOCUMENTE_SCANATEsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
                     DocumentScanat a = new DocumentScanat(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 DocumentScanat[] toReturn = new DocumentScanat[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (DocumentScanat)aList[i];
                 }
-                return toReturn;
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { return null; }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
@@ -1160,39 +1168,40 @@ namespace SOCISA.Models
             return toReturn;
         }
 
-        public DateTime? GetDataUltimeiModificari()
+        public response GetDataUltimeiModificari()
         {
             DateTime? toReturn = null;
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetDataUltimeiModificari", new object[] { new MySqlParameter("_ID_DOSAR", ID) });
                 toReturn = Convert.ToDateTime(da.ExecuteScalarQuery().Result);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { }
-            return toReturn;
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
-        public Utilizator[] GetInvolvedParties()
+        public response GetInvolvedParties()
         {
             Utilizator[] toReturn = null;
             try
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetInvolvedParties", new object[] { new MySqlParameter("_ID_DOSAR", ID) });
-                DbDataReader r = da.ExecuteSelectQuery();
+                MySqlDataReader r = da.ExecuteSelectQuery();
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
                     Utilizator a = new Utilizator(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_UTILIZATOR"]));
                     aList.Add(a);
                 }
+                r.Close(); r.Dispose();
                 toReturn = new Utilizator[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (Utilizator)aList[i];
                 }
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
             }
-            catch { toReturn = null; }
-            return toReturn;
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
