@@ -71,18 +71,36 @@ namespace SOCISA
                         //if (piX.Name == piJObj.Name)
                         if (piX.Name == key)
                         {
-                            //piX.SetValue(x, piJObj.GetValue(jObj));
-                            switch (piX.PropertyType.ToString())
+                            switch (piX.Name)
                             {
-                                case "System.DateTime":
-                                    //toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
-                                    toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, j.ToString(), (toReturn == "" ? "" : " AND "), tableAllias);
+                                case "NR_SCA":
+                                    if (j.ToString().IndexOf('*') == j.ToString().Length - 1)
+                                        toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_SCA", j.ToString().Remove(j.ToString().Length - 1), (toReturn == "" ? "" : " AND "));
+                                    else
+                                        toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_SCA", j.ToString(), (toReturn == "" ? "" : " AND "));
+                                    break;
+                                case "NR_DOSAR_CASCO":
+                                    if (j.ToString().IndexOf('*') == j.ToString().Length - 1)
+                                        toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_DOSAR_CASCO", j.ToString().Remove(j.ToString().Length - 1), (toReturn == "" ? "" : " AND "));
+                                    else
+                                        toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_DOSAR_CASCO", j.ToString(), (toReturn == "" ? "" : " AND "));
                                     break;
                                 default:
-                                    //toReturn += String.Format("{2}{3}.`{0}` like '%{1}%'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
-                                    toReturn += String.Format("{2}{3}.`{0}` like '{1}%'", piX.Name, j.ToString(), (toReturn == "" ? "" : " AND "), tableAllias);
+                                    //piX.SetValue(x, piJObj.GetValue(jObj));
+                                    switch (piX.PropertyType.ToString())
+                                    {
+                                        case "System.DateTime":
+                                            //toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
+                                            toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, j.ToString(), (toReturn == "" ? "" : " AND "), tableAllias);
+                                            break;
+                                        default:
+                                            //toReturn += String.Format("{2}{3}.`{0}` like '%{1}%'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
+                                            toReturn += String.Format("{2}{3}.`{0}` like '{1}%'", piX.Name, j.ToString(), (toReturn == "" ? "" : " AND "), tableAllias);
+                                            break;
+                                    }
                                     break;
                             }
+
                             propertyInMasterObject = true;
                             break;
                         }

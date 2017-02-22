@@ -35,6 +35,7 @@ namespace SOCISA.Models
         response GetChildren(int _id, string tableName, int childrenId);
         response Login(string user_name, string password);
         response Login(string user_name, string password, string ip);
+        response Find(string email);
     }
 
     public class UtilizatoriRepository : IUtilizatoriRepository
@@ -232,7 +233,8 @@ namespace SOCISA.Models
         {
             try
             {
-                // singura metoda care nu foloseste DataAccess pt. ca nu avem authenticatedUserId
+                Utilizator u = null;
+                // singura metoda, impreuna cu Find(email), care nu foloseste DataAccess pt. ca nu avem authenticatedUserId
                 MD5 md5h = MD5.Create();
                 string md5p = CommonFunctions.GetMd5Hash(md5h, password);
                 MySqlConnection con = new MySqlConnection(connectionString);
@@ -248,9 +250,13 @@ namespace SOCISA.Models
                 while (r.Read())
                 {
                     authenticatedUserId = Convert.ToInt32(r["ID"]);
-                    Utilizator u = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, r);
-                    return new response(true, JsonConvert.SerializeObject(u), u, null, null);
+                    u = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, r);
+                    break;
                 }
+                r.Close(); r.Dispose();
+                if(u != null)
+                    return new response(true, JsonConvert.SerializeObject(u), u, null, null);
+
                 Error err = ErrorParser.ErrorMessage("unauthorisedUser");
                 return new response(true, err.ERROR_MESSAGE, null, null, new System.Collections.Generic.List<Error>() { err });
             }
@@ -260,6 +266,36 @@ namespace SOCISA.Models
         public response Login(string user_name, string password)
         {
             return Login(user_name, password, null);
+        }
+
+        public response Find(string email)
+        {
+            try
+            {
+                // singura metoda, impreuna cu Login, care nu foloseste DataAccess pt. ca nu avem authenticatedUserId
+                Utilizator u = null;
+                MySqlConnection con = new MySqlConnection(connectionString);
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = con;
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandText = "UTILIZATORIsp_GetByEmail";
+                cmd.Parameters.Add(new MySqlParameter("_EMAIL", email));
+                con.Open();
+                MySqlDataReader r = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                while (r.Read())
+                {
+                    authenticatedUserId = Convert.ToInt32(r["ID"]);
+                    u = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, r);
+                    break;
+                }
+                r.Close();r.Dispose();
+                if(u != null)
+                    return new response(true, JsonConvert.SerializeObject(u), u, null, null);
+
+                Error err = ErrorParser.ErrorMessage("unauthorisedUser");
+                return new response(true, err.ERROR_MESSAGE, null, null, new List<Error>() { err });
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
     }
 }
