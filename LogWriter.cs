@@ -16,5 +16,17 @@ namespace SOCISA
             }
             catch { }
         }
+
+        public static void Log(string exp, string file)
+        {
+            try
+            {
+                using (StreamWriter w = File.AppendText(Path.Combine(CommonFunctions.GetLogsFolder(), file)))
+                {
+                    w.Write(exp);
+                }
+            }
+            catch { }
+        }
     }
 }

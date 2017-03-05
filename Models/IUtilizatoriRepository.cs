@@ -293,7 +293,7 @@ namespace SOCISA.Models
                     return new response(true, JsonConvert.SerializeObject(u), u, null, null);
 
                 Error err = ErrorParser.ErrorMessage("unauthorisedUser");
-                return new response(true, err.ERROR_MESSAGE, null, null, new List<Error>() { err });
+                return new response(false, err.ERROR_MESSAGE, null, null, new List<Error>() { err });
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }

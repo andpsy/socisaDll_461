@@ -27,6 +27,48 @@ namespace SOCISA
     /// </summary>
     public static class CommonFunctions
     {
+        public static T ConvertValue<T, U>(U value) where U : IConvertible
+        {
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
+
+        public static object ConvertValue(object value, Type T)
+        {
+            switch (T.Name)
+            {
+                case "String":
+                    return Convert.ToString(value);
+                case "DateTime":
+                    return Convert.ToDateTime(value);
+                case "Int32":
+                    return Convert.ToInt32(value);
+                case "Boolean":
+                    return Convert.ToBoolean(value);
+                case "Byte":
+                    return Convert.ToByte(value);
+                case "Byte[]":
+                    return (byte[])value;
+                case "Decimal":
+                    return Convert.ToDecimal(value);
+                case "Double":
+                    return Convert.ToDouble(value);
+                case "Int16":
+                    return Convert.ToInt16(value);
+                case "Int64":
+                    return Convert.ToInt64(value);
+                case "UInt16":
+                    return Convert.ToUInt16(value);
+                case "UInt32":
+                    return Convert.ToUInt32(value);
+                case "UInt64":
+                    return Convert.ToUInt64(value);
+                case "Single":
+                    return Convert.ToSingle(value);
+                default:
+                    return value;
+            }
+        }
+
         public static Dictionary<string, string> ClassNamesTableNamesAlliases = new Dictionary<string, string>()
         {
             {"Action", "actions" },

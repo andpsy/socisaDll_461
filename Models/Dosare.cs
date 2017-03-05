@@ -895,7 +895,8 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper() && fieldName.ToUpper() != "ID")
                         {
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType);
+                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType);
+                            //var tmpVal = CommonFunctions.ConvertValue(changes[fieldName], prop.PropertyType);
                             prop.SetValue(this, tmpVal);
                             break;
                         }
@@ -1044,6 +1045,56 @@ namespace SOCISA.Models
         {
             response toReturn = new response(true, "", null, null, new List<Error>());
             Error err = new Error();
+            Validation[] validations = Validator.GetTableValidations(_TABLE_NAME);
+            PropertyInfo[] pis = this.GetType().GetProperties();
+            foreach (Validation v in validations)
+            {
+                if (v.Active)
+                {
+                    foreach (PropertyInfo pi in pis)
+                    {
+                        if (v.FieldName.ToUpper() == pi.Name.ToUpper())
+                        {
+                            switch (v.ValidationType)
+                            {
+                                case "Mandatory":
+                                    if (pi.GetValue(this) == null || pi.GetValue(this).ToString().Trim() == "")
+                                    {
+                                        toReturn.Status = false;
+                                        err = ErrorParser.ErrorMessage(v.ErrorCode);
+                                        toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                                        toReturn.InsertedId = null;
+                                        toReturn.Error.Add(err);
+                                    }
+                                    break;
+                                case "Confirmation":
+                                    // ... TO DO ...
+                                    break;
+                                case "Duplicate":
+                                    try
+                                    {
+                                        if (ID == null) // doar la insert verificam dublura
+                                        {
+                                            Dosar dj = new Dosar(authenticatedUserId, connectionString, pi.GetValue(this).ToString()); // trebuie sa existe constructorul pt. campul trimis ca parametru !!!
+                                            if (dj != null && dj.ID != null)
+                                            {
+                                                toReturn.Status = false;
+                                                err = ErrorParser.ErrorMessage(v.ErrorCode);
+                                                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                                                toReturn.InsertedId = null;
+                                                toReturn.Error.Add(err);
+                                            }
+                                        }
+                                    }
+                                    catch { }
+                                    break;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            /*
             if (this.ID_ASIGURAT_CASCO == null || this.ID_ASIGURAT_CASCO <= 0)
             {
                 toReturn.Status = false;
@@ -1052,6 +1103,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
+            
             if (this.ID_ASIGURAT_RCA == null || this.ID_ASIGURAT_RCA <= 0)
             {
                 toReturn.Status = false;
@@ -1060,6 +1112,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
+            
             if (this.ID_SOCIETATE_CASCO == null || this.ID_SOCIETATE_CASCO <= 0)
             {
                 toReturn.Status = false;
@@ -1137,7 +1190,7 @@ namespace SOCISA.Models
                 if (ID == null) // doar la insert verificam dublura
                 {
                     Dosar dj = new Dosar(authenticatedUserId, connectionString, this.NR_DOSAR_CASCO);
-                    if (dj != null)
+                    if (dj != null && dj.ID != null)
                     {
                         toReturn.Status = false;
                         err = ErrorParser.ErrorMessage("dosarExistent");
@@ -1148,6 +1201,7 @@ namespace SOCISA.Models
                 }
             }
             catch { }
+            */
             return toReturn;
         }
 
