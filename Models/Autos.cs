@@ -190,23 +190,28 @@ namespace SOCISA.Models
 
         public response Validare()
         {
-            response toReturn = new response(true, "", null, null, new List<Error>()); ;
-            Error err = new Error();
-            if (this.NR_AUTO == null || this.NR_AUTO.Trim() == "")
+            bool succes;
+            response toReturn = Validator.Validate(authenticatedUserId, connectionString, this, _TABLE_NAME, out succes);
+            if (!succes) // daca nu s-au putut citi validarile din fisier, sau nu sunt definite in fisier, mergem pe varianta hardcodata
             {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyNrAuto");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.SERIE_SASIU == null || this.SERIE_SASIU.Trim() == "")
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptySerieSasiuAuto");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
+                toReturn = new response(true, "", null, null, new List<Error>()); ;
+                Error err = new Error();
+                if (this.NR_AUTO == null || this.NR_AUTO.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyNrAuto");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.SERIE_SASIU == null || this.SERIE_SASIU.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptySerieSasiuAuto");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
             }
             return toReturn;
         }

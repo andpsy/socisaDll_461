@@ -1043,165 +1043,190 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
+            /*
             response toReturn = new response(true, "", null, null, new List<Error>());
             Error err = new Error();
             Validation[] validations = Validator.GetTableValidations(_TABLE_NAME);
-            PropertyInfo[] pis = this.GetType().GetProperties();
-            foreach (Validation v in validations)
+            if (validations != null && validations.Length > 0) // daca s-au citit validarile din fisier mergem pe fisier
             {
-                if (v.Active)
+                PropertyInfo[] pis = this.GetType().GetProperties();
+                foreach (Validation v in validations)
                 {
-                    foreach (PropertyInfo pi in pis)
+                    if (v.Active)
                     {
-                        if (v.FieldName.ToUpper() == pi.Name.ToUpper())
+                        foreach (PropertyInfo pi in pis)
                         {
-                            switch (v.ValidationType)
+                            if (v.FieldName.ToUpper() == pi.Name.ToUpper())
                             {
-                                case "Mandatory":
-                                    if (pi.GetValue(this) == null || pi.GetValue(this).ToString().Trim() == "")
-                                    {
-                                        toReturn.Status = false;
-                                        err = ErrorParser.ErrorMessage(v.ErrorCode);
-                                        toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                                        toReturn.InsertedId = null;
-                                        toReturn.Error.Add(err);
-                                    }
-                                    break;
-                                case "Confirmation":
-                                    // ... TO DO ...
-                                    break;
-                                case "Duplicate":
-                                    try
-                                    {
-                                        if (ID == null) // doar la insert verificam dublura
+                                switch (v.ValidationType)
+                                {
+                                    case "Mandatory":
+                                        if (pi.GetValue(this) == null || pi.GetValue(this).ToString().Trim() == "")
                                         {
-                                            Dosar dj = new Dosar(authenticatedUserId, connectionString, pi.GetValue(this).ToString()); // trebuie sa existe constructorul pt. campul trimis ca parametru !!!
-                                            if (dj != null && dj.ID != null)
+                                            toReturn.Status = false;
+                                            err = ErrorParser.ErrorMessage(v.ErrorCode);
+                                            toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                                            toReturn.InsertedId = null;
+                                            toReturn.Error.Add(err);
+                                        }
+                                        break;
+                                    case "Confirmation":
+                                        // ... TO DO ...
+                                        break;
+                                    case "Duplicate":
+                                        try
+                                        {
+                                            Type typeOfThis = this.GetType();
+                                            Type propertyType = pi.GetValue(this).GetType();
+                                            //ConstructorInfo[] cis = typeOfThis.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                                            ConstructorInfo ci = typeOfThis.GetConstructor(new Type[] {Type.GetType("System.Int32"), Type.GetType("System.String"), propertyType });
+
+                                            if (ci != null && ID == null) // doar la insert verificam dublura
                                             {
-                                                toReturn.Status = false;
-                                                err = ErrorParser.ErrorMessage(v.ErrorCode);
-                                                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                                                toReturn.InsertedId = null;
-                                                toReturn.Error.Add(err);
+                                                //Dosar dj = new Dosar(authenticatedUserId, connectionString, pi.GetValue(this).ToString()); // trebuie sa existe constructorul pt. campul trimis ca parametru !!!
+                                                dynamic dj = Activator.CreateInstance(typeOfThis, new object[] { authenticatedUserId, connectionString, pi.GetValue(this) });
+                                                if (dj != null && dj.ID != null)
+                                                {
+                                                    toReturn.Status = false;
+                                                    err = ErrorParser.ErrorMessage(v.ErrorCode);
+                                                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                                                    toReturn.InsertedId = null;
+                                                    toReturn.Error.Add(err);
+                                                }
                                             }
                                         }
-                                    }
-                                    catch { }
-                                    break;
+                                        catch { }
+                                        break;
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
             }
-            /*
-            if (this.ID_ASIGURAT_CASCO == null || this.ID_ASIGURAT_CASCO <= 0)
+            */
+            bool succes;
+            response toReturn = Validator.Validate(authenticatedUserId, connectionString, this, _TABLE_NAME, out succes);
+            if(!succes) // daca nu s-au putut citi validarile din fisier, sau nu sunt definite in fisier, mergem pe varianta hardcodata
             {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyAsiguratCasco");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            
-            if (this.ID_ASIGURAT_RCA == null || this.ID_ASIGURAT_RCA <= 0)
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyAsiguratRca");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            
-            if (this.ID_SOCIETATE_CASCO == null || this.ID_SOCIETATE_CASCO <= 0)
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyAsiguratorCasco");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.ID_SOCIETATE_RCA == null || this.ID_SOCIETATE_RCA <= 0)
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyAsiguratorRca");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.NR_DOSAR_CASCO == null || this.NR_DOSAR_CASCO.Trim() == "")
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyNrDosarCasco");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.NR_POLITA_CASCO == null || this.NR_POLITA_CASCO.Trim() == "")
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyNrPolitaCasco");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.NR_POLITA_RCA == null || this.NR_POLITA_RCA.Trim() == "")
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyNrPolitaRca");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.ID_AUTO_CASCO == null || this.ID_AUTO_CASCO <= 0)
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyAutoCasco");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.ID_AUTO_RCA == null || this.ID_AUTO_RCA <= 0)
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyAutoRca");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.VALOARE_DAUNA == null || this.VALOARE_DAUNA.ToString().Trim() == "")
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyValoareDauna");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.VALOARE_REGRES == null || this.VALOARE_REGRES.ToString().Trim() == "")
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyValoareRegres");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            try
-            {
-                if (ID == null) // doar la insert verificam dublura
+                toReturn = new response(true, "", null, null, new List<Error>());
+                Error err = new Error();
+
+                if (this.ID_ASIGURAT_CASCO == null || this.ID_ASIGURAT_CASCO <= 0)
                 {
-                    Dosar dj = new Dosar(authenticatedUserId, connectionString, this.NR_DOSAR_CASCO);
-                    if (dj != null && dj.ID != null)
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyAsiguratCasco");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+
+                if (this.ID_ASIGURAT_RCA == null || this.ID_ASIGURAT_RCA <= 0)
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyAsiguratRca");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+
+                if (this.ID_SOCIETATE_CASCO == null || this.ID_SOCIETATE_CASCO <= 0)
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyAsiguratorCasco");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.ID_SOCIETATE_RCA == null || this.ID_SOCIETATE_RCA <= 0)
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyAsiguratorRca");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.NR_DOSAR_CASCO == null || this.NR_DOSAR_CASCO.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyNrDosarCasco");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.NR_POLITA_CASCO == null || this.NR_POLITA_CASCO.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyNrPolitaCasco");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.NR_POLITA_RCA == null || this.NR_POLITA_RCA.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyNrPolitaRca");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.ID_AUTO_CASCO == null || this.ID_AUTO_CASCO <= 0)
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyAutoCasco");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.ID_AUTO_RCA == null || this.ID_AUTO_RCA <= 0)
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyAutoRca");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.VALOARE_DAUNA == null || this.VALOARE_DAUNA.ToString().Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyValoareDauna");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.VALOARE_REGRES == null || this.VALOARE_REGRES.ToString().Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyValoareRegres");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.DATA_EVENIMENT == null || this.DATA_EVENIMENT.ToString().Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyDataEveniment");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                try
+                {
+                    if (ID == null) // doar la insert verificam dublura
                     {
-                        toReturn.Status = false;
-                        err = ErrorParser.ErrorMessage("dosarExistent");
-                        toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                        toReturn.InsertedId = null;
-                        toReturn.Error.Add(err);
+                        Dosar dj = new Dosar(authenticatedUserId, connectionString, this.NR_DOSAR_CASCO);
+                        if (dj != null && dj.ID != null)
+                        {
+                            toReturn.Status = false;
+                            err = ErrorParser.ErrorMessage("dosarExistent");
+                            toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                            toReturn.InsertedId = null;
+                            toReturn.Error.Add(err);
+                        }
                     }
                 }
+                catch { }
             }
-            catch { }
-            */
             return toReturn;
         }
 

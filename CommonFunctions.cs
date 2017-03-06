@@ -516,6 +516,14 @@ namespace SOCISA
             return System.IO.Path.Combine(AppContext.BaseDirectory, Convert.ToString(result.ScansFolder));
         }
 
+        public static string GetSettingsFolder()
+        {
+            string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+            string settings = File.ReadAllText(settingsFile);
+            dynamic result = JsonConvert.DeserializeObject(settings);
+            return System.IO.Path.Combine(AppContext.BaseDirectory, Convert.ToString(result.SettingsFolder));
+        }
+
         public static string GetPdfsFolder()
         {
             string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");

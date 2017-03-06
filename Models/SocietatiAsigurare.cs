@@ -51,11 +51,11 @@ namespace SOCISA.Models
             r.Close(); r.Dispose();
         }
 
-        public SocietateAsigurare(int _authenticatedUserId, string _connectionString, string _DENUMIRE)
+        public SocietateAsigurare(int _authenticatedUserId, string _connectionString, string _DENUMIRE_SCURTA)
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SOCIETATI_ASIGURAREsp_GetByDenumireScurta", new object[] { new MySqlParameter("_DENUMIRE_SCURTA", _DENUMIRE) });
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SOCIETATI_ASIGURAREsp_GetByDenumireScurta", new object[] { new MySqlParameter("_DENUMIRE_SCURTA", _DENUMIRE_SCURTA) });
             MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
@@ -218,33 +218,38 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare(bool _validareSimpla)
         {
-            response toReturn = new response(true, "", null, null, new List<Error>()); ;
-            Error err = new Error();
-            if (this.DENUMIRE_SCURTA == null || this.DENUMIRE_SCURTA.Trim() == "")
+            bool succes;
+            response toReturn = Validator.Validate(authenticatedUserId, connectionString, this, _TABLE_NAME, out succes);
+            if (!succes) // daca nu s-au putut citi validarile din fisier, sau nu sunt definite in fisier, mergem pe varianta hardcodata
             {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyDenumireScurtaSocietate");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (!_validareSimpla)
-            {
-                if (this.DENUMIRE == null || this.DENUMIRE.Trim() == "")
+                toReturn = new response(true, "", null, null, new List<Error>()); ;
+                Error err = new Error();
+                if (this.DENUMIRE_SCURTA == null || this.DENUMIRE_SCURTA.Trim() == "")
                 {
                     toReturn.Status = false;
-                    err = ErrorParser.ErrorMessage("emptyDenumireSocietate");
+                    err = ErrorParser.ErrorMessage("emptyDenumireScurtaSocietate");
                     toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
                     toReturn.InsertedId = null;
                     toReturn.Error.Add(err);
                 }
-                if (this.CUI == null || this.CUI.Trim() == "")
+                if (!_validareSimpla)
                 {
-                    toReturn.Status = false;
-                    err = ErrorParser.ErrorMessage("emptyCuiSocietate");
-                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                    toReturn.InsertedId = null;
-                    toReturn.Error.Add(err);
+                    if (this.DENUMIRE == null || this.DENUMIRE.Trim() == "")
+                    {
+                        toReturn.Status = false;
+                        err = ErrorParser.ErrorMessage("emptyDenumireSocietate");
+                        toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                        toReturn.InsertedId = null;
+                        toReturn.Error.Add(err);
+                    }
+                    if (this.CUI == null || this.CUI.Trim() == "")
+                    {
+                        toReturn.Status = false;
+                        err = ErrorParser.ErrorMessage("emptyCuiSocietate");
+                        toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                        toReturn.InsertedId = null;
+                        toReturn.Error.Add(err);
+                    }
                 }
             }
             return toReturn;
