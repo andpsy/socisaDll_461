@@ -64,6 +64,8 @@ namespace SOCISA.Models
         response GetDosareFromExcel(string sheet, string fileName);
         response GetDosareFromExcel(JObject _json);
         response ImportDosare(response responsesDosare, DateTime _date);
+        response ImportDosareDirect(string sheet, string fileName);
+        response ImportDosareDirect(JObject _json);
         response ImportDosareWithErrors(response responsesDosareWithErrors, DateTime _date);
         response GetDosareFromLog(DateTime data);
         response GetImportDates();
@@ -376,6 +378,18 @@ namespace SOCISA.Models
         public response GetInvolvedParties(Dosar item)
         {
             return item.GetInvolvedParties();
+        }
+
+        public response ImportDosareDirect(string sheet, string fileName)
+        {
+            response r = GetDosareFromExcel(sheet, fileName);
+            return ImportAll(r, DateTime.Now);
+        }
+
+        public response ImportDosareDirect (JObject _json)
+        {
+            response r = GetDosareFromExcel(_json);
+            return ImportAll(r, DateTime.Now);
         }
 
         /// <summary>
@@ -725,6 +739,37 @@ namespace SOCISA.Models
                     }
                 }
                 return GetDosareFromExcel(sheet, fileName);
+            }
+            catch (Exception exp)
+            {
+                return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
+            }
+        }
+
+        public response ImportAll(response responsesDosare, DateTime _date)
+        {
+            try
+            {
+                List<object[]> toReturnList = new List<object[]>();
+                foreach (object[] responseDosar in (object[])responsesDosare.Result)
+                {
+                    Dosar dosar = (Dosar)responseDosar[1];
+                    response response = (response)responseDosar[0];
+                    response r = new response();
+                    if (response.Status)
+                    {
+                        r = dosar.Insert();
+                    }
+                    else
+                    {
+                        r = dosar.InsertWithErrors();
+                        response.Status = false;
+                    }
+                    response.InsertedId = r.InsertedId;
+                    dosar.Log(response, _date);
+                    toReturnList.Add(new object[] { response, dosar });
+                }
+                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray()), toReturnList.ToArray(), null, null);
             }
             catch (Exception exp)
             {

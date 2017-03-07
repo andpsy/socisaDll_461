@@ -50,6 +50,25 @@ namespace SOCISA.Models
             catch (Exception exp) { throw exp; }
         }
 
+        public Action(int _authenticatedUserId, string _connectionString, string _NAME)
+        {
+            try
+            {
+                authenticatedUserId = _authenticatedUserId;
+                connectionString = _connectionString;
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_GetByName", new object[] { new MySqlParameter("_NAME", _NAME) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    IDataRecord item = (IDataRecord)r;
+                    ActionConstructor(item);
+                    break;
+                }
+                r.Close(); r.Dispose();
+            }
+            catch (Exception exp) { throw exp; }
+        }
+
         public Action(int _authenticatedUserId, string _connectionString, IDataRecord item)
         {
             try
@@ -185,23 +204,28 @@ namespace SOCISA.Models
 
         public response Validare()
         {
-            response toReturn = new response(true, "", null, null, new List<Error>()); ;
-            Error err = new Error();
-            if (this.NAME == null || this.NAME.Trim() == "")
+            bool succes;
+            response toReturn = Validator.Validate(authenticatedUserId, connectionString, this, _TABLE_NAME, out succes);
+            if (!succes) // daca nu s-au putut citi validarile din fisier, sau nu sunt definite in fisier, mergem pe varianta hardcodata
             {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyNumeActiune");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            if (this.ACTION == null || this.ACTION.Trim() == "")
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyAction");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
+                toReturn = new response(true, "", null, null, new List<Error>()); ;
+                Error err = new Error();
+                if (this.NAME == null || this.NAME.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyNumeActiune");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
+                if (this.ACTION == null || this.ACTION.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyAction");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
             }
             return toReturn;
         }

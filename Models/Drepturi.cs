@@ -46,6 +46,21 @@ namespace SOCISA.Models
             r.Close(); r.Dispose();
         }
 
+        public Drept(int _authenticatedUserId, string _connectionString, string _DENUMIRE)
+        {
+            authenticatedUserId = _authenticatedUserId;
+            connectionString = _connectionString;
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_GetByDenumire", new object[] { new MySqlParameter("_DENUMIRE", _DENUMIRE) });
+            MySqlDataReader r = da.ExecuteSelectQuery();
+            while (r.Read())
+            {
+                IDataRecord drept = (IDataRecord)r;
+                DreptConstructor(drept);
+                break;
+            }
+            r.Close(); r.Dispose();
+        }
+
         public Drept(int _authenticatedUserId, string _connectionString, IDataRecord drept)
         {
             authenticatedUserId = _authenticatedUserId;
@@ -183,17 +198,21 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
-            response toReturn = new response(true, "", null, null, new List<Error>());;
-            Error err = new Error();
-            if (this.DENUMIRE == null || this.DENUMIRE.Trim() == "")
+            bool succes;
+            response toReturn = Validator.Validate(authenticatedUserId, connectionString, this, _TABLE_NAME, out succes);
+            if (!succes) // daca nu s-au putut citi validarile din fisier, sau nu sunt definite in fisier, mergem pe varianta hardcodata
             {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyDenumireDrept");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
+                toReturn = new response(true, "", null, null, new List<Error>()); ;
+                Error err = new Error();
+                if (this.DENUMIRE == null || this.DENUMIRE.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyDenumireDrept");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
             }
-
             return toReturn;
         }
 
