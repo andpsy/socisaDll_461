@@ -106,20 +106,21 @@ namespace SOCISA
                             switch (piX.PropertyType.ToString())
                             {
                                 case "System.DateTime":
+                                case "System.Nullable`1[System.DateTime]":
                                     if (j.ToString().IndexOf('?') > -1)
                                     {
                                         DateTime dStart = Convert.ToDateTime(j.ToString().Split('?')[0]);
                                         DateTime dEnd = Convert.ToDateTime(j.ToString().Split('?')[1]);
-                                        toReturn += String.Format("{0}({1}.`{2}` >= '{3}' AND {1}.`{2}` <= '{4}')", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, dStart, dEnd);
+                                        toReturn += String.Format("{0}({1}.`{2}` >= '{3}' AND {1}.`{2}` <= '{4}')", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, CommonFunctions.ToMySqlFormatDate(dStart), CommonFunctions.ToMySqlFormatDate(dEnd));
                                     }
                                     else
                                     {
                                         DateTime d = Convert.ToDateTime(j.ToString());
-                                        toReturn += String.Format("{0} {1}.`{2}` = '{3}'", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, d);
+                                        toReturn += String.Format("{0} {1}.`{2}` = '{3}'", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, CommonFunctions.ToMySqlFormatDate(d));
                                     }
                                     break;
                                 default:
-                                    string op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString().Substring(1, j.ToString().Length - 2)) : j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString().Substring(1, j.ToString().Length - 1)) : j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString().Substring(0, j.ToString().Length - 2)) : String.Format("= '{0}'", j.ToString());
+                                    string op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString().Substring(1, j.ToString().Length - 2)) : j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString().Substring(1, j.ToString().Length - 1)) : j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString().Substring(0, j.ToString().Length - 1)) : String.Format("= '{0}'", j.ToString());
                                     toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
                                     break;
                             }

@@ -473,7 +473,7 @@ namespace SOCISA
                 MethodInfo[] mis = item.GetType().GetMethods();
                 foreach (MethodInfo mi in mis)
                 {
-                    if (mi.Name.ToLower().IndexOf(table_name.ToLower()) > -1)
+                    if (mi.Name.ToLower().IndexOf(table_name.ToLower().Replace("_","")) > -1)
                     {
                         methodToRun = mi;
                         break;

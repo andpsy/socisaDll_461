@@ -59,6 +59,8 @@ namespace SOCISA.Models
         public DateTime? DATA_NOTIFICARE { get; set; }
         public DateTime? DATA_ULTIMEI_MODIFICARI { get; set; }
         public bool? AVIZAT { get; set; }
+
+        public string CAZ { get; set; }
         /*
         public DosareProceseJson[] DosareProcese { get; set; }
         public ProceseJson[] Procese { get; set; }
@@ -227,6 +229,9 @@ namespace SOCISA.Models
             catch { }
             try { this.AVIZAT= Convert.ToBoolean(_dosar["AVIZAT"]); }
             catch { }
+            try { this.CAZ = _dosar["CAZ"].ToString(); }
+            catch { }
+
             /*
             try { this.Procese = GetProcese(); }
             catch { }
