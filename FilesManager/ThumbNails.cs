@@ -103,6 +103,7 @@ namespace SOCISA
                     }
                     catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
                 case ".jpg":
+                case ".jpeg":
                 case ".png":
                 case ".bmp":
                     try

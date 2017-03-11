@@ -42,6 +42,8 @@ namespace SOCISA.Models
         response HasChildren(int _id, string tableName, int childrenId);
         response GetChildrens(int _id, string tableName);
         response GetChildren(int _id, string tableName, int childrenId);
+
+        bool LoadTemplateFileIntoDb(string filePath, string _DETALII);
     }
 
     public class DocumenteScanateRepository : IDocumenteScanateRepository
@@ -53,6 +55,11 @@ namespace SOCISA.Models
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
+        }
+
+        public bool LoadTemplateFileIntoDb(string filePath, string _DETALII)
+        {
+            return FileManager.LoadTemplateFileIntoDb(authenticatedUserId, connectionString, filePath, _DETALII);
         }
 
         public response GetAll()

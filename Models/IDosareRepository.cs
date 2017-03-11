@@ -73,7 +73,8 @@ namespace SOCISA.Models
 
     public class DosareRepository : IDosareRepository
     {
-        private const string _TEMPLATE_CERERE_DESPAGUBIRE = "Cerere_despagubire_t.pdf";
+        private const string _TEMPLATE_CERERE_DESPAGUBIRE1 = "Cerere_despagubire_t1.pdf";
+        private const string _TEMPLATE_CERERE_DESPAGUBIRE2 = "Cerere_despagubire_t2.pdf";
         private string connectionString;
         private int authenticatedUserId;
 
@@ -351,7 +352,18 @@ namespace SOCISA.Models
         }
         public response ExportDosarCompletToPdf(Dosar item)
         {
-            return item.ExportDosarCompletToPdf(_TEMPLATE_CERERE_DESPAGUBIRE);
+            DocumentScanat[] tmp = (DocumentScanat[])item.GetDocumente().Result;
+            bool constatare_amiabila = false;
+            foreach(DocumentScanat ds in tmp)
+            {
+                Nomenclator tip_doc = new Nomenclator(authenticatedUserId, connectionString, "TIP_DOCUMENT", Convert.ToInt32(ds.ID_TIP_DOCUMENT));
+                if (tip_doc.DENUMIRE == "CONSTATARE AMIABILA")
+                {
+                    constatare_amiabila = true;
+                    break;
+                }
+            }
+            return item.ExportDosarCompletToPdf(constatare_amiabila ? _TEMPLATE_CERERE_DESPAGUBIRE1 : _TEMPLATE_CERERE_DESPAGUBIRE2);
         }
         public response ExportDosarCompletToPdf(string templateFileName, int _id)
         {
@@ -360,8 +372,20 @@ namespace SOCISA.Models
         }
         public response ExportDosarCompletToPdf(int _id)
         {
+            Dosar d = (Dosar)(Find(_id).Result);
+            DocumentScanat[] tmp = (DocumentScanat[])d.GetDocumente().Result;
+            bool constatare_amiabila = false;
+            foreach (DocumentScanat ds in tmp)
+            {
+                Nomenclator tip_doc = new Nomenclator(authenticatedUserId, connectionString, "TIP_DOCUMENT", Convert.ToInt32(ds.ID_TIP_DOCUMENT));
+                if (tip_doc.DENUMIRE == "CONSTATARE AMIABILA")
+                {
+                    constatare_amiabila = true;
+                    break;
+                }
+            }
             //return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarCompletToPdf(_TEMPLATE_CERERE_DESPAGUBIRE);
-            return ((Dosar)(Find(_id).Result)).ExportDosarCompletToPdf(_TEMPLATE_CERERE_DESPAGUBIRE);
+            return d.ExportDosarCompletToPdf(constatare_amiabila ? _TEMPLATE_CERERE_DESPAGUBIRE1 : _TEMPLATE_CERERE_DESPAGUBIRE2);
         }
         public void Import(Dosar item)
         {
