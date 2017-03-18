@@ -11,7 +11,7 @@ namespace SOCISA.Models
 {
     public interface IUtilizatoriDrepturiRepository
     {
-        response GetAll();
+        response GetAll(); response CountAll();
         response GetFiltered(string _sort, string _order, string _filter, string _limit);
         response GetFiltered(string _json);
         response GetFiltered(JObject _json);
@@ -70,6 +70,18 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
+        public response CountAll()
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORI_DREPTURIsp_count");
+                object count = da.ExecuteScalarQuery().Result;
+                if (count == null)
+                    return new response(true, "0", 0, null, null);
+                return new response(true, count.ToString(), Convert.ToInt32(count), null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
         public response GetFiltered(string _json)
         {
             JObject jObj = JObject.Parse(_json);

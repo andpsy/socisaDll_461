@@ -188,7 +188,7 @@ namespace SOCISA.Models
             response toReturn = new response(false, "", null, null, new List<Error>());
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADII_SENTINTEsp_delete", _parameters.ToArray());
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADII_SENTINTEsp_soft_delete", _parameters.ToArray());
             toReturn = da.ExecuteDeleteQuery();
             return toReturn;
         }

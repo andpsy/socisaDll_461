@@ -29,6 +29,7 @@ namespace SOCISA.Models
         public int ID_TIP_UTILIZATOR { get; set; }
         public string DEPARTAMENT { get; set; }
         public DateTime? LAST_REFRESH { get; set; }
+        public int? ID_SOCIETATE { get; set; }
 
         /// <summary>
         /// Constructorul default
@@ -92,6 +93,8 @@ namespace SOCISA.Models
             try { this.DEPARTAMENT = utilizator["DEPARTAMENT"].ToString(); }
             catch { }
             try { this.LAST_REFRESH = Convert.ToDateTime(utilizator["LAST_REFRESH"]); }
+            catch { }
+            try { this.ID_SOCIETATE = Convert.ToInt32(utilizator["ID_SOCIETATE"]); }
             catch { }
         }
 
@@ -218,7 +221,7 @@ namespace SOCISA.Models
             response toReturn = new response(false, "", null, null, new List<Error>());;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_delete", _parameters.ToArray());
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_soft_delete", _parameters.ToArray());
             toReturn = da.ExecuteDeleteQuery();
             return toReturn;
         }
@@ -503,48 +506,8 @@ namespace SOCISA.Models
         {
             try
             {
-                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORI_SOCIETATIsp_GetByIdUtilizator", new object[] { new MySqlParameter("_ID_UTILIZATOR", this.ID) });
-                MySqlDataReader r = da.ExecuteSelectQuery();
-                ArrayList aList = new ArrayList();
-                while (r.Read())
-                {
-                    SocietateAsigurare a = new SocietateAsigurare(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_SOCIETATE"]));
-                    aList.Add(a);
-                }
-                r.Close(); r.Dispose();
-                SocietateAsigurare[] toReturn = new SocietateAsigurare[aList.Count];
-                for (int i = 0; i < aList.Count; i++)
-                {
-                    toReturn[i] = (SocietateAsigurare)aList[i];
-                }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
-            }
-            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
-        }
-
-        /// <summary>
-        /// Metoda pt. popularea relatiilor dintre utilizatori si societatile de asigurare asignate utilizatorului curent
-        /// </summary>
-        /// <returns>vector de SOCISA.UtilizatoriSocietatiJson</returns>
-        public response GetUtilizatoriSocietati()
-        {
-            try
-            {
-                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORI_SOCIETATIsp_GetByIdUtilizator", new object[] { new MySqlParameter("_ID_UTILIZATOR", this.ID) });
-                MySqlDataReader r = da.ExecuteSelectQuery();
-                ArrayList aList = new ArrayList();
-                while (r.Read())
-                {
-                    UtilizatorSocietate d = new UtilizatorSocietate(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
-                    aList.Add(d);
-                }
-                r.Close(); r.Dispose();
-                UtilizatorSocietate[] toReturn = new UtilizatorSocietate[aList.Count];
-                for (int i = 0; i < aList.Count; i++)
-                {
-                    toReturn[i] = (UtilizatorSocietate)aList[i];
-                }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                SocietateAsigurare s = new SocietateAsigurare(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_SOCIETATE));
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(s), s, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }

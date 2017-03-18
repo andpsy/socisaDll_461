@@ -4,8 +4,9 @@
   "description": "socisa Db Layer",
   "language": "en",
   "version": "1.1.0-beta20",
-  "authors": [ "Andpsy" ],
-
+  "authors": [
+    "Andpsy"
+  ],
   "dependencies": {
     "CoreCompat.System.Drawing": "1.0.0-beta006",
     "EPPlus.Core": "1.3.1",
@@ -18,14 +19,18 @@
     "Xfinium.Pdf.NetCore": "6.6.0.2",
     "Xfinium.Pdf.Render.NetCore": "6.6.0.2"
   },
-
   "frameworks": {
     "netstandard1.6": {
-      "imports": "dnxcore50"
+      "imports": "dnxcore50",
+      "dependencies": {
+        "System.ServiceModel.Duplex": "4.0.1",
+        "System.ServiceModel.Http": "4.1.0",
+        "System.ServiceModel.NetTcp": "4.1.0",
+        "System.ServiceModel.Security": "4.0.1",
+        "System.Xml.XmlSerializer": "4.0.11"
+      }
     }
   },
-
-
   "runtimes": {
     "win10-x64": {
       "dependencies": {

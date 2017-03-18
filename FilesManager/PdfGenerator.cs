@@ -118,7 +118,8 @@ namespace SOCISA
                 pf.Save(fs);
                 fs.Flush();
                 fs.Dispose();
-                return new response();
+                string toReturn = Path.Combine(CommonFunctions.GetPdfsFolder(), fileName);
+                return new response(true, toReturn, toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -146,27 +147,27 @@ namespace SOCISA
             Dictionary<string, string> field_names = new Dictionary<string, string>();
             field_names.Add("{{NR_SCA}}", dosar.NR_SCA == null || dosar.NR_SCA.Trim() == "" ? "_________" : dosar.NR_SCA);
             field_names.Add("{{DATA_SCA}}", dosar.DATA_SCA == null ? "____________" : Convert.ToDateTime(dosar.DATA_SCA).Year.ToString());
-            field_names.Add("{{NR_DOSAR_CASCO}}", dosar.NR_DOSAR_CASCO == null || dosar.NR_DOSAR_CASCO.Trim() == "" ? "_______________________" : dosar.NR_DOSAR_CASCO);
-            field_names.Add("{{VALOARE_DAUNA}}", dosar.VALOARE_DAUNA.ToString().Trim() == "" ? "_______________" : dosar.VALOARE_DAUNA.ToString());
-            field_names.Add("{{NR_POLITA_CASCO}}", dosar.NR_POLITA_CASCO == null || dosar.NR_POLITA_CASCO.Trim() == "" ? "____________________" : dosar.NR_POLITA_CASCO);
-            field_names.Add("{{NR_POLITA_RCA}}", dosar.NR_POLITA_RCA == null || dosar.NR_POLITA_RCA.Trim() == "" ? "____________________" : dosar.NR_POLITA_RCA);
-            field_names.Add("{{DATA_EVENIMENT}}", dosar.DATA_EVENIMENT == null ? "______________" : Convert.ToDateTime(dosar.DATA_EVENIMENT).ToString("dd/MM/yyyy"));
+            field_names.Add("{{NR_DOSAR_CASCO}}", dosar.NR_DOSAR_CASCO == null || dosar.NR_DOSAR_CASCO.Trim() == "" ? "_________________" : dosar.NR_DOSAR_CASCO);
+            field_names.Add("{{VALOARE_DAUNA}}", dosar.VALOARE_DAUNA.ToString().Trim() == "" ? "___________" : dosar.VALOARE_DAUNA.ToString());
+            field_names.Add("{{NR_POLITA_CASCO}}", dosar.NR_POLITA_CASCO == null || dosar.NR_POLITA_CASCO.Trim() == "" ? "_________________" : dosar.NR_POLITA_CASCO);
+            field_names.Add("{{NR_POLITA_RCA}}", dosar.NR_POLITA_RCA == null || dosar.NR_POLITA_RCA.Trim() == "" ? "_________________" : dosar.NR_POLITA_RCA);
+            field_names.Add("{{DATA_EVENIMENT}}", dosar.DATA_EVENIMENT == null ? "___________" : Convert.ToDateTime(dosar.DATA_EVENIMENT).ToString("dd/MM/yyyy"));
 
-            field_names.Add("{{SOCIETATE_CASCO}}", sCasco.DENUMIRE == null || sCasco.DENUMIRE.Trim() == "" ? "______________________________________" : sCasco.DENUMIRE);
-            field_names.Add("{{ADRESA_SOCIETATE_CASCO}}", sCasco.ADRESA == null || sCasco.ADRESA.Trim() == "" ? "__________________________________________________________" : sCasco.ADRESA);
-            field_names.Add("{{NR_REG_COM_SOCIETATE_CASCO}}", sCasco.NR_REG_COM == null || sCasco.NR_REG_COM.Trim() == "" ? "___________________" : sCasco.NR_REG_COM.ToUpper());
-            field_names.Add("{{CUI_SOCIETATE_CASCO}}", sCasco.CUI == null || sCasco.CUI.Trim() == "" ? "__________________" : sCasco.CUI.ToUpper());
-            field_names.Add("{{IBAN_SOCIETATE_CASCO}}", sCasco.IBAN == null || sCasco.IBAN.Trim() == "" ? "________________________________________________" : sCasco.IBAN.ToUpper());
-            field_names.Add("{{BANCA_SOCIETATE_CASCO}}", sCasco.BANCA == null || sCasco.BANCA.Trim() == "" ? "_________________________________________" : sCasco.BANCA.ToUpper());
+            field_names.Add("{{SOCIETATE_CASCO}}", sCasco.DENUMIRE == null || sCasco.DENUMIRE.Trim() == "" ? "__________________________________" : sCasco.DENUMIRE);
+            field_names.Add("{{ADRESA_SOCIETATE_CASCO}}", sCasco.ADRESA == null || sCasco.ADRESA.Trim() == "" ? "___________________________________________________" : sCasco.ADRESA);
+            field_names.Add("{{NR_REG_COM_SOCIETATE_CASCO}}", sCasco.NR_REG_COM == null || sCasco.NR_REG_COM.Trim() == "" ? "_______________" : sCasco.NR_REG_COM.ToUpper());
+            field_names.Add("{{CUI_SOCIETATE_CASCO}}", sCasco.CUI == null || sCasco.CUI.Trim() == "" ? "______________" : sCasco.CUI.ToUpper());
+            field_names.Add("{{IBAN_SOCIETATE_CASCO}}", sCasco.IBAN == null || sCasco.IBAN.Trim() == "" ? "__________________________________________" : sCasco.IBAN.ToUpper());
+            field_names.Add("{{BANCA_SOCIETATE_CASCO}}", sCasco.BANCA == null || sCasco.BANCA.Trim() == "" ? "____________________________________" : sCasco.BANCA.ToUpper());
 
-            field_names.Add("{{SOCIETATE_RCA}}", sRca.DENUMIRE == null || sRca.DENUMIRE.Trim() == "" ? "______________________________________" : sRca.DENUMIRE);
-            field_names.Add("{{ADRESA_SOCIETATE_RCA}}", sRca.ADRESA == null || sRca.ADRESA.Trim() == "" ? "_________________________________________________________" : sRca.ADRESA);
-            field_names.Add("{{ASIGURAT_CASCO}}", aCasco.DENUMIRE == null || aCasco.DENUMIRE.Trim() == "" ? "______________________________________" : aCasco.DENUMIRE);
-            field_names.Add("{{ASIGURAT_RCA}}", aRca.DENUMIRE == null || aRca.DENUMIRE.Trim() == "" ? "______________________________________" : aRca.DENUMIRE);
+            field_names.Add("{{SOCIETATE_RCA}}", sRca.DENUMIRE == null || sRca.DENUMIRE.Trim() == "" ? "_________________________________" : sRca.DENUMIRE);
+            field_names.Add("{{ADRESA_SOCIETATE_RCA}}", sRca.ADRESA == null || sRca.ADRESA.Trim() == "" ? "___________________________________________________" : sRca.ADRESA);
+            field_names.Add("{{ASIGURAT_CASCO}}", aCasco.DENUMIRE == null || aCasco.DENUMIRE.Trim() == "" ? "__________________________________" : aCasco.DENUMIRE);
+            field_names.Add("{{ASIGURAT_RCA}}", aRca.DENUMIRE == null || aRca.DENUMIRE.Trim() == "" ? "__________________________________" : aRca.DENUMIRE);
 
-            field_names.Add("{{NR_AUTO_CASCO}}", autoCasco.NR_AUTO == null || autoCasco.NR_AUTO.Trim() == "" ? "___________________" : autoCasco.NR_AUTO.ToUpper());
-            field_names.Add("{{MARCA_AUTO_CASCO}}", autoCasco.MARCA == null || autoCasco.MARCA.Trim() == "" ? "_____________________" : autoCasco.MARCA.ToUpper());
-            field_names.Add("{{NR_AUTO_RCA}}", autoRca.NR_AUTO == null || autoRca.NR_AUTO.Trim() == "" ? "___________________" : autoRca.NR_AUTO.ToUpper());
+            field_names.Add("{{NR_AUTO_CASCO}}", autoCasco.NR_AUTO == null || autoCasco.NR_AUTO.Trim() == "" ? "____________" : autoCasco.NR_AUTO.ToUpper());
+            field_names.Add("{{MARCA_AUTO_CASCO}}", autoCasco.MARCA == null || autoCasco.MARCA.Trim() == "" ? "______________" : autoCasco.MARCA.ToUpper());
+            field_names.Add("{{NR_AUTO_RCA}}", autoRca.NR_AUTO == null || autoRca.NR_AUTO.Trim() == "" ? "____________" : autoRca.NR_AUTO.ToUpper());
             field_names.Add("{{PROPRIETAR_AUTO_RCA}}", "_______________________");
 
             field_names.Add("{{NORMA}}", dosar.DATA_EVENIMENT < new DateTime(2015, 1, 1) ? Articole.articole[0].Ordin : dosar.DATA_EVENIMENT >= new DateTime(2015, 1, 1) && dosar.DATA_EVENIMENT <= new DateTime(2016, 12, 22) ? Articole.articole[1].Ordin : Articole.articole[2].Ordin);
@@ -174,12 +175,14 @@ namespace SOCISA
             field_names.Add("{{ARTICOL_OBIECTIUNI}}", dosar.DATA_EVENIMENT < new DateTime(2015, 1, 1) ? Articole.articole[0].ArticolObiectiuni : dosar.DATA_EVENIMENT >= new DateTime(2015, 1, 1) && dosar.DATA_EVENIMENT <= new DateTime(2016, 12, 22) ? Articole.articole[1].ArticolObiectiuni : Articole.articole[2].ArticolObiectiuni);
             field_names.Add("{{TERMEN}}", dosar.DATA_EVENIMENT < new DateTime(2015, 1, 1) ? Articole.articole[0].NrZile : dosar.DATA_EVENIMENT >= new DateTime(2015, 1, 1) && dosar.DATA_EVENIMENT <= new DateTime(2016, 12, 22) ? Articole.articole[1].NrZile : Articole.articole[2].NrZile);
             field_names.Add("{{CAZ}}", dosar.CAZ == null || dosar.CAZ.Trim() == "" ? "_____" : dosar.CAZ);
+            field_names.Add("{{DATA}}", DateTime.Now.ToString("dd/MM/yyyy"));
 
 
             string docs = "";
             Models.DocumentScanat[] dsj = (Models.DocumentScanat[])dosar.GetDocumente().Result;
             foreach (Models.DocumentScanat doc in dsj)
             {
+                // de adaugat GetTip document in Documente si apoi luat denumire din nomenclator...
                 docs = String.Format("- {1}\r\n{0}", docs, (doc.DETALII != "" && doc.DETALII != null ? doc.DETALII : doc.DENUMIRE_FISIER));
             }
             field_names.Add("{{DOCUMENTE}}", docs);
@@ -205,9 +208,9 @@ namespace SOCISA
                 else
                 {
                     pfp.HorizontalAlign = PdfStringHorizontalAlign.Justified;
-                    if(s.IndexOf("Catre") < 0 && s.IndexOf("{{DOCUMENTE}}") < 0)
+                    if(s.IndexOf("Catre") < 0 && s.IndexOf("{{DOCUMENTE}}") < 0 && s.IndexOf("$$") < 0)
                         pfp.FirstLineIndent = 30;
-                    if (s.IndexOf("{{DOCUMENTE}}") > -1)
+                    if (s.IndexOf("{{DOCUMENTE}}") > -1 || s.IndexOf("$$") > -1)
                         pfp.LeftIndentation = 50;
                 }
 
@@ -230,10 +233,10 @@ namespace SOCISA
                 {
                     try
                     {
-                        PdfFormattedTextBlock b1 = new PdfFormattedTextBlock(sBlocks[i], sBlocks[i].IndexOf("CERERE DE DESPAGUBIRE") > -1 ? boldFont : regularFont);
+                        PdfFormattedTextBlock b1 = new PdfFormattedTextBlock(sBlocks[i].Replace("$$","\r\n"), sBlocks[i].IndexOf("CERERE DE DESPAGUBIRE") > -1 ? boldFont : regularFont);
                         pfp.Blocks.Add(b1);
                         string theFuckingWrightSplitter = "";
-                        if (splitter_count < splitters.Count)
+                        //if (splitter_count < splitters.Count)
                         {
                             foreach (string splitter in splitters)
                             {
@@ -241,6 +244,7 @@ namespace SOCISA
                                 {
                                     theFuckingWrightSplitter = splitter;
                                     splitter_count++;
+                                    splitters.Remove(splitter);
                                     break;
                                 }
                             }
@@ -343,45 +347,55 @@ namespace SOCISA
                 {
                     try
                     {
-                        MemoryStream ms = new MemoryStream(dsj.FILE_CONTENT);
-                        switch (dsj.EXTENSIE_FISIER.Replace(".", "").ToLower())
+                        if (dsj.VIZA_CASCO)
                         {
-                            case "pdf":
-                                PdfFixedDocument pd = new PdfFixedDocument(ms);
-                                for (int i = 0; i < pd.Pages.Count; i++)
-                                    poDocument.Pages.Add(pd.Pages[i]);
-                                break;
-                            case "png":
-                                Xfinium.Pdf.Graphics.PdfPngImage pngImg = new Xfinium.Pdf.Graphics.PdfPngImage(ms);
-                                PdfPage p = new PdfPage();
-                                p.Graphics.DrawImage(pngImg, 0, 0, p.Width, p.Height);
-                                poDocument.Pages.Add(p);
-                                break;
-                            case "jpg":
-                            case "jpeg":
-                                Xfinium.Pdf.Graphics.PdfJpegImage jpgImg = new Xfinium.Pdf.Graphics.PdfJpegImage(ms);
-                                p = new PdfPage();
-                                p.Graphics.DrawImage(jpgImg, 0, 0, p.Width, p.Height);
-                                poDocument.Pages.Add(p);
-                                break;
-                            case "tiff":
-                                Xfinium.Pdf.Graphics.PdfTiffImage tiffImg = new Xfinium.Pdf.Graphics.PdfTiffImage(ms);
-                                p = new PdfPage();
-                                p.Graphics.DrawImage(tiffImg, 0, 0, p.Width, p.Height);
-                                poDocument.Pages.Add(p);
-                                break;
-                            default:
-                                throw new Exception("unsupportedFormat");
+                            MemoryStream ms = new MemoryStream(dsj.FILE_CONTENT);
+                            switch (dsj.EXTENSIE_FISIER.Replace(".", "").ToLower())
+                            {
+                                case "pdf":
+                                    PdfFixedDocument pd = new PdfFixedDocument(ms);
+                                    for (int i = 0; i < pd.Pages.Count; i++)
+                                        poDocument.Pages.Add(pd.Pages[i]);
+                                    break;
+                                case "png":
+                                    Xfinium.Pdf.Graphics.PdfPngImage pngImg = new Xfinium.Pdf.Graphics.PdfPngImage(ms);
+                                    PdfPage p = new PdfPage();
+                                    p.Graphics.DrawImage(pngImg, 0, 0, p.Width, p.Height);
+                                    poDocument.Pages.Add(p);
+                                    break;
+                                case "jpg":
+                                case "jpeg":
+                                    Xfinium.Pdf.Graphics.PdfJpegImage jpgImg = new Xfinium.Pdf.Graphics.PdfJpegImage(ms);
+                                    p = new PdfPage();
+                                    p.Graphics.DrawImage(jpgImg, 0, 0, p.Width, p.Height);
+                                    poDocument.Pages.Add(p);
+                                    break;
+                                case "tiff":
+                                    Xfinium.Pdf.Graphics.PdfTiffImage tiffImg = new Xfinium.Pdf.Graphics.PdfTiffImage(ms);
+                                    p = new PdfPage();
+                                    p.Graphics.DrawImage(tiffImg, 0, 0, p.Width, p.Height);
+                                    poDocument.Pages.Add(p);
+                                    break;
+                                default:
+                                    throw new Exception("unsupportedFormat");
+                            }
                         }
                     }
                     catch(Exception exp) { LogWriter.Log(exp); }
                 }
-                string fileName = dosar.NR_DOSAR_CASCO.Replace('/', '_').Replace(' ', '_') + "_documente.pdf";
-                FileStream fs = File.Open(Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), FileMode.Create, FileAccess.ReadWrite);
-                poDocument.Save(fs);
-                fs.Flush();
-                fs.Dispose();
-                return new response(true, Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), null, null);
+                if (poDocument.Pages.Count > 0)
+                {
+                    string fileName = dosar.NR_DOSAR_CASCO.Replace('/', '_').Replace(' ', '_') + "_documente.pdf";
+                    FileStream fs = File.Open(Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), FileMode.Create, FileAccess.ReadWrite);
+                    poDocument.Save(fs);
+                    fs.Flush();
+                    fs.Dispose();
+                    return new response(true, Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), Path.Combine(CommonFunctions.GetPdfsFolder(), fileName), null, null);
+                }
+                else
+                {
+                    return new response(false, ErrorParser.ErrorMessage("dosarFaraDocumente").ERROR_MESSAGE, null, null, new List<Error>() { ErrorParser.ErrorMessage("dosarFaraDocumente") });
+                }
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }

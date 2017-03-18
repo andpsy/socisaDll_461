@@ -163,7 +163,7 @@ namespace SOCISA.Models
             if (this.ID != null)
             {
                 _parameters.Add(new MySqlParameter("_ID", this.ID));
-                da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJE_UTILIZATORIsp_delete", _parameters.ToArray());
+                da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJE_UTILIZATORIsp_soft_delete", _parameters.ToArray());
             }
             else
             {

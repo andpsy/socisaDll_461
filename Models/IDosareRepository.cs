@@ -13,7 +13,7 @@ namespace SOCISA.Models
 {
     public interface IDosareRepository
     {
-        response GetAll();
+        response GetAll(); response CountAll();
         response GetFiltered(string _sort, string _order, string _filter, string _limit);
         response GetFiltered(string _json);
         response GetFiltered(JObject _json);
@@ -75,6 +75,8 @@ namespace SOCISA.Models
     {
         private const string _TEMPLATE_CERERE_DESPAGUBIRE1 = "Cerere_despagubire_t1.pdf";
         private const string _TEMPLATE_CERERE_DESPAGUBIRE2 = "Cerere_despagubire_t2.pdf";
+        private const string _TEMPLATE_CERERE_DESPAGUBIRE3 = "Cerere_t2.pdf";
+        private const string _TEMPLATE_CERERE_DESPAGUBIRE4 = "Cerere_t1.pdf";
         private string connectionString;
         private int authenticatedUserId;
 
@@ -105,6 +107,19 @@ namespace SOCISA.Models
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Dosar)aList[i];
                 return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response CountAll()
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_count");
+                object count = da.ExecuteScalarQuery().Result;
+                if(count == null)
+                    return new response(true, "0", 0, null, null);
+                return new response(true, count.ToString(), Convert.ToInt32(count), null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -353,6 +368,12 @@ namespace SOCISA.Models
         public response ExportDosarCompletToPdf(Dosar item)
         {
             DocumentScanat[] tmp = (DocumentScanat[])item.GetDocumente().Result;
+            SocietateAsigurare srca = (SocietateAsigurare)item.GetSocietateRca().Result;
+            bool faliment = false;
+            if (srca.DENUMIRE.ToUpper().IndexOf("ASTRA") > -1 || srca.DENUMIRE.ToUpper().IndexOf("CARPATICA") > -1)
+            {
+                faliment = true;
+            }
             bool constatare_amiabila = false;
             foreach(DocumentScanat ds in tmp)
             {
@@ -363,7 +384,13 @@ namespace SOCISA.Models
                     break;
                 }
             }
-            return item.ExportDosarCompletToPdf(constatare_amiabila ? _TEMPLATE_CERERE_DESPAGUBIRE1 : _TEMPLATE_CERERE_DESPAGUBIRE2);
+            string template = "";
+            if (faliment && constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE3;
+            if (faliment && !constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE4;
+            if (!faliment && constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE1;
+            if (!faliment && !constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE2;
+
+            return item.ExportDosarCompletToPdf(template);
         }
         public response ExportDosarCompletToPdf(string templateFileName, int _id)
         {
@@ -373,6 +400,12 @@ namespace SOCISA.Models
         public response ExportDosarCompletToPdf(int _id)
         {
             Dosar d = (Dosar)(Find(_id).Result);
+            SocietateAsigurare srca = (SocietateAsigurare)d.GetSocietateRca().Result;
+            bool faliment = false;
+            if (srca.DENUMIRE.ToUpper().IndexOf("ASTRA") > -1 || srca.DENUMIRE.ToUpper().IndexOf("CARPATICA") > -1)
+            {
+                faliment = true;
+            }
             DocumentScanat[] tmp = (DocumentScanat[])d.GetDocumente().Result;
             bool constatare_amiabila = false;
             foreach (DocumentScanat ds in tmp)
@@ -385,7 +418,13 @@ namespace SOCISA.Models
                 }
             }
             //return JsonConvert.DeserializeObject<Dosar>(Find(_id).Message).ExportDosarCompletToPdf(_TEMPLATE_CERERE_DESPAGUBIRE);
-            return d.ExportDosarCompletToPdf(constatare_amiabila ? _TEMPLATE_CERERE_DESPAGUBIRE1 : _TEMPLATE_CERERE_DESPAGUBIRE2);
+            string template = "";
+            if (faliment && constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE3;
+            if (faliment && !constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE4;
+            if (!faliment && constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE1;
+            if (!faliment && !constatare_amiabila) template = _TEMPLATE_CERERE_DESPAGUBIRE2;
+
+            return d.ExportDosarCompletToPdf(template);
         }
         public void Import(Dosar item)
         {

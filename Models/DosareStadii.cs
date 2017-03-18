@@ -300,7 +300,7 @@ namespace SOCISA.Models
             
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADIIsp_delete", _parameters.ToArray());
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSARE_STADIIsp_soft_delete", _parameters.ToArray());
             toReturn = da.ExecuteDeleteQuery();
             return toReturn;
         }

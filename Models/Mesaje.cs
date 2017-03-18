@@ -198,7 +198,7 @@ namespace SOCISA.Models
             response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_delete", _parameters.ToArray());
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_soft_delete", _parameters.ToArray());
             toReturn = da.ExecuteDeleteQuery();
             return toReturn;
         }
@@ -327,7 +327,7 @@ namespace SOCISA.Models
                 ArrayList aList = new ArrayList();
                 while (r.Read())
                 {
-                    Utilizator a = new Utilizator(authenticatedUserId, connectionString, Convert.ToInt32(r["ID_UTILIZATOR"]));
+                    Utilizator a = new Utilizator(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
                     aList.Add(a);
                 }
                 r.Close(); r.Dispose();
