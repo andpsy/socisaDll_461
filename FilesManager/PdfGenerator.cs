@@ -182,8 +182,9 @@ namespace SOCISA
             Models.DocumentScanat[] dsj = (Models.DocumentScanat[])dosar.GetDocumente().Result;
             foreach (Models.DocumentScanat doc in dsj)
             {
-                // de adaugat GetTip document in Documente si apoi luat denumire din nomenclator...
-                docs = String.Format("- {1}\r\n{0}", docs, (doc.DETALII != "" && doc.DETALII != null ? doc.DETALII : doc.DENUMIRE_FISIER));
+                Models.Nomenclator tip_document = (Models.Nomenclator)doc.GetTipDocument().Result;
+                //docs = String.Format("- {1}\r\n{0}", docs, (doc.DETALII != "" && doc.DETALII != null ? doc.DETALII : doc.DENUMIRE_FISIER));
+                docs = String.Format("- {1}\r\n{0}", docs, tip_document.DENUMIRE + " " + (doc.DETALII != "" && doc.DETALII != null ? doc.DETALII : ""));
             }
             field_names.Add("{{DOCUMENTE}}", docs);
 

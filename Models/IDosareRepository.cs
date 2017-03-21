@@ -106,7 +106,7 @@ namespace SOCISA.Models
                 Dosar[] toReturn = new Dosar[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Dosar)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -141,16 +141,16 @@ namespace SOCISA.Models
                     switch (t.Key.ToLower())
                     {
                         case "sort":
-                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                         case "order":
-                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                         case "filter":
-                            f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                         case "limit":
-                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                     }
                 }
@@ -185,7 +185,7 @@ namespace SOCISA.Models
                 Dosar[] toReturn = new Dosar[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Dosar)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -195,7 +195,7 @@ namespace SOCISA.Models
             try
             {
                 Dosar item = new Dosar(authenticatedUserId, connectionString, _id);
-                return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
+                return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null); ;
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
 
@@ -230,7 +230,7 @@ namespace SOCISA.Models
 
         public response Update(string fieldValueCollection)
         {
-            Dosar tmpItem = JsonConvert.DeserializeObject<Dosar>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            Dosar tmpItem = JsonConvert.DeserializeObject<Dosar>(fieldValueCollection, CommonFunctions.JsonDeserializerSettings); // sa vedem daca merge asa sau trebuie cu JObject
             //return JsonConvert.DeserializeObject<Dosar>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
             return ((Dosar)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
@@ -775,7 +775,7 @@ namespace SOCISA.Models
                     }
                     catch { }
                 }
-                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray()), toReturnList.ToArray(), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }
             catch (Exception exp)
             {
@@ -832,7 +832,7 @@ namespace SOCISA.Models
                     dosar.Log(response, _date);
                     toReturnList.Add(new object[] { response, dosar });
                 }
-                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray()), toReturnList.ToArray(), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }
             catch (Exception exp)
             {
@@ -859,7 +859,7 @@ namespace SOCISA.Models
                     dosar.Log(response, _date);
                     toReturnList.Add(new object[] { response, dosar });
                 }
-                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray()), toReturnList.ToArray(), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }catch(Exception exp)
             {
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
@@ -886,7 +886,7 @@ namespace SOCISA.Models
                     dosar.Log(response, _date);
                     toReturnList.Add(new object[] { response, dosar });
                 }
-                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray()), toReturnList.ToArray(), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }
             catch (Exception exp)
             {
@@ -912,13 +912,13 @@ namespace SOCISA.Models
                     r.Status = Convert.ToBoolean(dr["STATUS"]);
                     r.Message = dr["MESSAGE"].ToString();
                     r.InsertedId = Convert.ToInt32(dr["INSERTED_ID"]);
-                    r.Error = JsonConvert.DeserializeObject<List<Error>>(dr["ERRORS"].ToString());
+                    r.Error = JsonConvert.DeserializeObject<List<Error>>(dr["ERRORS"].ToString(), CommonFunctions.JsonDeserializerSettings);
 
                     Dosar dosar = r.Status ? new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r.InsertedId)) : new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r.InsertedId), true);
                     toReturnList.Add(new object[] { r, dosar });
                 }
                 dr.Close(); dr.Dispose();
-                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray()), toReturnList.ToArray(), null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }
             catch (Exception exp)
             {
@@ -938,7 +938,7 @@ namespace SOCISA.Models
                     dates.Add(r["DATA_IMPORT"].ToString());
                 }
                 r.Close(); r.Dispose();
-                return new response(true, JsonConvert.SerializeObject(dates), dates, null, null);
+                return new response(true, JsonConvert.SerializeObject(dates, CommonFunctions.JsonSerializerSettings), dates, null, null);
             }
             catch (Exception exp)
             {

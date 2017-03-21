@@ -66,7 +66,7 @@ namespace SOCISA.Models
                 Auto[] toReturn = new Auto[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Auto)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null); 
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null); 
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
@@ -100,16 +100,16 @@ namespace SOCISA.Models
                     switch (t.Key.ToLower())
                     {
                         case "sort":
-                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                         case "order":
-                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                         case "filter":
-                            f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                         case "limit":
-                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j);
+                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                     }
                 }
@@ -143,7 +143,7 @@ namespace SOCISA.Models
                 Auto[] toReturn = new Auto[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
                     toReturn[i] = (Auto)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn), toReturn, null, null); 
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null); 
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
@@ -153,7 +153,7 @@ namespace SOCISA.Models
             try
             {
                 Auto item = new Auto(authenticatedUserId, connectionString, _id);
-                return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
+                return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null); ;
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
@@ -163,7 +163,7 @@ namespace SOCISA.Models
             try
             {
                 Auto item = new Auto(authenticatedUserId, connectionString, _nr_auto);
-                return new response(true, JsonConvert.SerializeObject(item), item, null, null); ;
+                return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null); ;
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }

@@ -274,7 +274,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = (Stadiu)aList[i];
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -301,7 +301,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = (DosarStadiu)aList[i];
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -328,7 +328,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = (Proces)aList[i];
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -351,7 +351,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = new PlatiJson(Convert.ToInt32(dosarePlati.Rows[i]["ID_PLATA"]));
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -373,7 +373,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = new PlatiContracteJson(Convert.ToInt32(dosarePlatiContracte.Rows[i]["ID_PLATA_CONTRACT"]));
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -394,7 +394,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = new MesajeJson(Convert.ToInt32(dosareMesaje.Rows[i]["ID_MESAJ"]));
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -409,7 +409,7 @@ namespace SOCISA.Models
             try
             {
                 Auto toReturn = new Auto(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_AUTO_CASCO));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -423,7 +423,7 @@ namespace SOCISA.Models
             try
             {
                 Auto toReturn = new Auto(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_AUTO_RCA));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -437,7 +437,7 @@ namespace SOCISA.Models
             try
             {
                 Asigurat toReturn = new Asigurat(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_ASIGURAT_CASCO));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -451,7 +451,7 @@ namespace SOCISA.Models
             try
             {
                 Asigurat toReturn = new Asigurat(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_ASIGURAT_RCA));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -465,7 +465,7 @@ namespace SOCISA.Models
             try
             {
                 SocietateAsigurare toReturn = new SocietateAsigurare(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_SOCIETATE_CASCO));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -479,7 +479,7 @@ namespace SOCISA.Models
             try
             {
                 SocietateAsigurare toReturn = new SocietateAsigurare(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_SOCIETATE_RCA));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -493,7 +493,7 @@ namespace SOCISA.Models
             try
             {
                 Intervenient toReturn = new Intervenient(authenticatedUserId, connectionString, Convert.ToInt32(this.ID_INTERVENIENT));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -507,7 +507,7 @@ namespace SOCISA.Models
             try
             {
                 Nomenclator toReturn = new Nomenclator(authenticatedUserId, connectionString, "tip_dosare", (Convert.ToInt32(this.ID_TIP_DOSAR)));
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -534,7 +534,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = (Utilizator)aList[i];
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -557,7 +557,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = (DocumentScanat)aList[i];
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -890,7 +890,7 @@ namespace SOCISA.Models
             }
             else
             {
-                Dictionary<string, string> changes = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(fieldValueCollection);
+                Dictionary<string, string> changes = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(fieldValueCollection, CommonFunctions.JsonDeserializerSettings);
                 foreach (string fieldName in changes.Keys)
                 {
                     PropertyInfo[] props = this.GetType().GetProperties();
@@ -900,7 +900,7 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper() && fieldName.ToUpper() != "ID")
                         {
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType);
+                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType, CommonFunctions.JsonDeserializerSettings);
                             //var tmpVal = CommonFunctions.ConvertValue(changes[fieldName], prop.PropertyType);
                             prop.SetValue(this, tmpVal);
                             break;
@@ -1037,7 +1037,7 @@ namespace SOCISA.Models
                 new MySqlParameter("_STATUS", r.Status), 
                 new MySqlParameter("_MESSAGE", r.Message), 
                 new MySqlParameter("_INSERTED_ID", r.InsertedId), 
-                new MySqlParameter("_ERRORS", Newtonsoft.Json.JsonConvert.SerializeObject(r.Error)), 
+                new MySqlParameter("_ERRORS", Newtonsoft.Json.JsonConvert.SerializeObject(r.Error, CommonFunctions.JsonSerializerSettings)), 
                 new MySqlParameter("_DATA_IMPORT", _data_import) });
             da.ExecuteInsertQuery();
         }
@@ -1259,7 +1259,7 @@ namespace SOCISA.Models
             {
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetDataUltimeiModificari", new object[] { new MySqlParameter("_ID_DOSAR", ID) });
                 toReturn = Convert.ToDateTime(da.ExecuteScalarQuery().Result);
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -1283,7 +1283,7 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = (Utilizator)aList[i];
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn), toReturn, null, null);
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }

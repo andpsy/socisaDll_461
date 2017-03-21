@@ -124,6 +124,15 @@ namespace SOCISA.Models
             try { this.CALE_FISIER = documentScanat["CALE_FISIER"].ToString(); }
             catch { }
         }
+        public response GetTipDocument()
+        {
+            try
+            {
+                Nomenclator toReturn = new Nomenclator(authenticatedUserId, connectionString, "tip_document", (Convert.ToInt32(this.ID_TIP_DOCUMENT)));
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
 
         /// <summary>
         /// Metoda pentru inserarea Documentului scanat curent
@@ -268,7 +277,7 @@ namespace SOCISA.Models
             }
             else
             {
-                Dictionary<string, string> changes = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(fieldValueCollection);
+                Dictionary<string, string> changes = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(fieldValueCollection, CommonFunctions.JsonDeserializerSettings);
                 foreach (string fieldName in changes.Keys)
                 {
                     PropertyInfo[] props = this.GetType().GetProperties();
@@ -278,7 +287,7 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper())
                         {
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType);
+                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType, CommonFunctions.JsonDeserializerSettings);
                             prop.SetValue(this, tmpVal);
                             break;
                         }

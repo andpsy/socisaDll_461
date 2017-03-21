@@ -8,9 +8,98 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace SOCISA
 {
+    public class DecimalSerializerConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return (objectType == typeof(decimal) ||
+                    objectType == typeof(decimal?) ||
+                    objectType == typeof(double) ||
+                    objectType == typeof(double?) ||
+                    objectType == typeof(float) ||
+                    objectType == typeof(float?));
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            writer.WriteValue(Convert.ToString(value, CultureInfo.CurrentCulture));
+        }
+    }
+
+    public class DecimalDeserializerConverter : JsonConverter
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return (objectType == typeof(decimal) ||
+                    objectType == typeof(decimal?) ||
+                    objectType == typeof(double) ||
+                    objectType == typeof(double?) ||
+                    objectType == typeof(float) ||
+                    objectType == typeof(float?));
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            string ot = objectType.ToString().ToLower();
+            JToken token = JToken.Load(reader);
+            if (token.Type == JTokenType.Float || token.Type == JTokenType.Integer)
+            {
+                return token.ToObject<decimal>();
+            }
+            if (token.Type == JTokenType.String)
+            {
+                try
+                {
+                    if ((ot.IndexOf("double") > -1 || ot.IndexOf("float") > -1 ) && ot.IndexOf("nullable") < 0)
+                    {
+                        Double d;
+                        d = Double.Parse(token.ToString(), CultureInfo.CurrentCulture);
+                        return d;
+                    }
+                    if ((ot.IndexOf("double") > -1 || ot.IndexOf("float") > -1)  && ot.IndexOf("nullable") > -1)
+                    {
+                        Double? d;
+                        d = Double.Parse(token.ToString(), CultureInfo.CurrentCulture);
+                        return d;
+                    }
+                    if (ot.IndexOf("decimal") > -1 && ot.IndexOf("nullable") < 0)
+                    {
+                        Decimal d;
+                        d = Decimal.Parse(token.ToString(), CultureInfo.CurrentCulture);
+                        return d;
+                    }
+                    if (ot.IndexOf("decimal") > -1 && ot.IndexOf("nullable") > -1)
+                    {
+                        Decimal? d;
+                        d = Decimal.Parse(token.ToString(), CultureInfo.CurrentCulture);
+                        return d;
+                    }
+                }
+                catch { return null; }
+            }
+            if (token.Type == JTokenType.Null && objectType == typeof(decimal?))
+            {
+                return null;
+            }
+            throw new JsonSerializationException("Unexpected token type: " + token.Type.ToString());
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            writer.WriteValue(value);
+        }
+    }
+
     public struct ThumbNailSize
     {
         public int Width, Height;
@@ -27,6 +116,40 @@ namespace SOCISA
     /// </summary>
     public static class CommonFunctions
     {
+        public static JsonSerializerSettings JsonSerializerSettings
+        {
+            get
+            {
+                JsonSerializerSettings settings = new JsonSerializerSettings
+                {
+                    Culture = CultureInfo.CurrentCulture,
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore,
+                    Formatting = Formatting.None,
+                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                    Converters = new List<JsonConverter> { new DecimalSerializerConverter() }
+                };
+                return settings;
+            }
+        }
+
+        public static JsonSerializerSettings JsonDeserializerSettings
+        {
+            get
+            {
+                JsonSerializerSettings settings = new JsonSerializerSettings
+                {
+                    Culture = CultureInfo.CurrentCulture,
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore,
+                    Formatting = Formatting.None,
+                    DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                    Converters = new List<JsonConverter> { new DecimalDeserializerConverter() }
+                };
+                return settings;
+            }
+        }
+
         public static T ConvertValue<T, U>(U value) where U : IConvertible
         {
             return (T)Convert.ChangeType(value, typeof(T));
