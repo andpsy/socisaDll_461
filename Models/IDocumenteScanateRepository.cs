@@ -337,7 +337,7 @@ namespace SOCISA.Models
             byte[] f = null;
             if (file is byte[]) f = (byte[])file;
             if (file is string) f = FileManager.UploadFile(Convert.ToString(file));
-            if (file is Microsoft.AspNetCore.Http.IFormFile) f = FileManager.UploadFile((Microsoft.AspNetCore.Http.IFormFile)file);
+            //if (file is Microsoft.AspNetCore.Http.IFormFile) f = FileManager.UploadFile((Microsoft.AspNetCore.Http.IFormFile)file);
             return f;
         }
     }

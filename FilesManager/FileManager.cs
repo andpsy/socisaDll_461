@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Data;
 using MySql.Data.MySqlClient;
-using Microsoft.AspNetCore.Http;
+//using Microsoft.AspNetCore.Http;
 
 namespace SOCISA
 {
@@ -25,12 +25,14 @@ namespace SOCISA
         }
         */
 
+        /*
         public static byte[] UploadFile(IFormFile file)
         {
             BinaryReader reader = new BinaryReader(file.OpenReadStream());
             byte[]  toReturn = reader.ReadBytes((int)file.Length);
             return toReturn;
         }
+        */
 
         public static byte[] UploadFile(string filePath)
         {
