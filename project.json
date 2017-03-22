@@ -3,7 +3,7 @@
   "copyright": "AndPsy",
   "description": "socisa Db Layer",
   "language": "en",
-  "version": "1.1.0-beta20",
+  "version": "1.1.0-beta21",
   "authors": [
     "Andpsy"
   ],
@@ -13,11 +13,16 @@
     "Microsoft.AspNetCore.Http": "1.1.0",
     "MySql.Data": "7.0.6-IR31",
     "NETStandard.Library": "1.6.1",
-    "Newtonsoft.Json": "10.0.1-beta1",
+    "Newtonsoft.Json": "10.0.1",
     "OfficeOpenXml.Core.ExcelPackage": "1.0.0",
     "runtime.linux-x64.CoreCompat.System.Drawing": "1.0.0-beta009",
-    "Xfinium.Pdf.NetCore": "6.6.0.2",
-    "Xfinium.Pdf.Render.NetCore": "6.6.0.2"
+    "System.ServiceModel.Duplex": "4.3.0",
+    "System.ServiceModel.Http": "4.3.0",
+    "System.ServiceModel.NetTcp": "4.3.0",
+    "System.ServiceModel.Security": "4.3.0",
+    "System.Xml.XmlSerializer": "4.3.0",
+    "Xfinium.Pdf.NetCore": "6.7.0",
+    "Xfinium.Pdf.Render.NetCore": "6.7.0"
   },
   "frameworks": {
     "netstandard1.6": {

@@ -42,6 +42,7 @@ namespace SOCISA
         {
             return (objectType == typeof(decimal) ||
                     objectType == typeof(decimal?) ||
+                    //objectType == typeof(string) ||
                     objectType == typeof(double) ||
                     objectType == typeof(double?) ||
                     objectType == typeof(float) ||
@@ -372,7 +373,8 @@ namespace SOCISA
 
         public static string DoubleValue(string _value)
         {
-            return _value.Replace(",", "");
+            //return _value.Replace(",", "");
+            return Convert.ToString(_value, CultureInfo.CurrentCulture);
         }
 
         public static double BackDoubleValue(string _value)
@@ -387,7 +389,8 @@ namespace SOCISA
             {
                 try
                 {
-                    toReturn = Convert.ToDouble(_value.Replace(",", ""));
+                    //toReturn = Convert.ToDouble(_value.Replace(",", ""));
+                    toReturn = Convert.ToDouble(_value, CultureInfo.CurrentCulture);
                     return toReturn;
                 }
                 catch { return Double.NaN; }

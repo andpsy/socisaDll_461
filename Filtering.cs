@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 
 namespace SOCISA
 {
@@ -102,7 +103,7 @@ namespace SOCISA
                                     break;
                             }
                             */
-                            
+                            string op = "";
                             switch (piX.PropertyType.ToString())
                             {
                                 case "System.DateTime":
@@ -119,8 +120,18 @@ namespace SOCISA
                                         toReturn += String.Format("{0} {1}.`{2}` = '{3}'", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, CommonFunctions.ToMySqlFormatDate(d));
                                     }
                                     break;
+                                case "System.Double":
+                                case "System.Nullable`1[System.Double]":
+                                case "System.Decimal":
+                                case "System.Nullable`1[System.Decimal]":
+                                    op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", CommonFunctions.BackDoubleValue(j.ToString().Substring(1, j.ToString().Length - 2)).ToString(CultureInfo.InvariantCulture) ) : 
+                                        j.ToString().StartsWith("*") ? String.Format("like '%{0}'", CommonFunctions.BackDoubleValue( j.ToString().Substring(1, j.ToString().Length - 1)).ToString(CultureInfo.InvariantCulture) ) : 
+                                        j.ToString().EndsWith("*") ? String.Format("like '{0}%'", CommonFunctions.BackDoubleValue( j.ToString().Substring(0, j.ToString().Length - 1)).ToString(CultureInfo.InvariantCulture) ) : 
+                                        String.Format("= '{0}'", CommonFunctions.BackDoubleValue( j.ToString()).ToString(CultureInfo.InvariantCulture) );
+                                    toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
+                                    break;
                                 default:
-                                    string op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString().Substring(1, j.ToString().Length - 2)) : j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString().Substring(1, j.ToString().Length - 1)) : j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString().Substring(0, j.ToString().Length - 1)) : String.Format("= '{0}'", j.ToString());
+                                    op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString().Substring(1, j.ToString().Length - 2)) : j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString().Substring(1, j.ToString().Length - 1)) : j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString().Substring(0, j.ToString().Length - 1)) : String.Format("= '{0}'", j.ToString());
                                     toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
                                     break;
                             }
