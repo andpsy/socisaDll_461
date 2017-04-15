@@ -75,7 +75,7 @@ namespace SOCISA.Models
         {
             try
             {
-                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_count");
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ASIGURATIsp_count");
                 object count = da.ExecuteScalarQuery().Result;
                 if (count == null)
                     return new response(true, "0", 0, null, null);

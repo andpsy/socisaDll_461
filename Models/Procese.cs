@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
@@ -18,35 +19,62 @@ namespace SOCISA.Models
         private string connectionString { get; set; }
 
         public int? ID { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_INTERN { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_DOSAR_INSTANTA { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? DATA_DEPUNERE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string OBSERVATII { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? SUMA_SOLICITATA { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? PENALITATI { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? TAXA_TIMBRU { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? TIMBRU_JUDICIAR { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? ONORARIU_EXPERT { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? ONORARIU_AVOCAT { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_INSTANTA { get; set; }
         /* public NomenclatorJson Instanta { get; set; } */
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_COMPLET { get; set; }
         /* public NomenclatorJson Complet { get; set; } */
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_CONTRACT { get; set; }
         /* public ContracteJson Contract { get; set; } */
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string STADIU { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ZILE_PENALIZARI { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? CHELTUIELI_MICA_PUBLICITATE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? ONORARIU_CURATOR { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? ALTE_CHELTUIELI_JUDECATA { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? TAXA_TIMBRU_REEXAMINARE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_DOSAR_EXECUTARE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? DATA_EXECUTARE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? ONORARIU_AVOCAT_EXECUTARE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? CHELTUIELI_EXECUTARE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? DESPAGUBIRE_ACORDATA { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? CHELTUIELI_JUDECATA_ACORDATE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public bool MONITORIZARE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_TIP_PROCES { get; set; }
         /*
         public NomenclatorJson TipProces { get; set; }
@@ -99,7 +127,7 @@ namespace SOCISA.Models
             catch { }
             try { this.NR_DOSAR_INSTANTA = dosarInstanta["NR_DOSAR_INSTANTA"].ToString(); }
             catch { }
-            try { this.DATA_DEPUNERE = Convert.ToDateTime(dosarInstanta["DATA_DEPUNERE"]); }
+            try { this.DATA_DEPUNERE = CommonFunctions.IsNullable(dosarInstanta["DATA_DEPUNERE"]) ? null : (DateTime?)Convert.ToDateTime(dosarInstanta["DATA_DEPUNERE"]); }
             catch { }
             try { this.OBSERVATII = dosarInstanta["OBSERVATII"].ToString(); }
             catch { }
@@ -135,7 +163,7 @@ namespace SOCISA.Models
             catch { }
             try { this.NR_DOSAR_EXECUTARE = dosarInstanta["NR_DOSAR_EXECUTARE"].ToString(); }
             catch { }
-            try { this.DATA_EXECUTARE = Convert.ToDateTime(dosarInstanta["DATA_EXECUTARE"]); }
+            try { this.DATA_EXECUTARE = CommonFunctions.IsNullable(dosarInstanta["DATA_EXECUTARE"]) ? null : (DateTime?)Convert.ToDateTime(dosarInstanta["DATA_EXECUTARE"]); }
             catch { }
             try { this.ONORARIU_AVOCAT_EXECUTARE = Convert.ToDouble(dosarInstanta["ONORARIU_AVOCAT_EXECUTARE"]); }
             catch { }
@@ -412,7 +440,7 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper())
                         {
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
+                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 && changes[fieldName] == null ? null : prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? CommonFunctions.SwitchBackFormatedDate(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
                             prop.SetValue(this, tmpVal);
                             break;
                         }

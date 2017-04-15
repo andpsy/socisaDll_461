@@ -6,77 +6,98 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace SOCISA.Models
 {
-    public class Sentinta
+    public class TipDocument
     {
-        const string _TABLE_NAME = "sentinte";
-        private int authenticatedUserId { get; set; }
-        private string connectionString { get; set; }
+        const string _TABLE_NAME = "tip_document";
+        int authenticatedUserId { get; set; }
+        string connectionString { get; set; }
 
+        [Key]
         public int? ID { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public string NR_SENTINTA { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public DateTime? DATA_SENTINTA { get; set; }
-        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public DateTime? DATA_COMUNICARE { get; set; }
-        //public int? ID_SOLUTIE {get;set;}
-        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-        public string SOLUTIE { get; set; }
-        /* public SolutiiJson Solutie { get; set; } */
 
-        public Sentinta() { }
+        [Required]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public string DENUMIRE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public string DETALII { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public string QINFO { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public bool MANDATORY { get; set; }
 
-        public Sentinta(int _authenticatedUserId, string _connectionString)
+        public TipDocument() { }
+
+        public TipDocument(int _authenticatedUserId, string _connectionString)
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
         }
 
-        public Sentinta(int _authenticatedUserId, string _connectionString, int _ID)
+        public TipDocument(int _authenticatedUserId, string _connectionString, int _ID)
         {
-            authenticatedUserId = _authenticatedUserId;
-            connectionString = _connectionString;
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SENTINTEsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
-            MySqlDataReader r = da.ExecuteSelectQuery();
-            while (r.Read())
+            try
             {
-                IDataRecord item = (IDataRecord)r;
-                SentintaConstructor(item);
-                break;
+                authenticatedUserId = _authenticatedUserId;
+                connectionString = _connectionString;
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    IDataRecord item = (IDataRecord)r;
+                    TipDocumentConstructor(item);
+                    break;
+                }
+                r.Close(); r.Dispose();
             }
-            r.Close(); r.Dispose();
+            catch (Exception exp) { throw exp; }
         }
 
-        public Sentinta(int _authenticatedUserId, string _connectionString, IDataRecord item)
+        public TipDocument(int _authenticatedUserId, string _connectionString, string _DENUMIRE)
         {
-            authenticatedUserId = _authenticatedUserId;
-            connectionString = _connectionString;
-            SentintaConstructor(item);
+            try
+            {
+                authenticatedUserId = _authenticatedUserId;
+                connectionString = _connectionString;
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_GetByName", new object[] { new MySqlParameter("_DENUMIRE", _DENUMIRE) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    IDataRecord item = (IDataRecord)r;
+                    TipDocumentConstructor(item);
+                    break;
+                }
+                r.Close(); r.Dispose();
+            }
+            catch (Exception exp) { throw exp; }
         }
 
-        public void SentintaConstructor(IDataRecord sentinta)
+        public TipDocument(int _authenticatedUserId, string _connectionString, IDataRecord item)
         {
-            try { this.ID = Convert.ToInt32(sentinta["ID"]); }
+            try
+            {
+                authenticatedUserId = _authenticatedUserId;
+                connectionString = _connectionString;
+                TipDocumentConstructor(item);
+            }
+            catch (Exception exp) { throw exp; }
+        }
+
+        public void TipDocumentConstructor(IDataRecord item)
+        {
+            try { this.ID = Convert.ToInt32(item["ID"]); }
             catch { }
-            try { this.NR_SENTINTA = sentinta["NR_SENTINTA"].ToString(); }
+            try { this.DENUMIRE = item["DENUMIRE"].ToString(); }
             catch { }
-            try { this.DATA_SENTINTA = CommonFunctions.IsNullable(sentinta["DATA_SENTINTA"]) ? null : (DateTime?)Convert.ToDateTime(sentinta["DATA_SENTINTA"]); }
+            try { this.DETALII = item["DETALII"].ToString(); }
             catch { }
-            try { this.DATA_COMUNICARE = CommonFunctions.IsNullable(sentinta["DATA_COMUNICARE"]) ? null : (DateTime?)Convert.ToDateTime(sentinta["DATA_COMUNICARE"]); }
+            try { this.QINFO = item["QINFO"].ToString(); }
             catch { }
-            try { this.SOLUTIE = sentinta["SOLUTIE"].ToString(); }
+            try { this.MANDATORY = Convert.ToBoolean( item["MANDATORY"]); }
             catch { }
-            /*
-            try { this.ID_SOLUTIE = Convert.ToInt32(stadiu["ID_SOLUTIE"]); }
-            catch { }
-            */
-            /*
-            try { this.Solutie = GetSolutie(); }
-            catch { }
-            */
         }
 
         public response Insert()
@@ -89,7 +110,7 @@ namespace SOCISA.Models
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
 
-            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "sentinte");
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "tip_document");
             foreach (PropertyInfo prop in props)
             {
                 if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
@@ -105,35 +126,9 @@ namespace SOCISA.Models
                     }
                 }
             }
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SENTINTEsp_insert", _parameters.ToArray());
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_insert", _parameters.ToArray());
             toReturn = da.ExecuteInsertQuery();
             if (toReturn.Status) this.ID = toReturn.InsertedId;
-
-            return toReturn;
-        }
-
-        public response Insert(int _ID_DOSAR_STADIU)
-        {
-            response toReturn = Insert();
-            if (toReturn.Status)
-            {
-                this.ID = toReturn.InsertedId;
-                DosarStadiuSentinta dssj = new DosarStadiuSentinta();
-                dssj.ID_DOSAR_STADIU = _ID_DOSAR_STADIU;
-                dssj.ID_SENTINTA = Convert.ToInt32(this.ID);
-                dssj.Insert();
-            }
-            /*
-            if (this.Solutie != null)
-            {
-                response toReturnS = Solutie.Insert();
-                if (toReturnS.Status && toReturnS.InsertedId != null)
-                {
-                    this.ID_SOLUTIE = toReturnS.InsertedId;
-                    //this.UpdateSentinta();
-                }
-            }
-            */
 
             return toReturn;
         }
@@ -147,7 +142,7 @@ namespace SOCISA.Models
             }
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
-            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "sentinte");
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "tip_document");
             foreach (PropertyInfo prop in props)
             {
                 if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
@@ -162,7 +157,7 @@ namespace SOCISA.Models
                     }
                 }
             }
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SENTINTEsp_update", _parameters.ToArray());
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_update", _parameters.ToArray());
             toReturn = da.ExecuteUpdateQuery();
 
             return toReturn;
@@ -203,58 +198,28 @@ namespace SOCISA.Models
             response toReturn = new response(false, "", null, null, new List<Error>()); ;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SENTINTEsp_soft_delete", _parameters.ToArray());
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_soft_delete", _parameters.ToArray());
             toReturn = da.ExecuteDeleteQuery();
-            return toReturn;
-        }
-
-        public response Delete(int _ID_DOSAR_STADIU)
-        {
-            response toReturn = new response(true, "", null, null, new List<Error>()); ;
-
-            DosarStadiuSentinta dssj = new DosarStadiuSentinta();
-            dssj.ID_DOSAR_STADIU = _ID_DOSAR_STADIU;
-            dssj.ID_SENTINTA = Convert.ToInt32(this.ID);
-            toReturn = dssj.Delete();
-
-            if (toReturn.Status)
-            {
-                toReturn = Delete();
-                /* this.Solutie.Delete(); */
-            }
             return toReturn;
         }
 
         public response Validare()
         {
-            response toReturn = new response(true, "", null, null, new List<Error>()); ;
-            Error err = new Error();
-            if (this.NR_SENTINTA == null || this.NR_SENTINTA.Trim() == "")
+            bool succes;
+            response toReturn = Validator.Validate(authenticatedUserId, connectionString, this, _TABLE_NAME, out succes);
+            if (!succes) // daca nu s-au putut citi validarile din fisier, sau nu sunt definite in fisier, mergem pe varianta hardcodata
             {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyNrSentinta");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
+                toReturn = new response(true, "", null, null, new List<Error>()); ;
+                Error err = new Error();
+                if (this.DENUMIRE == null || this.DENUMIRE.Trim() == "")
+                {
+                    toReturn.Status = false;
+                    err = ErrorParser.ErrorMessage("emptyDenumireTipDocument");
+                    toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
+                    toReturn.InsertedId = null;
+                    toReturn.Error.Add(err);
+                }
             }
-            if (this.DATA_SENTINTA == null || this.DATA_SENTINTA == new DateTime())
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptyDataSentinta");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            /*
-            if (this.ID_SOLUTIE == null || this.ID_SOLUTIE <= 0)
-            {
-                toReturn.Status = false;
-                err = ErrorParser.ErrorMessage("emptySolutieSentinta");
-                toReturn.Message = string.Format("{0}{1};", toReturn.Message == null ? "" : toReturn.Message, err.ERROR_MESSAGE);
-                toReturn.InsertedId = null;
-                toReturn.Error.Add(err);
-            }
-            */
             return toReturn;
         }
 
@@ -270,12 +235,12 @@ namespace SOCISA.Models
 
         public response HasChildrens(string tableName)
         {
-            return CommonFunctions.HasChildrens(authenticatedUserId, connectionString, this, "sentinte", tableName);
+            return CommonFunctions.HasChildrens(authenticatedUserId, connectionString, this, "tip_document", tableName);
         }
 
         public response HasChildren(string tableName, int childrenId)
         {
-            return CommonFunctions.HasChildren(authenticatedUserId, connectionString, this, "sentinte", tableName, childrenId);
+            return CommonFunctions.HasChildren(authenticatedUserId, connectionString, this, "tip_document", tableName, childrenId);
         }
 
         public response GetChildrens(string tableName)

@@ -367,17 +367,32 @@ namespace SOCISA
         public object[] GenerateMySqlParameters(MySqlDataReader _dt, object[] _object)
         {
             ArrayList _alist = new ArrayList();
+            #if NET461
+            for (int i = 0; i < _dt.FieldCount; i++)
+            {
+                string dcName = _dt.GetName(i).ToString();
+                if (dcName.ToLower() != "id" && dcName.ToLower() != "extension")
+                {
+                    _alist.Add(new MySqlParameter("_" + dcName, _object[i].ToString()));
+                }
+                /*
+                Console.Write(SqlReader.GetName(col).ToString()); // Gets the column name
+                Console.Write(SqlReader.GetFieldType(col).ToString()); // Gets the column type
+                Console.Write(SqlReader.GetDataTypeName(col).ToString()); // Gets the column database type
+                */
+            }
+            #else
             System.Collections.ObjectModel.ReadOnlyCollection<DbColumn> _columns = _dt.GetColumnSchema();
 
             for (int i = 0; i < _columns.Count; i++)
             {
                 string dcName = _columns[i].ColumnName;
-
                 if (dcName.ToLower() != "id" && dcName.ToLower() != "extension")
                 {
                     _alist.Add(new MySqlParameter("_" + dcName, _object[i].ToString()));
                 }
             }
+            #endif
             return _alist.ToArray();
         }
 
@@ -454,8 +469,18 @@ namespace SOCISA
             mc.Open();
 
             MySqlDataReader mdr = m.ExecuteReader();
+            #if NET461
+            while (mdr.Read())
+            {
+                for (int i = 0; i < mdr.FieldCount; i++)
+                {
+                    string dcName = mdr.GetName(i).ToString();
+                    toReturn += (dcName.ToUpper() + " = " + mdr[dcName].ToString());
+                }
+                break;
+            }
+            #else
             System.Collections.ObjectModel.ReadOnlyCollection<DbColumn> _columns = mdr.GetColumnSchema();
-
             while (mdr.Read())
             {
                 for (int i = 0; i < _columns.Count; i++)
@@ -465,6 +490,7 @@ namespace SOCISA
                 }
                 break;
             }
+            #endif
             mc.Close();
 
             return toReturn;

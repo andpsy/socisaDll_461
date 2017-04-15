@@ -34,10 +34,14 @@ namespace SOCISA
 
     public class Filter
     {
+        string _limit;
         public string Sort { get; set; }
         public string Order { get; set; }
         public string Filtru { get; set; }
-        public string Limit { get; set; }
+        public string Limit {
+            get { return _limit; }
+            set { string toReturn = value.ToLower().IndexOf("limit") > -1 ? " " + value.ToUpper() + " " : " LIMIT " + value + " "; _limit = toReturn;  }
+        }
 
         public Filter() { }
         public Filter(string _sort, string _order, string _filtru, string _limit)
@@ -51,6 +55,29 @@ namespace SOCISA
         public static string GenerateFilterFromJsonObject(Type T, string _filter, int authenticatedUserId, string connectionString)
         {
             string toReturn = "";
+            try
+            {
+                JObject jObj = JObject.Parse(_filter);
+                if(jObj.Count == 2)
+                {
+                    /*
+                    JToken j1 = jObj[0];
+                    JToken j2 = jObj[1];
+                    if(JsonConvert.DeserializeObject(JsonConvert.SerializeObject( j1), T).GetType().Name.IndexOf("Dosar") > -1 && j2.HasValues)
+                    */
+                    JToken j1 = jObj["jDosar"];
+                    JToken j2 = jObj["jdosarJson"];
+                    if (jObj["jDosar"] != null && jObj["jdosarJson"] != null)
+                    {
+                        string f1 = GenerateFilterFromJsonObject(T, JsonConvert.SerializeObject(j1), authenticatedUserId, connectionString);
+                        string f2 = GenerateFilterFromJsonObject(T, JsonConvert.SerializeObject(j2), authenticatedUserId, connectionString);
+                        toReturn = !String.IsNullOrEmpty(f1) && !String.IsNullOrEmpty(f2) ? String.Format("{0} AND {1}", f1, f2) : String.Format("{0}{1}", f1 == null ? "" : f1, f2 == null ? "" : f2);
+                        return toReturn;
+                    }
+                }
+            }
+            catch { }
+
 
             try
             {
@@ -70,112 +97,80 @@ namespace SOCISA
                     foreach (PropertyInfo piX in pisX)
                     {
                         //if (piX.Name == piJObj.Name)
-                        if (piX.Name == key)
+                        if (piX.Name != "ID" && (j != null && !String.IsNullOrEmpty(j.ToString())))
                         {
-                            /* -- folosim la toate selectia cui [*]zzzzz[*]
-                            switch (piX.Name)
+                            if (piX.Name == key)
                             {
-                                case "NR_SCA":
-                                    if (j.ToString().IndexOf('*') == j.ToString().Length - 1)
-                                        toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_SCA", j.ToString().Remove(j.ToString().Length - 1), (toReturn == "" ? "" : " AND "));
-                                    else
-                                        toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_SCA", j.ToString(), (toReturn == "" ? "" : " AND "));
-                                    break;
-                                case "NR_DOSAR_CASCO":
-                                    if (j.ToString().IndexOf('*') == j.ToString().Length - 1)
-                                        toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_DOSAR_CASCO", j.ToString().Remove(j.ToString().Length - 1), (toReturn == "" ? "" : " AND "));
-                                    else
-                                        toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_DOSAR_CASCO", j.ToString(), (toReturn == "" ? "" : " AND "));
-                                    break;
-                                default:
-                                    //piX.SetValue(x, piJObj.GetValue(jObj));
-                                    switch (piX.PropertyType.ToString())
-                                    {
-                                        case "System.DateTime":
-                                            //toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
-                                            toReturn += String.Format("{2}{3}.`{0}` = '{1}'", piX.Name, j.ToString(), (toReturn == "" ? "" : " AND "), tableAllias);
-                                            break;
-                                        default:
-                                            //toReturn += String.Format("{2}{3}.`{0}` like '%{1}%'", piX.Name, piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "), tableAllias);
-                                            toReturn += String.Format("{2}{3}.`{0}` like '{1}%'", piX.Name, j.ToString(), (toReturn == "" ? "" : " AND "), tableAllias);
-                                            break;
-                                    }
-                                    break;
-                            }
-                            */
-                            string op = "";
-                            switch (piX.PropertyType.ToString())
-                            {
-                                case "System.DateTime":
-                                case "System.Nullable`1[System.DateTime]":
-                                    if (j.ToString().IndexOf('?') > -1)
-                                    {
-                                        DateTime dStart = Convert.ToDateTime(j.ToString().Split('?')[0]);
-                                        DateTime dEnd = Convert.ToDateTime(j.ToString().Split('?')[1]);
-                                        toReturn += String.Format("{0}({1}.`{2}` >= '{3}' AND {1}.`{2}` <= '{4}')", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, CommonFunctions.ToMySqlFormatDate(dStart), CommonFunctions.ToMySqlFormatDate(dEnd));
-                                    }
-                                    else
-                                    {
-                                        DateTime d = Convert.ToDateTime(j.ToString());
-                                        toReturn += String.Format("{0} {1}.`{2}` = '{3}'", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, CommonFunctions.ToMySqlFormatDate(d));
-                                    }
-                                    break;
-                                case "System.Double":
-                                case "System.Nullable`1[System.Double]":
-                                case "System.Decimal":
-                                case "System.Nullable`1[System.Decimal]":
-                                    op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", CommonFunctions.BackDoubleValue(j.ToString().Substring(1, j.ToString().Length - 2)).ToString(CultureInfo.InvariantCulture) ) : 
-                                        j.ToString().StartsWith("*") ? String.Format("like '%{0}'", CommonFunctions.BackDoubleValue( j.ToString().Substring(1, j.ToString().Length - 1)).ToString(CultureInfo.InvariantCulture) ) : 
-                                        j.ToString().EndsWith("*") ? String.Format("like '{0}%'", CommonFunctions.BackDoubleValue( j.ToString().Substring(0, j.ToString().Length - 1)).ToString(CultureInfo.InvariantCulture) ) : 
-                                        String.Format("= '{0}'", CommonFunctions.BackDoubleValue( j.ToString()).ToString(CultureInfo.InvariantCulture) );
-                                    toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
-                                    break;
-                                default:
-                                    op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString().Substring(1, j.ToString().Length - 2)) : j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString().Substring(1, j.ToString().Length - 1)) : j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString().Substring(0, j.ToString().Length - 1)) : String.Format("= '{0}'", j.ToString());
-                                    toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
-                                    break;
-                            }
 
-                            propertyInMasterObject = true;
-                            break;
+                                string op = "";
+                                switch (piX.PropertyType.ToString())
+                                {
+                                    case "System.Boolean":
+                                    case "System.Nullable`1[System.Boolean]":
+                                        op = String.IsNullOrEmpty(j.ToString()) ? "is null" : String.Format("= {0}", j.ToString().ToLower());
+                                        toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
+                                        break;
+                                    case "System.DateTime":
+                                    case "System.Nullable`1[System.DateTime]":
+                                        if (j.ToString().IndexOf('?') > -1)
+                                        {
+                                            DateTime dStart = Convert.ToDateTime(j.ToString().Split('?')[0]);
+                                            DateTime dEnd = Convert.ToDateTime(j.ToString().Split('?')[1]);
+                                            toReturn += String.Format("{0}(DATE({1}.`{2}`) >= '{3}' AND DATE({1}.`{2}`) <= '{4}')", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, CommonFunctions.ToMySqlFormatDate(dStart), CommonFunctions.ToMySqlFormatDate(dEnd));
+                                        }
+                                        else
+                                        {
+                                            DateTime d = Convert.ToDateTime(j.ToString());
+                                            toReturn += String.Format("{0} {1}.`{2}` = '{3}'", (toReturn == "" ? " " : " AND "), tableAllias, piX.Name, CommonFunctions.ToMySqlFormatDate(d));
+                                        }
+                                        break;
+                                    case "System.Double":
+                                    case "System.Nullable`1[System.Double]":
+                                    case "System.Decimal":
+                                    case "System.Nullable`1[System.Decimal]":
+                                        op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString()==null?null:Convert.ToDouble( CommonFunctions.BackDoubleValue(j.ToString().Substring(1, j.ToString().Length - 2))).ToString(CultureInfo.InvariantCulture)) :
+                                            j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString()==null ? null : Convert.ToDouble( CommonFunctions.BackDoubleValue(j.ToString().Substring(1, j.ToString().Length - 1))).ToString(CultureInfo.InvariantCulture)) :
+                                            j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString()==null?null: Convert.ToDouble( CommonFunctions.BackDoubleValue(j.ToString().Substring(0, j.ToString().Length - 1))).ToString(CultureInfo.InvariantCulture)) :
+                                            String.Format("= '{0}'", j.ToString()==null? null:Convert.ToDouble( CommonFunctions.BackDoubleValue(j.ToString())).ToString(CultureInfo.InvariantCulture));
+                                        toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
+                                        break;
+                                    default:
+                                        op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString().Substring(1, j.ToString().Length - 2)) : j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString().Substring(1, j.ToString().Length - 1)) : j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString().Substring(0, j.ToString().Length - 1)) : String.Format("= '{0}'", j.ToString());
+                                        toReturn += String.Format("{0}{1}.`{2}` {3}", (toReturn == "" ? "" : " AND "), tableAllias, piX.Name, op);
+                                        break;
+                                }
+
+                                propertyInMasterObject = true;
+                                break;
+                            }
                         }
                     }
-                    if (!propertyInMasterObject) // pt. campuri externe trimise pt. filtrare - ex. Nume societate sau asigurat din Dosar
+                    if (!propertyInMasterObject && (j != null && !String.IsNullOrEmpty(j.ToString()))) // pt. campuri externe trimise pt. filtrare - ex. Nume societate sau asigurat din Dosar
                     {
                         string op = j.ToString().StartsWith("*") && j.ToString().EndsWith("*") ? String.Format("like '%{0}%'", j.ToString().Substring(1, j.ToString().Length - 2)) : j.ToString().StartsWith("*") ? String.Format("like '%{0}'", j.ToString().Substring(1, j.ToString().Length - 1)) : j.ToString().EndsWith("*") ? String.Format("like '{0}%'", j.ToString().Substring(0, j.ToString().Length - 2)) : String.Format("= '{0}'", j.ToString());
                         //switch (piJObj.Name.ToLower().Replace("_", "").Replace(" ", ""))
                         switch (key.ToLower().Replace("_", "").Replace(" ", ""))
                         {
-                            /* -- nu e cazul, ca nu sunt externe
-                            case "nrsca":
-                                if(j.ToString().IndexOf('*') == j.ToString().Length-1)
-                                    toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_SCA", j.ToString().Remove(j.ToString().Length-1), (toReturn == "" ? "" : " AND "));
-                                else
-                                    toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_SCA", j.ToString(), (toReturn == "" ? "" : " AND "));
-                                break;
-                            case "nrdosarcasco":
-                                if (j.ToString().IndexOf('*') == j.ToString().Length - 1)
-                                    toReturn += String.Format("{2}DOSARE.`{0}` LIKE '{1}%'", "NR_DOSAR_CASCO", j.ToString().Remove(j.ToString().Length - 1), (toReturn == "" ? "" : " AND "));
-                                else
-                                    toReturn += String.Format("{2}DOSARE.`{0}` = '{1}'", "NR_DOSAR_CASCO", j.ToString(), (toReturn == "" ? "" : " AND "));
-                                break;
-                            */
                             case "asiguratcasco":
+                            case "numeasiguratcasco":
                                 //toReturn += String.Format("{2}ASIGC.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
                                 //toReturn += String.Format("{2}ASIGC.`{0}` LIKE '{1}%'", "DENUMIRE", j.ToString(), (toReturn == "" ? "" : " AND "));
                                 toReturn += String.Format("{2}ASIGC.`{0}` {1}", "DENUMIRE", op, (toReturn == "" ? "" : " AND "));
                                 break;
                             case "asiguratrca":
+                            case "numeasiguratrca":
                                 //toReturn += String.Format("{2}ASIGR.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
                                 //toReturn += String.Format("{2}ASIGR.`{0}` LIKE '{1}%'", "DENUMIRE", j.ToString(), (toReturn == "" ? "" : " AND "));
                                 toReturn += String.Format("{2}ASIGR.`{0}` {1}", "DENUMIRE", op, (toReturn == "" ? "" : " AND "));
                                 break;
                             case "autocasco":
+                            case "numarautocasco":
                                 //toReturn += String.Format("{2}AC.`{0}` LIKE '%{1}%'", "NR_AUTO", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
                                 //toReturn += String.Format("{2}AC.`{0}` LIKE '{1}%'", "NR_AUTO", j.ToString(), (toReturn == "" ? "" : " AND "));
                                 toReturn += String.Format("{2}AC.`{0}` {1}", "NR_AUTO", op, (toReturn == "" ? "" : " AND "));
                                 break;
                             case "autorca":
+                            case "numarautorca":
                                 //toReturn += String.Format("{2}AR.`{0}` LIKE '%{1}%'", "NR_AUTO", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
                                 //toReturn += String.Format("{2}AR.`{0}` LIKE '{1}%'", "NR_AUTO", j.ToString(), (toReturn == "" ? "" : " AND "));
                                 toReturn += String.Format("{2}AR.`{0}` {1}", "NR_AUTO", op, (toReturn == "" ? "" : " AND "));
@@ -193,6 +188,7 @@ namespace SOCISA
                                 toReturn += String.Format("{2}SR.`{0}` {1}", "DENUMIRE_SCURTA", op, (toReturn == "" ? "" : " AND "));
                                 break;
                             case "intervenient":
+                            case "numeintervenient":
                                 //toReturn += String.Format("{2}I.`{0}` LIKE '%{1}%'", "DENUMIRE", piJObj.GetValue(jObj, null), (toReturn == "" ? "" : " AND "));
                                 //toReturn += String.Format("{2}I.`{0}` LIKE '{1}%'", "DENUMIRE", j.ToString(), (toReturn == "" ? "" : " AND "));
                                 toReturn += String.Format("{2}I.`{0}` {1}", "DENUMIRE", op, (toReturn == "" ? "" : " AND "));

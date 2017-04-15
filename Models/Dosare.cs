@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace SOCISA.Models
 {
@@ -17,50 +19,174 @@ namespace SOCISA.Models
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 
+        [Key]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID { get; set; }
+
+        [Display(Name = "Numar SCA")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_SCA { get; set; }
+
+        [Display(Name = "Data SCA")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? DATA_SCA { get; set; }
+
+        [Required(ErrorMessage = "Campul \"Asigurat pagubit (CASCO)\" este obligatoriu!")]
+        [Key]
+        [Display(Name = "Asigurat pagubit (CASCO)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_ASIGURAT_CASCO { get; set; }
+
         //public string ASIGURAT_CASCO { get; set; }
         /* public AsiguratiJson AsiguratCasco { get; set; } */
+
+        [Required(ErrorMessage = "Campul \"Numar polita CASCO\" este obligatoriu!")]
+        [Display(Name = "Numar polita CASCO")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_POLITA_CASCO { get; set; }
+
+        [Required(ErrorMessage = "Campul \"Numar Auto CASCO\" este obligatoriu!")]
+        [Key]
+        [Display(Name = "Numar Auto pagubit (CASCO)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_AUTO_CASCO { get; set; }
+
         /* public AutoJson AutoCasco { get; set; } */
         //public string NR_AUTO_CASCO { get; set; }
+
+        [Required(ErrorMessage = "Campul \"Asigurator pagubit (Societate CASCO)\" este obligatoriu!")]
+        [Key]
+        [Display(Name = "Asigurator pagubit (Societate CASCO)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_SOCIETATE_CASCO { get; set; }
+
         /* public SocietatiAsigurareJson SocietateCasco { get; set; } */
+
+        [Required(ErrorMessage = "Campul \"Numar polita vinovat (RCA)\" este obligatoriu!")]
+        [Display(Name = "Numar polita vinovat (RCA)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_POLITA_RCA { get; set; }
+
+        [Required(ErrorMessage = "Campul \"Numar Auto vinovat (RCA)\" este obligatoriu!")]
+        [Key]
+        [Display(Name = "Numar Auto vinovat (RCA)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_AUTO_RCA { get; set; }
+
         //public string NR_AUTO_RCA { get; set; }
         /* public AutoJson AutoRca { get; set; } */
+
+        [Required(ErrorMessage = "Campul \"Valoare Dauna\" este obligatoriu!")]
+        [Display(Name = "Valoare Dauna")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? VALOARE_DAUNA { get; set; }
+
+        [Required(ErrorMessage = "Campul \"Valoare Regres\" este obligatoriu!")]
+        [Display(Name = "Valoare Regres")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? VALOARE_REGRES { get; set; }
+
+        [Key]
+        [Display(Name = "Nume sofer vinovat (Intervenient)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_INTERVENIENT { get; set; }
+
         //public string INTERVENIENT { get; set; }
         /* public IntervenientiJson Intervenient { get; set; } */
+
+        [Required(ErrorMessage = "Campul \"Numar dosar CASCO\" este obligatoriu!")]
+        [Display(Name = "Numar dosar CASCO")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_DOSAR_CASCO { get; set; }
+
+        [Display(Name = "VMD")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? VMD { get; set; }
+
+        [Display(Name = "Observatii")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string OBSERVATII { get; set; }
+
+        [Required(ErrorMessage = "Campul \"Asigurator vinovat (Societate RCA)\" este obligatoriu!")]
+        [Key]
+        [Display(Name = "Asigurator vinovat (Societate RCA)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_SOCIETATE_RCA { get; set; }
+
         /* public SocietatiAsigurareJson SocietateRca { get; set; } */
+
+        [Required(ErrorMessage = "Campul \"Data eveniment\" este obligatoriu!")]
+        [Display(Name = "Data eveniment")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? DATA_EVENIMENT { get; set; }
+
+        [Display(Name = "Rezerva Dauna")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? REZERVA_DAUNA { get; set; }
+
+        [Display(Name = "Data intrare RCA")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? DATA_INTRARE_RCA { get; set; }
+
+        [Display(Name = "Data iesire CASCO")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? DATA_IESIRE_CASCO { get; set; }
+
+        [Display(Name = "Numar intrare RCA")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_INTRARE_RCA { get; set; }
+
+        [Display(Name = "Numar iesire CASCO")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_IESIRE_CASCO { get; set; }
+
+        [Key]
+        [Display(Name = "Asigurat vinovat (RCA)")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_ASIGURAT_RCA { get; set; }
+
         //public string ASIGURAT_RCA { get; set; }
         /* public AsiguratiJson AsiguratRca { get; set; } */
-        public int? ID_TIP_DOSAR { get; set; }
-        /* public NomenclatorJson TipDosar { get; set; } */
-        public double? SUMA_IBNR { get; set; }
-        public DateTime? DATA_AVIZARE { get; set; }
-        public DateTime? DATA_NOTIFICARE { get; set; }
-        public DateTime? DATA_ULTIMEI_MODIFICARI { get; set; }
-        public bool? AVIZAT { get; set; }
 
+        [Key]
+        [Display(Name = "Tip Dosar")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public int? ID_TIP_DOSAR { get; set; }
+
+        /* public NomenclatorJson TipDosar { get; set; } */
+
+        [Display(Name = "Suma IBNR")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public double? SUMA_IBNR { get; set; }
+
+        [Display(Name = "Data Avizare")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public DateTime? DATA_AVIZARE { get; set; }
+
+        [Display(Name = "Data Notificare")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public DateTime? DATA_NOTIFICARE { get; set; }
+
+        [Display(Name = "Data ultimei modificari")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public DateTime? DATA_ULTIMEI_MODIFICARI { get; set; }
+
+        [Display(Name = "Viza CASCO")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public bool AVIZAT { get; set; }
+
+        [Display(Name = "Caz constatare amiabila")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string CAZ { get; set; }
+
         /*
         public DosareProceseJson[] DosareProcese { get; set; }
         public ProceseJson[] Procese { get; set; }
@@ -164,7 +290,7 @@ namespace SOCISA.Models
             catch { }
             try { this.NR_SCA = _dosar["NR_SCA"].ToString(); }
             catch { }
-            try { this.DATA_SCA = Convert.ToDateTime(_dosar["DATA_SCA"]); }
+            try { this.DATA_SCA = CommonFunctions.IsNullable(_dosar["DATA_SCA"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_SCA"]); }
             catch { }
             try { this.ID_ASIGURAT_CASCO = Convert.ToInt32(_dosar["ID_ASIGURAT_CASCO"]); }
             catch { }
@@ -200,13 +326,13 @@ namespace SOCISA.Models
             try { this.ID_SOCIETATE_RCA = Convert.ToInt32(_dosar["ID_SOCIETATE_RCA"]); }
             catch { }
             /* try { this.SocietateRca = GetSocietateRca(); } catch { } */
-            try { this.DATA_EVENIMENT = Convert.ToDateTime(_dosar["DATA_EVENIMENT"]); }
+            try { this.DATA_EVENIMENT = CommonFunctions.IsNullable(_dosar["DATA_EVENIMENT"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_EVENIMENT"]); }
             catch { }
             try { this.REZERVA_DAUNA = Convert.ToDouble(_dosar["REZERVA_DAUNA"]); }
             catch { }
-            try { this.DATA_INTRARE_RCA = Convert.ToDateTime(_dosar["DATA_INTRARE_RCA"]); }
+            try { this.DATA_INTRARE_RCA = CommonFunctions.IsNullable(_dosar["DATA_INTRARE_RCA"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_INTRARE_RCA"]); }
             catch { }
-            try { this.DATA_IESIRE_CASCO = Convert.ToDateTime(_dosar["DATA_IESIRE_CASCO"]); }
+            try { this.DATA_IESIRE_CASCO = CommonFunctions.IsNullable(_dosar["DATA_IESIRE_CASCO"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_IESIRE_CASCO"]); }
             catch { }
             try { this.NR_INTRARE_RCA = _dosar["NR_INTRARE_RCA"].ToString(); }
             catch { }
@@ -221,11 +347,11 @@ namespace SOCISA.Models
             /* try { this.TipDosar = GetTipDosar(); } catch { } */
             try { this.SUMA_IBNR = Convert.ToDouble(_dosar["SUMA_IBNR"]); }
             catch { }
-            try { this.DATA_AVIZARE = Convert.ToDateTime(_dosar["DATA_AVIZARE"]); }
+            try { this.DATA_AVIZARE = CommonFunctions.IsNullable(_dosar["DATA_AVIZARE"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_AVIZARE"]); }
             catch { }
-            try { this.DATA_NOTIFICARE = Convert.ToDateTime(_dosar["DATA_NOTIFICARE"]); }
+            try { this.DATA_NOTIFICARE = CommonFunctions.IsNullable(_dosar["DATA_NOTIFICARE"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_NOTIFICARE"]); }
             catch { }
-            try { this.DATA_ULTIMEI_MODIFICARI = Convert.ToDateTime(_dosar["DATA_ULTIMEI_MODIFICARI"]); }
+            try { this.DATA_ULTIMEI_MODIFICARI = CommonFunctions.IsNullable(_dosar["DATA_ULTIMEI_MODIFICARI"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_ULTIMEI_MODIFICARI"]); }
             catch { }
             try { this.AVIZAT= Convert.ToBoolean(_dosar["AVIZAT"]); }
             catch { }
@@ -901,7 +1027,7 @@ namespace SOCISA.Models
                         if (fieldName.ToUpper() == prop.Name.ToUpper() && fieldName.ToUpper() != "ID")
                         {
                             //var tmpVal = CommonFunctions.ConvertValue(changes[fieldName], prop.PropertyType);
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
+                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 && changes[fieldName] == null ? null : prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? CommonFunctions.SwitchBackFormatedDate(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
                             prop.SetValue(this, tmpVal);
                             /*
                             if (prop.PropertyType.FullName.IndexOf("System.String") > -1)

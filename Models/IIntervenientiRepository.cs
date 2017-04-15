@@ -17,6 +17,7 @@ namespace SOCISA.Models
         response GetFiltered(JObject _json);
 
         response Find(int _id);
+        response Find(string _denumire);
         response Insert(Intervenient item);
         response Update(Intervenient item);
         response Update(int id, string fieldValueCollection);
@@ -152,6 +153,15 @@ namespace SOCISA.Models
             try
             {
                 Intervenient item = new Intervenient(authenticatedUserId, connectionString, _id);
+                return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null); ;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+        }
+        public response Find(string _denumire)
+        {
+            try
+            {
+                Intervenient item = new Intervenient(authenticatedUserId, connectionString, _denumire);
                 return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null); ;
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }

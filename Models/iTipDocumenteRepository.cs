@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace SOCISA.Models
 {
-    public interface IActionsRepository
+    public interface ITipDocumenteRepository
     {
         //Action[] GetAll();
         response GetAll(); response CountAll();
@@ -19,22 +19,22 @@ namespace SOCISA.Models
         response GetFiltered(string _json);
         response GetFiltered(JObject _json);
 
-        //Action Find(int _id);
+        //TipDocument Find(int _id);
         response Find(int _id);
-        response Insert(Action item);
-        response Update(Action item);
+        response Insert(TipDocument item);
+        response Update(TipDocument item);
         response Update(int id, string fieldValueCollection);
         response Update(string fieldValueCollection);
 
-        response Delete(Action item);
-        //bool HasChildrens(Action item, string tableName);
-        response HasChildrens(Action item, string tableName);
-        //bool HasChildren(Action item, string tableName, int childrenId);
-        response HasChildren(Action item, string tableName, int childrenId);
-        //object[] GetChildrens(Action item, string tableName);
-        response GetChildrens(Action item, string tableName);
-        //object GetChildren(Action item, string tableName, int childrenId);
-        response GetChildren(Action item, string tableName, int childrenId);
+        response Delete(TipDocument item);
+        //bool HasChildrens(TipDocument item, string tableName);
+        response HasChildrens(TipDocument item, string tableName);
+        //bool HasChildren(TipDocument item, string tableName, int childrenId);
+        response HasChildren(TipDocument item, string tableName, int childrenId);
+        //object[] GetChildrens(TipDocument item, string tableName);
+        response GetChildrens(TipDocument item, string tableName);
+        //object GetChildren(TipDocument item, string tableName, int childrenId);
+        response GetChildren(TipDocument item, string tableName, int childrenId);
 
         response Delete(int _id);
         //bool HasChildrens(int _id, string tableName);
@@ -47,12 +47,12 @@ namespace SOCISA.Models
         response GetChildren(int _id, string tableName, int childrenId);
     }
 
-    public class ActionsRepository : IActionsRepository
+    public class TipDocumenteRepository : ITipDocumenteRepository
     {
         private string connectionString;
         private int authenticatedUserId;
 
-        public ActionsRepository(int _authenticatedUserId, string _connectionString)
+        public TipDocumenteRepository(int _authenticatedUserId, string _connectionString)
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
@@ -62,7 +62,7 @@ namespace SOCISA.Models
         {
             try
             {
-                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_select", new object[] {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_select", new object[] {
                 new MySqlParameter("_SORT", null),
                 new MySqlParameter("_ORDER", null),
                 new MySqlParameter("_FILTER", null),
@@ -71,13 +71,13 @@ namespace SOCISA.Models
                 MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
-                    Action a = new Action(authenticatedUserId, connectionString, (IDataRecord)r);
+                    TipDocument a = new TipDocument(authenticatedUserId, connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
                 r.Close(); r.Dispose();
-                Action[] toReturn = new Action[aList.Count];
+                TipDocument[] toReturn = new TipDocument[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
-                    toReturn[i] = (Action)aList[i];
+                    toReturn[i] = (TipDocument)aList[i];
                 return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
@@ -86,7 +86,7 @@ namespace SOCISA.Models
         {
             try
             {
-                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_count");
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_count");
                 object count = da.ExecuteScalarQuery().Result;
                 if (count == null)
                     return new response(true, "0", 0, null, null);
@@ -172,11 +172,11 @@ namespace SOCISA.Models
                 #endregion
                 try
                 {
-                    string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(Action), _filter, authenticatedUserId, connectionString);
+                    string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(TipDocument), _filter, authenticatedUserId, connectionString);
                     _filter = newFilter == null ? _filter : newFilter;
                 }
                 catch { }
-                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_select", new object[] {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "TIP_DOCUMENTsp_select", new object[] {
                 new MySqlParameter("_SORT", _sort),
                 new MySqlParameter("_ORDER", _order),
                 new MySqlParameter("_FILTER", _filter),
@@ -185,71 +185,71 @@ namespace SOCISA.Models
                 MySqlDataReader r = da.ExecuteSelectQuery();
                 while (r.Read())
                 {
-                    Action a = new Action(authenticatedUserId, connectionString, (IDataRecord)r);
+                    TipDocument a = new TipDocument(authenticatedUserId, connectionString, (IDataRecord)r);
                     aList.Add(a);
                 }
                 r.Close(); r.Dispose();
-                Action[] toReturn = new Action[aList.Count];
+                TipDocument[] toReturn = new TipDocument[aList.Count];
                 for (int i = 0; i < aList.Count; i++)
-                    toReturn[i] = (Action)aList[i];
-                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null); 
+                    toReturn[i] = (TipDocument)aList[i];
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
-            catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
         public response Find(int _id)
         {
             try
             {
-                Action item = new Action(authenticatedUserId, connectionString, _id);
+                TipDocument item = new TipDocument(authenticatedUserId, connectionString, _id);
                 return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null); ;
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
-        public response Insert(Action item)
+        public response Insert(TipDocument item)
         {
             return item.Insert();
         }
 
-        public response Update(Action item)
+        public response Update(TipDocument item)
         {
             return item.Update();
         }
 
         public response Update(int id, string fieldValueCollection)
         {
-            //Action item = JsonConvert.DeserializeObject<Action>(Find(id).Message);
-            Action item = (Action)(Find(id).Result);
+            //TipDocument item = JsonConvert.DeserializeObject<TipDocument>(Find(id).Message);
+            TipDocument item = (TipDocument)(Find(id).Result);
             return item.Update(fieldValueCollection);
         }
         public response Update(string fieldValueCollection)
         {
-            Action tmpItem = JsonConvert.DeserializeObject<Action>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
-            //return JsonConvert.DeserializeObject<Action>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
-            return ((Action)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
+            TipDocument tmpItem = JsonConvert.DeserializeObject<TipDocument>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
+            //return JsonConvert.DeserializeObject<TipDocument>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
+            return ((TipDocument)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
-        public response Delete(Action item)
+        public response Delete(TipDocument item)
         {
             return item.Delete();
         }
 
-        public response HasChildrens(Action item, string tableName)
+        public response HasChildrens(TipDocument item, string tableName)
         {
             return item.HasChildrens(tableName);
         }
 
-        public response HasChildren(Action item, string tableName, int childrenId)
+        public response HasChildren(TipDocument item, string tableName, int childrenId)
         {
             return item.HasChildren(tableName, childrenId);
         }
 
-        public response GetChildrens(Action item, string tableName)
+        public response GetChildrens(TipDocument item, string tableName)
         {
             return item.GetChildrens(tableName);
         }
 
-        public response GetChildren(Action item, string tableName, int childrenId)
+        public response GetChildren(TipDocument item, string tableName, int childrenId)
         {
             return item.GetChildren(tableName, childrenId);
         }
@@ -257,33 +257,33 @@ namespace SOCISA.Models
         public response Delete(int _id)
         {
             response obj = Find(_id);
-            //return JsonConvert.DeserializeObject<Action>(obj.Message).Delete();
-            return ((Action)obj.Result).Delete();
+            //return JsonConvert.DeserializeObject<TipDocument>(obj.Message).Delete();
+            return ((TipDocument)obj.Result).Delete();
         }
 
         public response HasChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            //return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildrens(tableName);
-            return ((Action)obj.Result).HasChildrens(tableName);
+            //return JsonConvert.DeserializeObject<TipDocument>(obj.Message).HasChildrens(tableName);
+            return ((TipDocument)obj.Result).HasChildrens(tableName);
         }
         public response HasChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
             //return JsonConvert.DeserializeObject<Action>(obj.Message).HasChildren(tableName, childrenId);
-            return ((Action)obj.Result).HasChildren(tableName, childrenId);
+            return ((TipDocument)obj.Result).HasChildren(tableName, childrenId);
         }
         public response GetChildrens(int _id, string tableName)
         {
             var obj = Find(_id);
-            //return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildrens(tableName);
-            return ((Action)obj.Result).GetChildrens(tableName);
+            //return JsonConvert.DeserializeObject<TipDocument>(obj.Message).GetChildrens(tableName);
+            return ((TipDocument)obj.Result).GetChildrens(tableName);
         }
         public response GetChildren(int _id, string tableName, int childrenId)
         {
             var obj = Find(_id);
-            //return JsonConvert.DeserializeObject<Action>(obj.Message).GetChildren(tableName, childrenId);
-            return ((Action)obj.Result).GetChildren(tableName, childrenId);
+            //return JsonConvert.DeserializeObject<TipDocument>(obj.Message).GetChildren(tableName, childrenId);
+            return ((TipDocument)obj.Result).GetChildren(tableName, childrenId);
         }
     }
-} 
+}

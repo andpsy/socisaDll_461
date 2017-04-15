@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "socisaDll", "socisaDll.xproj", "{8C7760CE-4E25-492F-8F34-F0259B5E663D}"
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "socisaDll_461", "socisaDll_461.xproj", "{8C7760CE-4E25-492F-8F34-F0259B5E663D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

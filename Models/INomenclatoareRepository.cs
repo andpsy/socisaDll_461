@@ -17,6 +17,7 @@ namespace SOCISA.Models
         response GetFiltered(string tableName, JObject _json);
 
         response Find(string tableName, int _id);
+        response Find(string tableName, string _denumire);
         response Insert(Nomenclator item);
         response Update(Nomenclator item);
         response Update(string tableName, int id, string fieldValueCollection);
@@ -154,6 +155,15 @@ namespace SOCISA.Models
             {
                 Nomenclator item = new Nomenclator(authenticatedUserId, connectionString, tableName, _id);
                 return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null); 
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+        }
+        public response Find(string tableName, string _denumire)
+        {
+            try
+            {
+                Nomenclator item = new Nomenclator(authenticatedUserId, connectionString, tableName, _denumire);
+                return new response(true, JsonConvert.SerializeObject(item, CommonFunctions.JsonSerializerSettings), item, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }

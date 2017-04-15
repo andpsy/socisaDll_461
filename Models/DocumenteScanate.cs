@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
@@ -18,17 +19,29 @@ namespace SOCISA.Models
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
         public int? ID { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string DENUMIRE_FISIER { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string EXTENSIE_FISIER { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? DATA_INCARCARE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public long DIMENSIUNE_FISIER { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int ID_TIP_DOCUMENT { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int ID_DOSAR { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public bool VIZA_CASCO { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string DETALII { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public byte[] FILE_CONTENT { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public byte[] SMALL_ICON { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public byte[] MEDIUM_ICON { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string CALE_FISIER { get; set; }
 
         /// <summary>
@@ -103,7 +116,7 @@ namespace SOCISA.Models
             catch { }
             try { this.EXTENSIE_FISIER = documentScanat["EXTENSIE_FISIER"].ToString(); }
             catch { }
-            try { this.DATA_INCARCARE = Convert.ToDateTime(documentScanat["DATA_INCARCARE"]); }
+            try { this.DATA_INCARCARE = CommonFunctions.IsNullable(documentScanat["DATA_INCARCARE"]) ? null : (DateTime?)Convert.ToDateTime(documentScanat["DATA_INCARCARE"]); }
             catch { }
             try { this.DIMENSIUNE_FISIER = Convert.ToInt32(documentScanat["DIMENSIUNE_FISIER"]); }
             catch { }
@@ -287,7 +300,7 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper())
                         {
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
+                            var tmpVal = (prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 || prop.PropertyType.FullName.IndexOf("byte[]") > -1) && changes[fieldName] == null ? null : prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? CommonFunctions.SwitchBackFormatedDate(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
                             prop.SetValue(this, tmpVal);
                             break;
                         }

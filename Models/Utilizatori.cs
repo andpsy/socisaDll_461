@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using System.Security.Cryptography;
+using Newtonsoft.Json;
 
 namespace SOCISA.Models
 {
@@ -18,17 +19,29 @@ namespace SOCISA.Models
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
         public int? ID {get;set;}
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string USER_NAME { get; set; }
-        //public string PASSWORD { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public string PASSWORD { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NUME_COMPLET { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string DETALII { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public bool IS_ONLINE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string EMAIL { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string IP { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string MAC { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int ID_TIP_UTILIZATOR { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string DEPARTAMENT { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public DateTime? LAST_REFRESH { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_SOCIETATE { get; set; }
 
         /// <summary>
@@ -74,10 +87,10 @@ namespace SOCISA.Models
             catch { }
             try { this.USER_NAME = utilizator["USER_NAME"].ToString(); }
             catch { }
-            /*
+            
             try { this.PASSWORD = utilizator["PASSWORD"].ToString(); }
             catch { }
-            */
+            
             try { this.NUME_COMPLET = utilizator["NUME_COMPLET"].ToString(); }
             catch { }
             try { this.DETALII = utilizator["DETALII"].ToString(); }
@@ -94,7 +107,7 @@ namespace SOCISA.Models
             catch { }
             try { this.DEPARTAMENT = utilizator["DEPARTAMENT"].ToString(); }
             catch { }
-            try { this.LAST_REFRESH = Convert.ToDateTime(utilizator["LAST_REFRESH"]); }
+            try { this.LAST_REFRESH = CommonFunctions.IsNullable(utilizator["LAST_REFRESH"]) ? null : (DateTime?)Convert.ToDateTime(utilizator["LAST_REFRESH"]); }
             catch { }
             try { this.ID_SOCIETATE = Convert.ToInt32(utilizator["ID_SOCIETATE"]); }
             catch { }
@@ -203,7 +216,7 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper())
                         {
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
+                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 && changes[fieldName] == null ? null : prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? CommonFunctions.SwitchBackFormatedDate(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
                             prop.SetValue(this, tmpVal);
                             break;
                         }
@@ -244,7 +257,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
-            /*
+            
             if (this.PASSWORD == null || this.PASSWORD.Trim() == "")
             {
                 toReturn.Status = false;
@@ -253,7 +266,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
-            */
+            
             return toReturn;
         }
 

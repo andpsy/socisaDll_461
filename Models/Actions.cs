@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Reflection;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace SOCISA.Models
 {
@@ -14,13 +16,23 @@ namespace SOCISA.Models
         int authenticatedUserId { get; set; }
         string connectionString { get; set; }
 
+        [Key]
         public int? ID { get; set; }
+
+        [Required]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NAME { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string SUMMARY { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string IMG { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string ACTION { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string OBJECT_NAME { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string TYPE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ORDER { get; set; }
 
         public Action() { }
@@ -181,7 +193,7 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper())
                         {
-                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? Convert.ToDateTime(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
+                            var tmpVal = prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 && changes[fieldName] == null ? null : prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? CommonFunctions.SwitchBackFormatedDate(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
                             prop.SetValue(this, tmpVal);
                             break;
                         }

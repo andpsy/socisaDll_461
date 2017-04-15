@@ -141,16 +141,19 @@ namespace SOCISA.Models
                     switch (t.Key.ToLower())
                     {
                         case "sort":
-                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
+                            //f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
+                            f.Sort = CommonFunctions.IsNullOrEmpty(j) ? null : j.ToString();
                             break;
                         case "order":
-                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
+                            //f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
+                            f.Order = CommonFunctions.IsNullOrEmpty(j) ? null : j.ToString();
                             break;
                         case "filter":
                             f.Filtru = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
                             break;
                         case "limit":
-                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
+                            //f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : JsonConvert.SerializeObject(j, CommonFunctions.JsonSerializerSettings);
+                            f.Limit = CommonFunctions.IsNullOrEmpty(j) ? null : j.ToString();
                             break;
                     }
                 }
@@ -166,7 +169,7 @@ namespace SOCISA.Models
                 try
                 {
                     string newFilter = Filtering.GenerateFilterFromJsonObject(typeof(Dosar), _filter, authenticatedUserId, connectionString);
-                    _filter = newFilter == null ? _filter : newFilter;
+                    _filter = newFilter == null || newFilter.Trim() == "" ? _filter : newFilter;
                 }
                 catch { }
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_select", new object[] {

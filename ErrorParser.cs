@@ -2,6 +2,7 @@
 using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Xml;
+using System.IO;
 
 namespace SOCISA
 {
@@ -83,7 +84,7 @@ namespace SOCISA
             get
             {
                 Dictionary<string, Error> errorMessages = new Dictionary<string, Error>();
-                XmlReader r = XmlReader.Create("ErrorMessages.xml");
+                XmlReader r = XmlReader.Create(Path.Combine(AppContext.BaseDirectory, "App_Data", "ErrorMessages.xml"));
 
                 XmlDocument xdoc = new XmlDocument();//xml doc used for xml parsing
 

@@ -270,8 +270,9 @@ namespace SOCISA
             }
         }
 
-        public static DateTime SwitchBackFormatedDate(string dt)
+        public static DateTime? SwitchBackFormatedDate(string dt)
         {
+            if (dt == null) return null;
             DateTime toReturn = new DateTime();
             if (dt.IndexOf('.') > 0)
             {
@@ -325,6 +326,7 @@ namespace SOCISA
             catch { return null; }
         }
 
+        /*
         public static MySqlParameter SetNull(DbColumn _dc, MySqlParameter _initialParam, object _initialValue)
         {
             MySqlParameter _newParam = _initialParam;
@@ -332,7 +334,7 @@ namespace SOCISA
                 _newParam.Value = null;
             return _newParam;
         }
-
+        */
         public static MySqlParameter SetNull(MySqlParameter _initialParam)
         {
             MySqlParameter _newParam = _initialParam;
@@ -377,8 +379,10 @@ namespace SOCISA
             return Convert.ToString(_value, CultureInfo.CurrentCulture);
         }
 
-        public static double BackDoubleValue(string _value)
+        public static double? BackDoubleValue(string _value)
         {
+            if (_value == null) return null;
+
             double toReturn;
             try
             {
@@ -706,5 +710,10 @@ namespace SOCISA
                    (token.Type == Newtonsoft.Json.Linq.JTokenType.Null);
         }
 
+        public static bool IsNullable(object x)
+        {
+            if (x == null || x == DBNull.Value || x.ToString().Trim() == "") return true;
+            return false;
+        }
     }
 }
