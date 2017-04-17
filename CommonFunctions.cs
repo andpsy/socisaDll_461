@@ -248,6 +248,36 @@ namespace SOCISA
             return json;
         }
 
+        public static string GenerateJsonFromModifiedFields(object OriginalObject, object ModifiedObject)
+        {
+            string toReturn = "{";
+            PropertyInfo[] pis = OriginalObject.GetType().GetProperties();
+            foreach (PropertyInfo pi in pis)
+            {
+                if (pi.Name != "ID" && pi.Name != "FILE_CONTENT" && pi.Name != "SMALL_ICON" && pi.Name != "MEDIUM_ICON")
+                {
+                    if (pi.GetValue(OriginalObject) != null && pi.GetValue(ModifiedObject) != null)
+                    {
+                        if (pi.GetValue(OriginalObject).ToString() != pi.GetValue(ModifiedObject).ToString())
+                        {
+                            toReturn += toReturn.Length > 1 ? "," : "";
+                            toReturn += "\"" + pi.Name + "\":";
+                            if(pi.PropertyType.Name.ToLower().IndexOf("bool") > -1 || pi.PropertyType.Name.ToLower().IndexOf("int") > -1)
+                                toReturn += pi.GetValue(ModifiedObject).ToString().ToLower();
+                            else
+                                toReturn += "\"" + pi.GetValue(ModifiedObject).ToString() + "\"";
+                        }
+                    }
+                    else
+                    {
+                        ;
+                    }
+                }
+            }
+            toReturn += "}";
+            return toReturn;
+        }
+
         public static string ToMySqlFormatDate(DateTime dt)
         {
             return dt.Year + "-" + dt.Month + "-" + dt.Day;

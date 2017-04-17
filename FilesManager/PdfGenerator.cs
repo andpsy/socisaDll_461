@@ -189,8 +189,8 @@ namespace SOCISA
             field_names.Add("{{DOCUMENTE}}", docs);
 
 
-            PdfAnsiTrueTypeFont boldFont = new PdfAnsiTrueTypeFont(new FileStream("arialbold.ttf", FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
-            PdfAnsiTrueTypeFont regularFont = new PdfAnsiTrueTypeFont(new FileStream("arial.ttf", FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
+            PdfAnsiTrueTypeFont boldFont = new PdfAnsiTrueTypeFont(new FileStream(Path.Combine(AppContext.BaseDirectory, "Content", "arialbold.ttf"), FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
+            PdfAnsiTrueTypeFont regularFont = new PdfAnsiTrueTypeFont(new FileStream(Path.Combine(AppContext.BaseDirectory, "Content", "arial.ttf"), FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
 
             PdfFormattedContent pfc = new PdfFormattedContent();
             foreach (string s in pdfText)

@@ -69,6 +69,119 @@ namespace SOCISA
             return GenerateImgThumbNail(tSize.thumbNailType.ToString(), CommonFunctions.GetScansFolder(), fileName, tSize.Width, tSize.Height);
         }
 
+        public static response GenerateByteThumbNail(string fileName, ThumbNailSizes tSize)
+        {
+            return GenerateByteThumbNail(File.Exists(fileName) ? "" : CommonFunctions.GetScansFolder(), fileName, tSize);
+        }
+
+        public static response GenerateByteThumbNail(string path, string fileName, ThumbNailSizes tSize)
+        {
+            return GenerateByteThumbNail(path, fileName, tSize.Width, tSize.Height);
+        }
+
+        public static response GenerateByteThumbNail(string path, string fileName, int width, int height)
+        {
+            FileInfo fi = new FileInfo(Path.Combine(path, fileName));
+            switch (fi.Extension)
+            {
+                case ".pdf":
+                    try
+                    {
+                        FileStream fs = new FileStream(Path.Combine(path, fileName), FileMode.Open, FileAccess.Read);
+                        PdfFixedDocument pDoc = new PdfFixedDocument(fs);
+                        fs.Dispose();
+                        PdfPageRenderer renderer = new PdfPageRenderer(pDoc.Pages[0]);
+                        PdfRendererSettings s = new PdfRendererSettings();
+                        s.DpiX = s.DpiY = 96;
+
+                        FileStream pngStream = File.OpenWrite(Path.Combine(path, fileName.Replace(".pdf", ".png")));
+                        renderer.ConvertPageToImage(pngStream, PdfPageImageFormat.Png, s);
+                        pngStream.Flush();
+                        pngStream.Dispose();
+                        byte[] toReturn = GetByteThumbNail(path, fileName.Replace(".pdf", ".png"), null, width, height);
+                        response r = new response(true, "", toReturn, null, null);
+                        try
+                        {
+                            File.Delete(Path.Combine(path, fileName.Replace(".pdf", ".png")));
+                        }
+                        catch { }
+                        return r;
+                    }
+                    catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+                case ".jpg":
+                case ".jpeg":
+                case ".png":
+                case ".bmp":
+                    try
+                    {
+                        byte[] toReturn = GetByteThumbNail(path, fileName, null, width, height);
+                        return new response(true, "", toReturn, null, null);
+                    }
+                    catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+                default:
+                    Error err = ErrorParser.ErrorMessage("unsupportedFormat");
+                    return new response(false, err.ERROR_MESSAGE, null, null, new System.Collections.Generic.List<Error>() { err });
+            }
+        }
+
+        private static byte[] GetByteThumbNail(string path, string originalFilename, Image img, int canvasWidth, int canvasHeight)
+        {
+            try
+            {
+                Image image;
+                if (img == null && originalFilename != null)
+                {
+                    //image = Image.FromFile(Path.Combine(path, originalFilename)); // -- locks the file and can not delete temp png!
+                    using (var bmpTemp = new Bitmap(Path.Combine(path, originalFilename)))
+                    {
+                        image = new Bitmap(bmpTemp);
+                    }
+                }
+                else
+                {
+                    image = img;
+                }
+
+                int originalWidth = image.Width;
+                int originalHeight = image.Height;
+
+                Image thumbnail = new Bitmap(canvasWidth, canvasHeight);
+                Graphics graphic = Graphics.FromImage(thumbnail);
+
+                graphic.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphic.SmoothingMode = SmoothingMode.HighQuality;
+                graphic.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                graphic.CompositingQuality = CompositingQuality.HighQuality;
+
+                double ratioX = (double)canvasWidth / (double)originalWidth;
+                double ratioY = (double)canvasHeight / (double)originalHeight;
+                double ratio = ratioX < ratioY ? ratioX : ratioY;
+
+                int newHeight = Convert.ToInt32(originalHeight * ratio);
+                int newWidth = Convert.ToInt32(originalWidth * ratio);
+
+                int posX = Convert.ToInt32((canvasWidth - (originalWidth * ratio)) / 2);
+                int posY = Convert.ToInt32((canvasHeight - (originalHeight * ratio)) / 2);
+
+                graphic.Clear(Color.White); // white padding
+                graphic.DrawImage(image, posX, posY, newWidth, newHeight);
+
+                ImageCodecInfo[] info = ImageCodecInfo.GetImageEncoders();
+                EncoderParameters encoderParameters;
+                encoderParameters = new EncoderParameters(1);
+                encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 100L);
+                using (var ms = new MemoryStream())
+                {
+                    thumbnail.Save(ms, ImageFormat.Gif);
+                    graphic.Dispose();
+                    thumbnail.Dispose();
+                    image.Dispose();
+                    return ms.ToArray();
+                }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return null; }
+        }
+
 
         public static response GenerateImgThumbNail(string sType, string path, string fileName, int width, int height)
         {

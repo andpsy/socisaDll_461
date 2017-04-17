@@ -162,6 +162,8 @@ namespace SOCISA.Models
                 {
                     //this.FILE_CONTENT = FileManager.GetFileContentFromFile(this.CALE_FISIER);
                     this.FILE_CONTENT = FileManager.UploadFile(this.CALE_FISIER);
+                    this.SMALL_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Small)).Result;
+                    this.MEDIUM_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Custom)).Result;
                     this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
                     this.EXTENSIE_FISIER = this.CALE_FISIER.Substring(this.CALE_FISIER.LastIndexOf('.'));
                     //File.Delete(this.CALE_FISIER); // nu mai stergem, ca ne trebuie si in File Storage !
@@ -228,10 +230,12 @@ namespace SOCISA.Models
             catch { }
             try
             {
-                if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
+                if ((this.FILE_CONTENT == null || this.DIMENSIUNE_FISIER == 0) && this.CALE_FISIER != null)
                 {
                     //this.FILE_CONTENT = FileManager.GetFileContentFromFile(this.CALE_FISIER);
                     this.FILE_CONTENT = FileManager.UploadFile(this.CALE_FISIER);
+                    this.SMALL_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Small)).Result;
+                    this.MEDIUM_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Custom)).Result;
                     this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
                     this.EXTENSIE_FISIER = this.CALE_FISIER.Substring(this.CALE_FISIER.LastIndexOf('.'));
                     //File.Delete(this.CALE_FISIER);
@@ -300,7 +304,7 @@ namespace SOCISA.Models
                         //if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1 && fieldName.ToUpper() == prop.Name.ToUpper()) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
                         if (fieldName.ToUpper() == prop.Name.ToUpper())
                         {
-                            var tmpVal = (prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 || prop.PropertyType.FullName.IndexOf("byte[]") > -1) && changes[fieldName] == null ? null : prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? CommonFunctions.SwitchBackFormatedDate(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
+                            var tmpVal = (prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 || prop.PropertyType.FullName.IndexOf("System.Byte[]") > -1) && changes[fieldName] == null ? null : prop.PropertyType.FullName.IndexOf("System.Nullable") > -1 || prop.PropertyType.FullName.IndexOf("System.Byte[]") > -1 ? Convert.FromBase64String(changes[fieldName]) :  prop.PropertyType.FullName.IndexOf("System.String") > -1 ? changes[fieldName] : prop.PropertyType.FullName.IndexOf("System.DateTime") > -1 ? CommonFunctions.SwitchBackFormatedDate(changes[fieldName]) : ((prop.PropertyType.FullName.IndexOf("Double") > -1) ? CommonFunctions.BackDoubleValue(changes[fieldName]) : Newtonsoft.Json.JsonConvert.DeserializeObject(changes[fieldName], prop.PropertyType));
                             prop.SetValue(this, tmpVal);
                             break;
                         }
