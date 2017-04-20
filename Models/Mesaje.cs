@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.Common;
 using System.Reflection;
 using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace SOCISA.Models
 {
@@ -18,11 +19,14 @@ namespace SOCISA.Models
 
         public int? ID { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        [Required(ErrorMessage = "Campul \"De la\" este obligatoriu!")]
+        [Display(Name = "De la")]
         public int ID_SENDER { get; set; }
         /* public UtilizatoriJson Sender { get; set; } */
         //public int ID_RECEIVER { get; set; }
         /* public UtilizatoriJson Receiver { get; set; } */
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        [Display(Name = "Subiect")]
         public string SUBIECT { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string BODY { get; set; }
@@ -35,6 +39,8 @@ namespace SOCISA.Models
         public int? IMPORTANTA { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_TIP_MESAJ { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public int? REPLY_TO { get; set; }
         /* public NomenclatorJson TipMesaj { get; set; } */
         //public DateTime DATA_CITIRE { get; set; }
         //public MesajeAttachmentsJson[] MesajeAttachments { get; set; }
@@ -93,6 +99,8 @@ namespace SOCISA.Models
             try { this.IMPORTANTA = Convert.ToInt32(mesaj["IMPORTANTA"]); }
             catch { }
             try { this.ID_TIP_MESAJ = Convert.ToInt32(mesaj["ID_TIP_MESAJ"]); }
+            catch { }
+            try { this.REPLY_TO = Convert.ToInt32(mesaj["REPLY_TO"]); }
             catch { }
             //try { this.DATA_CITIRE = Convert.ToDateTime(mesaj["DATA_CITIRE"]); }
             //catch { }

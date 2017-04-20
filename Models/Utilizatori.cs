@@ -43,6 +43,8 @@ namespace SOCISA.Models
         public DateTime? LAST_REFRESH { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_SOCIETATE { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public DateTime? LAST_LOGIN { get; set; }
 
         /// <summary>
         /// Constructorul default
@@ -111,6 +113,8 @@ namespace SOCISA.Models
             catch { }
             try { this.ID_SOCIETATE = Convert.ToInt32(utilizator["ID_SOCIETATE"]); }
             catch { }
+            try { this.LAST_LOGIN = CommonFunctions.IsNullable(utilizator["LAST_LOGIN"]) ? null : (DateTime?)Convert.ToDateTime(utilizator["LAST_LOGIN"]); }
+            catch { }
         }
 
         /// <summary>
@@ -177,8 +181,10 @@ namespace SOCISA.Models
                     string propType = prop.PropertyType.ToString();
                     object propValue = prop.GetValue(this, null);
                     propValue = propValue == null ? DBNull.Value : propValue;
+                    
                     if (propType != null)
                     {
+                        /*
                         if (propName.ToUpper() == "PASSWORD")
                         {
                             MD5 md5h = MD5.Create();
@@ -186,14 +192,14 @@ namespace SOCISA.Models
                             _parameters.Add(new MySqlParameter("_PASSWORD", md5p));
                         }
                         else
+                        */
                             _parameters.Add(new MySqlParameter(String.Format("_{0}", propName.ToUpper()), propValue));
                     }
+                    
                 }
             }
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_update", _parameters.ToArray());
             toReturn = da.ExecuteUpdateQuery();
-            if (toReturn.Status) this.ID = toReturn.InsertedId;
-
             return toReturn;
         }
 

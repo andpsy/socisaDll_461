@@ -38,7 +38,7 @@ namespace SOCISA.Models
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DREPTURIsp_GetById", new object[] { new MySqlParameter("_ID", _ID) });
             MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {
@@ -53,7 +53,7 @@ namespace SOCISA.Models
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "ACTIONSsp_GetByDenumire", new object[] { new MySqlParameter("_DENUMIRE", _DENUMIRE) });
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DREPTURIsp_GetByDenumire", new object[] { new MySqlParameter("_DENUMIRE", _DENUMIRE) });
             MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {

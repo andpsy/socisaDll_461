@@ -13,7 +13,9 @@ namespace SOCISA.Models
 {
     public interface IDosareRepository
     {
-        response GetAll(); response CountAll();
+        response GetAll();
+        response CountAll();
+        response CountFromLastLogin();
         response GetFiltered(string _sort, string _order, string _filter, string _limit);
         response GetFiltered(string _json);
         response GetFiltered(JObject _json);
@@ -37,6 +39,7 @@ namespace SOCISA.Models
         response GetChildrens(int _id, string tableName);
         response GetChildren(int _id, string tableName, int childrenId);
 
+        response GetMesaje(Dosar item);
         response GetUtilizatori(Dosar item);
         response GetSocietateCasco(Dosar item);
         response GetSocietateRca(Dosar item);
@@ -118,6 +121,19 @@ namespace SOCISA.Models
                 DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_count");
                 object count = da.ExecuteScalarQuery().Result;
                 if(count == null)
+                    return new response(true, "0", 0, null, null);
+                return new response(true, count.ToString(), Convert.ToInt32(count), null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response CountFromLastLogin()
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_CountFromLastLogin");
+                object count = da.ExecuteScalarQuery().Result;
+                if (count == null)
                     return new response(true, "0", 0, null, null);
                 return new response(true, count.ToString(), Convert.ToInt32(count), null, null);
             }
@@ -299,6 +315,10 @@ namespace SOCISA.Models
             return ((Dosar)obj.Result).GetChildren(tableName, childrenId);
         }
 
+        public response GetMesaje(Dosar item)
+        {
+            return item.GetMesaje();
+        }
         public response GetUtilizatori(Dosar item)
         {
             return item.GetUtilizatori();

@@ -20,7 +20,6 @@ namespace SOCISA.Models
         private string connectionString { get; set; }
 
         [Key]
-        [DataType(DataType.Date)]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID { get; set; }
 
@@ -34,7 +33,6 @@ namespace SOCISA.Models
         public DateTime? DATA_SCA { get; set; }
 
         [Required(ErrorMessage = "Campul \"Asigurat pagubit (CASCO)\" este obligatoriu!")]
-        [Key]
         [Display(Name = "Asigurat pagubit (CASCO)")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_ASIGURAT_CASCO { get; set; }
@@ -48,7 +46,6 @@ namespace SOCISA.Models
         public string NR_POLITA_CASCO { get; set; }
 
         [Required(ErrorMessage = "Campul \"Numar Auto CASCO\" este obligatoriu!")]
-        [Key]
         [Display(Name = "Numar Auto pagubit (CASCO)")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_AUTO_CASCO { get; set; }
@@ -57,7 +54,6 @@ namespace SOCISA.Models
         //public string NR_AUTO_CASCO { get; set; }
 
         [Required(ErrorMessage = "Campul \"Asigurator pagubit (Societate CASCO)\" este obligatoriu!")]
-        [Key]
         [Display(Name = "Asigurator pagubit (Societate CASCO)")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_SOCIETATE_CASCO { get; set; }
@@ -70,7 +66,6 @@ namespace SOCISA.Models
         public string NR_POLITA_RCA { get; set; }
 
         [Required(ErrorMessage = "Campul \"Numar Auto vinovat (RCA)\" este obligatoriu!")]
-        [Key]
         [Display(Name = "Numar Auto vinovat (RCA)")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_AUTO_RCA { get; set; }
@@ -88,7 +83,6 @@ namespace SOCISA.Models
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public double? VALOARE_REGRES { get; set; }
 
-        [Key]
         [Display(Name = "Nume sofer vinovat (Intervenient)")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_INTERVENIENT { get; set; }
@@ -110,7 +104,6 @@ namespace SOCISA.Models
         public string OBSERVATII { get; set; }
 
         [Required(ErrorMessage = "Campul \"Asigurator vinovat (Societate RCA)\" este obligatoriu!")]
-        [Key]
         [Display(Name = "Asigurator vinovat (Societate RCA)")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_SOCIETATE_RCA { get; set; }
@@ -145,7 +138,6 @@ namespace SOCISA.Models
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string NR_IESIRE_CASCO { get; set; }
 
-        [Key]
         [Display(Name = "Asigurat vinovat (RCA)")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_ASIGURAT_RCA { get; set; }
@@ -153,7 +145,6 @@ namespace SOCISA.Models
         //public string ASIGURAT_RCA { get; set; }
         /* public AsiguratiJson AsiguratRca { get; set; } */
 
-        [Key]
         [Display(Name = "Tip Dosar")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ID_TIP_DOSAR { get; set; }
@@ -186,6 +177,11 @@ namespace SOCISA.Models
         [Display(Name = "Caz constatare amiabila")]
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public string CAZ { get; set; }
+
+        [Display(Name = "Data crearii")]
+        [DataType(DataType.Date)]
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public DateTime? DATA_CREARE { get; set; }
 
         /*
         public DosareProceseJson[] DosareProcese { get; set; }
@@ -357,6 +353,8 @@ namespace SOCISA.Models
             catch { }
             try { this.CAZ = _dosar["CAZ"].ToString(); }
             catch { }
+            try { this.DATA_CREARE = CommonFunctions.IsNullable(_dosar["DATA_CREARE"]) ? null : (DateTime?)Convert.ToDateTime(_dosar["DATA_CREARE"]); }
+            catch { }
 
             /*
             try { this.Procese = GetProcese(); }
@@ -503,7 +501,7 @@ namespace SOCISA.Models
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
-        
+        */
         /// <summary>
         /// Metoda pt. popularea Mesajelor carora le este asociat Dosarul
         /// </summary>
@@ -512,19 +510,25 @@ namespace SOCISA.Models
         {
             try
             {
-                DataAccess da = new DataAccess(CommandType.StoredProcedure, "MESAJEsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
-                DataTable dosareMesaje = da.ExecuteSelectQuery().Tables[0];
-
-                MesajeJson[] toReturn = new MesajeJson[dosareMesaje.Rows.Count];
-                for (int i = 0; i < dosareMesaje.Rows.Count; i++)
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_GetByIdDosar", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                ArrayList aList = new ArrayList();
+                while (r.Read())
                 {
-                    toReturn[i] = new MesajeJson(Convert.ToInt32(dosareMesaje.Rows[i]["ID_MESAJ"]));
+                    //Mesaj a = new Mesaj(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
+                    Mesaj a = new Mesaj(authenticatedUserId, connectionString, r);
+                    aList.Add(a);
+                }
+                r.Close(); r.Dispose();
+                Mesaj[] toReturn = new Mesaj[aList.Count];
+                for (int i = 0; i < aList.Count; i++)
+                {
+                    toReturn[i] = (Mesaj)aList[i];
                 }
                 return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
-        */
 
         /// <summary>
         /// Metoda pt. popularea Autoturismului CASCO din Dosar
@@ -753,6 +757,7 @@ namespace SOCISA.Models
             /* -- end insert informatii externe (auto, asigurati, intervenient, tipdosar, societati) -- */
 
             this.DATA_ULTIMEI_MODIFICARI = DateTime.Now;
+            this.DATA_CREARE = DateTime.Now;
 
             PropertyInfo[] props = this.GetType().GetProperties();
             ArrayList _parameters = new ArrayList();
