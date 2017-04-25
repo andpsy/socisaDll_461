@@ -530,6 +530,41 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
+        public response GetSentMesaje()
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_GetByIdDosarSent", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                ArrayList aList = new ArrayList();
+                while (r.Read())
+                {
+                    //Mesaj a = new Mesaj(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
+                    Mesaj a = new Mesaj(authenticatedUserId, connectionString, r);
+                    aList.Add(a);
+                }
+                r.Close(); r.Dispose();
+                Mesaj[] toReturn = new Mesaj[aList.Count];
+                for (int i = 0; i < aList.Count; i++)
+                {
+                    toReturn[i] = (Mesaj)aList[i];
+                }
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response GetNewMesaje(DateTime _LAST_REFRESH)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_GetByIdDosarNew", new object[] { new MySqlParameter("_ID_DOSAR", this.ID), new MySqlParameter("_LAST_REFRESH", _LAST_REFRESH) });
+                response r = da.ExecuteScalarQuery();
+                return r;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
         /// <summary>
         /// Metoda pt. popularea Autoturismului CASCO din Dosar
         /// </summary>

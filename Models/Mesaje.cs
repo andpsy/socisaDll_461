@@ -231,6 +231,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
+            /*
             if (((Utilizator[])this.GetReceiversByIdDosar().Result).Length == 0)
             {
                 toReturn.Status = false;
@@ -239,6 +240,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
+            */
             if (this.SUBIECT == null || this.SUBIECT.Trim() == "")
             {
                 toReturn.Status = false;
@@ -247,6 +249,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
+            /*
             if (this.BODY == null || this.BODY.Trim() == "")
             {
                 toReturn.Status = false;
@@ -255,6 +258,7 @@ namespace SOCISA.Models
                 toReturn.InsertedId = null;
                 toReturn.Error.Add(err);
             }
+            */
             return toReturn;
         }
 

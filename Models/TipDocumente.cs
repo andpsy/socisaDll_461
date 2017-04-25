@@ -28,6 +28,8 @@ namespace SOCISA.Models
         public string QINFO { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public bool MANDATORY { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public int? DISPLAY_ORDER { get; set; }
 
         public TipDocument() { }
 
@@ -97,6 +99,8 @@ namespace SOCISA.Models
             try { this.QINFO = item["QINFO"].ToString(); }
             catch { }
             try { this.MANDATORY = Convert.ToBoolean( item["MANDATORY"]); }
+            catch { }
+            try { this.DISPLAY_ORDER = Convert.ToInt32(item["DISPLAY_ORDER"]); }
             catch { }
         }
 
