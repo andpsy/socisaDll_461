@@ -40,6 +40,7 @@ namespace SOCISA
 
     public static class PdfGenerator
     {
+        public const int PDF_PAGE_MARGIN = 60;
         public static response ExportDosarToPdf(string templateFileName, Models.Dosar dosar)
         {
             try
@@ -361,20 +362,26 @@ namespace SOCISA
                                 case "png":
                                     Xfinium.Pdf.Graphics.PdfPngImage pngImg = new Xfinium.Pdf.Graphics.PdfPngImage(ms);
                                     PdfPage p = new PdfPage();
-                                    p.Graphics.DrawImage(pngImg, 0, 0, p.Width, p.Height);
+                                    ThumbNailSize tns = ThumbNails.ScaleImage(pngImg, p.Width - PDF_PAGE_MARGIN, p.Height - PDF_PAGE_MARGIN);
+                                    p.Graphics.DrawImage(pngImg, (p.Width - tns.Width) / 2, (p.Height - tns.Height) / 2, tns.Width, tns.Height);
+                                    //p.Graphics.DrawImage(pngImg, 0, 0, p.Width, p.Height);
                                     poDocument.Pages.Add(p);
                                     break;
                                 case "jpg":
                                 case "jpeg":
                                     Xfinium.Pdf.Graphics.PdfJpegImage jpgImg = new Xfinium.Pdf.Graphics.PdfJpegImage(ms);
                                     p = new PdfPage();
-                                    p.Graphics.DrawImage(jpgImg, 0, 0, p.Width, p.Height);
+                                    tns = ThumbNails.ScaleImage(jpgImg, p.Width - PDF_PAGE_MARGIN, p.Height - PDF_PAGE_MARGIN);
+                                    p.Graphics.DrawImage(jpgImg, (p.Width - tns.Width) / 2, (p.Height - tns.Height) / 2, tns.Width, tns.Height);
+                                    //p.Graphics.DrawImage(jpgImg, 0, 0, p.Width, p.Height);
                                     poDocument.Pages.Add(p);
                                     break;
                                 case "tiff":
                                     Xfinium.Pdf.Graphics.PdfTiffImage tiffImg = new Xfinium.Pdf.Graphics.PdfTiffImage(ms);
                                     p = new PdfPage();
-                                    p.Graphics.DrawImage(tiffImg, 0, 0, p.Width, p.Height);
+                                    tns = ThumbNails.ScaleImage(tiffImg, p.Width - PDF_PAGE_MARGIN, p.Height - PDF_PAGE_MARGIN);
+                                    p.Graphics.DrawImage(tiffImg, (p.Width - tns.Width) / 2, (p.Height - tns.Height) / 2, tns.Width, tns.Height);
+                                    //p.Graphics.DrawImage(tiffImg, 0, 0, p.Width, p.Height);
                                     poDocument.Pages.Add(p);
                                     break;
                                 default:

@@ -303,6 +303,19 @@ namespace SOCISA
             return new ThumbNailSize(newWidth, newHeight);
         }
 
+        public static ThumbNailSize ScaleImage(Xfinium.Pdf.Graphics.PdfImage image, double width, double height)
+        {
+            double ratioX = width / (double)image.Width;
+            double ratioY = height / (double)image.Height;
+            double sz = (double)Math.Max(image.Width, image.Height);
+            double ratio = (double)Math.Min(width, height) / sz;
+            ratio = ratio > 1 ? 1 : ratio;
+
+            var newWidth = (int)(image.Width * ratio);
+            var newHeight = (int)(image.Height * ratio);
+            return new ThumbNailSize(newWidth, newHeight);
+        }
+
         public static void DeleteThumbNail(Models.DocumentScanat d)
         {
             try {
