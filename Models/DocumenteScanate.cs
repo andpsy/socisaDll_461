@@ -147,6 +147,28 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
+        public response Avizare(bool _avizat)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOCUMENTE_SCANATEsp_Avizare", new object[] { new MySqlParameter("_ID", this.ID), new MySqlParameter("_AVIZAT", _avizat) });
+                response r = da.ExecuteUpdateQuery();
+                if (r.Status)
+                {
+                    try
+                    {
+                        MesajeRepository mr = new MesajeRepository(authenticatedUserId, connectionString);
+                        string partial_sub = String.Format("DOCUMENT {0}", _avizat ? "NOU" : "ELIMINAT DIN DOSAR");
+                        string subiect = String.Format("{0} ({1})", partial_sub, ((Nomenclator)new NomenclatoareRepository(authenticatedUserId, connectionString).Find("tip_document", Convert.ToInt32(this.ID_TIP_DOCUMENT)).Result).DENUMIRE);
+                        mr.GenerateAndSendMessage(this.ID_DOSAR, DateTime.Now, subiect, subiect, partial_sub, authenticatedUserId, (int)Importanta.Low);
+                    }
+                    catch { }
+                }
+                return new response(true, null, r, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
         /// <summary>
         /// Metoda pentru inserarea Documentului scanat curent
         /// </summary>

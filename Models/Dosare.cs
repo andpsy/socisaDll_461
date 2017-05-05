@@ -727,6 +727,28 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
+        public response Avizare(bool _avizat)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_Avizare", new object[] { new MySqlParameter("_ID", this.ID), new MySqlParameter("_AVIZAT", _avizat) });
+                response r = da.ExecuteUpdateQuery();
+                if (r.Status)
+                {
+                    try
+                    {
+                        MesajeRepository mr = new MesajeRepository(authenticatedUserId, connectionString);
+                        string partial_sub = String.Format("DOSAR {0}", _avizat ? "NOU" : "ELIMINAT");
+                        string subiect = String.Format("{0} ({1})", partial_sub, this.NR_DOSAR_CASCO);
+                        mr.GenerateAndSendMessage(this.ID, DateTime.Now, subiect, subiect, partial_sub, authenticatedUserId, (int)Importanta.Low);
+                    }
+                    catch { }
+                }
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(r, CommonFunctions.JsonSerializerSettings), r, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
         /// <summary>
         /// Metoda pentru inserarea Dosarului curent
         /// </summary>

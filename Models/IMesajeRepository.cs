@@ -28,7 +28,7 @@ namespace SOCISA.Models
         response GetChildrens(Mesaj item, string tableName);
         response GetChildren(Mesaj item, string tableName, int childrenId);
 
-        response GenerateAndSendMessage(int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta);
+        response GenerateAndSendMessage(int? IdDosar, DateTime Data, string Subiect, string Body, string TipMesaj, int IdSender, int Importanta);
         response GetReceiversByIdDosar(Mesaj item);
         response SendToInvolvedParties(Mesaj item);
         response GetDosar(Mesaj item);
@@ -216,9 +216,9 @@ namespace SOCISA.Models
             return item.GetChildren(tableName, childrenId);
         }
 
-        public response GenerateAndSendMessage(int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta)
+        public response GenerateAndSendMessage(int? IdDosar, DateTime Data, string Subiect, string Body, string TipMesaj, int IdSender, int Importanta)
         {
-            Mesaj mesaj = new Mesaj(authenticatedUserId, connectionString, IdDosar, Data, TipMesaj, IdSender, Importanta);
+            Mesaj mesaj = new Mesaj(authenticatedUserId, connectionString, IdDosar, Data, Subiect, Body, TipMesaj, IdSender, Importanta);
             response r = mesaj.Insert();
             if(r.Status && r.InsertedId != null)
                 r.AddResponse( mesaj.SendToInvolvedParties());

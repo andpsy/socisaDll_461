@@ -34,6 +34,8 @@ namespace SOCISA.Models
         public string TYPE { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Include)]
         public int? ORDER { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Include)]
+        public int? PARENT_ID { get; set; }
 
         public Action() { }
 
@@ -108,6 +110,8 @@ namespace SOCISA.Models
             try { this.TYPE = item["TYPE"].ToString(); }
             catch { }
             try { this.ORDER = Convert.ToInt32(item["ORDER"]); }
+            catch { }
+            try { this.PARENT_ID = Convert.ToInt32(item["PARENT_ID"]); }
             catch { }
         }
 

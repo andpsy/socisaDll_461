@@ -517,6 +517,7 @@ namespace SOCISA.Models
                         Auto autoRca = new Auto(authenticatedUserId, connectionString);
                         Nomenclator tipDosar = new Nomenclator(authenticatedUserId, connectionString, "tip_dosare");
                         Dosar dosar = new Dosar(authenticatedUserId, connectionString);
+                        DosarExtended dosarExtended = new DosarExtended();
 
                         try
                         {
@@ -550,6 +551,7 @@ namespace SOCISA.Models
                             r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                             toReturn.AddResponse(r);
                         }
+                        dosarExtended.AsiguratCasco = asigCasco;
 
                         try
                         {
@@ -583,6 +585,7 @@ namespace SOCISA.Models
                             r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                             toReturn.AddResponse(r);
                         }
+                        dosarExtended.AsiguratRca = asigRca;
 
                         try
                         {
@@ -616,6 +619,7 @@ namespace SOCISA.Models
                             r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                             toReturn.AddResponse(r);
                         }
+                        dosarExtended.SocietateCasco = sCasco;
 
                         try
                         {
@@ -649,6 +653,7 @@ namespace SOCISA.Models
                             r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                             toReturn.AddResponse(r);
                         }
+                        dosarExtended.SocietateRca = sRca;
 
                         try
                         {
@@ -683,6 +688,7 @@ namespace SOCISA.Models
                             r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                             toReturn.AddResponse(r);
                         }
+                        dosarExtended.AutoCasco = autoCasco;
 
                         try
                         {
@@ -717,6 +723,7 @@ namespace SOCISA.Models
                             r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                             toReturn.AddResponse(r);
                         }
+                        dosarExtended.AutoRca = autoRca;
 
                         try
                         {
@@ -745,6 +752,7 @@ namespace SOCISA.Models
                             toReturn.AddResponse(r);
                             */
                         }
+                        dosarExtended.Intervenient = intervenient;
 
                         try { dosar.NR_DOSAR_CASCO = ews.Cells[rowNumber, columnNames["Nr. CASCO"]].Text.Trim(); }
                         catch { }
@@ -789,12 +797,13 @@ namespace SOCISA.Models
                         */
 
                         // verificare daca exista dosarul in baza de date sau a mai fost importat si adaugare mesaj in errorlist ....
+                        dosarExtended.Dosar = dosar;
                         r = dosar.Validare();
                         if (!r.Status)
                         {
                             toReturn.AddResponse(r);
                         }
-                        toReturnList.Add(new object[] { toReturn, dosar });
+                        toReturnList.Add(new object[] { toReturn, dosarExtended });
                     }
                     catch { }
                 }
@@ -839,21 +848,21 @@ namespace SOCISA.Models
                 List<object[]> toReturnList = new List<object[]>();
                 foreach (object[] responseDosar in (object[])responsesDosare.Result)
                 {
-                    Dosar dosar = (Dosar)responseDosar[1];
+                    DosarExtended dosarExtended = (DosarExtended)responseDosar[1];
                     response response = (response)responseDosar[0];
                     response r = new response();
                     if (response.Status)
                     {
-                        r = dosar.Insert();
+                        r = dosarExtended.Dosar.Insert();
                     }
                     else
                     {
-                        r = dosar.InsertWithErrors();
+                        r = dosarExtended.Dosar.InsertWithErrors();
                         response.Status = false;
                     }
                     response.InsertedId = r.InsertedId;
-                    dosar.Log(response, _date);
-                    toReturnList.Add(new object[] { response, dosar });
+                    dosarExtended.Dosar.Log(response, _date);
+                    toReturnList.Add(new object[] { response, dosarExtended });
                 }
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }
@@ -875,12 +884,12 @@ namespace SOCISA.Models
                 List<object[]> toReturnList = new List<object[]>();
                 foreach (object[] responseDosar in (object[])responsesDosare.Result)
                 {
-                    Dosar dosar = (Dosar)responseDosar[1];
+                    DosarExtended dosarExtended = (DosarExtended)responseDosar[1];
                     response response = (response)responseDosar[0];
-                    response r = dosar.Insert();
+                    response r = dosarExtended.Dosar.Insert();
                     response.InsertedId = r.InsertedId;
-                    dosar.Log(response, _date);
-                    toReturnList.Add(new object[] { response, dosar });
+                    dosarExtended.Dosar.Log(response, _date);
+                    toReturnList.Add(new object[] { response, dosarExtended });
                 }
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }catch(Exception exp)
@@ -901,13 +910,13 @@ namespace SOCISA.Models
                 List<object[]> toReturnList = new List<object[]>();
                 foreach (object[] responseDosarWithErrors in (object[])responsesDosareWithErrors.Result)
                 {
-                    Dosar dosar = (Dosar)responseDosarWithErrors[1];
+                    DosarExtended dosarExtended = (DosarExtended)responseDosarWithErrors[1];
                     response response = (response)responseDosarWithErrors[0];
-                    response r = dosar.InsertWithErrors();
+                    response r = dosarExtended.Dosar.InsertWithErrors();
                     response.InsertedId = r.InsertedId;
                     response.Status = false;
-                    dosar.Log(response, _date);
-                    toReturnList.Add(new object[] { response, dosar });
+                    dosarExtended.Dosar.Log(response, _date);
+                    toReturnList.Add(new object[] { response, dosarExtended });
                 }
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }
@@ -938,7 +947,19 @@ namespace SOCISA.Models
                     r.Error = JsonConvert.DeserializeObject<List<Error>>(dr["ERRORS"].ToString(), CommonFunctions.JsonDeserializerSettings);
 
                     Dosar dosar = r.Status ? new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r.InsertedId)) : new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r.InsertedId), true);
-                    toReturnList.Add(new object[] { r, dosar });
+                    DosarExtended de = new DosarExtended();
+                    de.Dosar = dosar;
+                    de.AsiguratCasco = (Asigurat)dosar.GetAsiguratCasco().Result;
+                    de.AsiguratRca = (Asigurat)dosar.GetAsiguratRca().Result;
+                    de.AutoCasco = (Auto)dosar.GetAutoCasco().Result;
+                    de.AutoRca = (Auto)dosar.GetAutoRca().Result;
+                    de.SocietateCasco = (SocietateAsigurare)dosar.GetSocietateCasco().Result;
+                    de.SocietateRca = (SocietateAsigurare)dosar.GetSocietateRca().Result;
+                    de.Intervenient = (Intervenient)dosar.GetIntervenient().Result;
+                    de.TipDosar = (Nomenclator)dosar.GetTipDosar().Result;
+
+                    //toReturnList.Add(new object[] { r, dosar });
+                    toReturnList.Add(new object[] { r, de });
                 }
                 dr.Close(); dr.Dispose();
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
@@ -958,7 +979,7 @@ namespace SOCISA.Models
             {
                 while (r.Read())
                 {
-                    dates.Add(r["DATA_IMPORT"].ToString());
+                    dates.Add(Convert.ToDateTime( r["DATA_IMPORT"]).ToString("dd.MM.yyyy HH:mm:ss"));
                 }
                 r.Close(); r.Dispose();
                 return new response(true, JsonConvert.SerializeObject(dates, CommonFunctions.JsonSerializerSettings), dates, null, null);

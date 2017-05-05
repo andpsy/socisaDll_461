@@ -10,10 +10,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SOCISA.Models
 {
+    public enum Importanta { Low = 0, Medium, High };
+
     public class Mesaj
     {
         const string _TABLE_NAME = "mesaje";
-        public enum Importanta { Low = 0, Medium, High };
         private int authenticatedUserId { get; set; }
         private string connectionString { get; set; }
 
@@ -385,6 +386,23 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
+        public response GetMessageReadDate(int idUtilizator)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJE_UTILIZATORIsp_GetByIdMesajIdUtilizator", new object[] { new MySqlParameter("_ID_MESAJ", this.ID), new MySqlParameter("_ID_UTILIZATOR", idUtilizator) });
+                IDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    MesajUtilizator mesajUtilizator = new MesajUtilizator(authenticatedUserId, connectionString, (IDataRecord)r);
+                    return new response(true, mesajUtilizator.DATA_CITIRE.ToString(), mesajUtilizator.DATA_CITIRE, null, null);
+                }
+                r.Close(); r.Dispose();
+                return new response(true, null, null, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
         /// <summary>
         /// Metoda pt. popularea Tipului mesajului
         /// </summary>
@@ -413,14 +431,14 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
-        public Mesaj(int _authenticatedUserId, string _connectionString, int? IdDosar, DateTime Data, string TipMesaj, int IdSender, int Importanta)
+        public Mesaj(int _authenticatedUserId, string _connectionString, int? IdDosar, DateTime Data, string Subiect, string Body, string TipMesaj, int IdSender, int Importanta)
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
             ID_DOSAR = IdDosar;
             DATA = Data;
-            SUBIECT = TipMesaj;
-            BODY = TipMesaj;
+            SUBIECT = Subiect;
+            BODY = Body;
             ID_SENDER = IdSender;
             ID_TIP_MESAJ = new Nomenclator(authenticatedUserId, connectionString, "tip_mesaje").GetIdByName("tip_mesaje", TipMesaj);
             IMPORTANTA = Importanta;

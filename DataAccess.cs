@@ -188,10 +188,16 @@ namespace SOCISA
                 try
                 {
                     string action = "";
+                    /*
                     if (mySqlCommand.CommandText.ToLower().IndexOf("insert") > 0) action = "INSERT";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("update") > 0) action = "UPDATE";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("delete") > 0) action = "DELETE";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("import") > 0) action = "IMPORT";
+                    */
+                    if (action == "")
+                    {
+                        action = mySqlCommand.CommandText.ToUpper().Substring(mySqlCommand.CommandText.ToUpper().IndexOf("SP_") + 3);
+                    }
                     string table = action != "IMPORT" ? mySqlCommand.CommandText.ToUpper().Replace("SP_", "").Replace(action, "") : mySqlCommand.CommandText.ToUpper().Replace("SP", "").Replace("REGULARIMPORT", "");
                     string detalii_before = "";
                     if (mySqlCommand.Parameters.Contains("_ID") && mySqlCommand.Parameters["_ID"].Direction == ParameterDirection.Input && (action == "UPDATE" || action == "DELETE")) // pt. Update / Delete
@@ -240,10 +246,16 @@ namespace SOCISA
                 try
                 {
                     string action = "";
+                    /*
                     if (mySqlCommand.CommandText.ToLower().IndexOf("insert") > 0) action = "INSERT";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("update") > 0) action = "UPDATE";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("delete") > 0) action = "DELETE";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("import") > 0) action = "IMPORT";
+                    */
+                    if(action == "")
+                    {
+                        action = mySqlCommand.CommandText.ToUpper().Substring(mySqlCommand.CommandText.ToUpper().IndexOf("SP_") + 3);
+                    }
                     string table = action != "IMPORT" ? mySqlCommand.CommandText.ToUpper().Replace("SP_", "").Replace(action, "") : mySqlCommand.CommandText.ToUpper().Replace("SP", "").Replace("REGULARIMPORT", "");
                     string detalii_before = "";
                     if (mySqlCommand.Parameters.Contains("_ID"))
@@ -252,7 +264,7 @@ namespace SOCISA
                         {
                             detalii_before = GetDetaliiBefore(table, Convert.ToInt32(mySqlCommand.Parameters["_ID"].Value));
                         }
-                        catch { detalii_before = ""; }
+                        catch(Exception exp) { LogWriter.Log(exp); detalii_before = ""; }
                     }
                     string detalii_after = "";
                     try
@@ -260,7 +272,7 @@ namespace SOCISA
                         foreach (MySqlParameter mp in mySqlCommand.Parameters)
                             detalii_after += (mp.ParameterName + " = " + mp.Value.ToString() + ", ");
                     }
-                    catch { }
+                    catch(Exception exp) { LogWriter.Log(exp); }
 
                     SaveLog(DateTime.Now, action, table, detalii_before, detalii_after);
                 }
@@ -297,10 +309,16 @@ namespace SOCISA
                 try
                 {
                     string action = "";
+                    /*
                     if (mySqlCommand.CommandText.ToLower().IndexOf("insert") > 0) action = "INSERT";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("update") > 0) action = "UPDATE";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("delete") > 0) action = "DELETE";
                     if (mySqlCommand.CommandText.ToLower().IndexOf("import") > 0) action = "IMPORT";
+                    */
+                    if (action == "")
+                    {
+                        action = mySqlCommand.CommandText.ToUpper().Substring(mySqlCommand.CommandText.ToUpper().IndexOf("SP_") + 3);
+                    }
                     string table = action != "IMPORT" ? mySqlCommand.CommandText.ToUpper().Replace("SP_", "").Replace(action, "") : mySqlCommand.CommandText.ToUpper().Replace("SP", "").Replace("REGULARIMPORT", "");
                     string detalii_before = "";
                     if (mySqlCommand.Parameters.Contains("_ID") && mySqlCommand.Parameters["_ID"].Direction != ParameterDirection.Output)
@@ -459,7 +477,7 @@ namespace SOCISA
             MySqlConnection mc = new MySqlConnection();
             mc.ConnectionString = ConnectionString;
             MySqlCommand m = new MySqlCommand();
-            m.Connection = mySqlConnection;
+            m.Connection = mc;
             m.CommandType = CommandType.StoredProcedure;
             m.CommandText = _tabela.ToUpper() + "sp_GetById";
             MySqlParameter _AUTHENTICATED_USER_ID = new MySqlParameter("_AUTHENTICATED_USER_ID", this.ID_UTILIZATOR);
@@ -475,7 +493,7 @@ namespace SOCISA
                 for (int i = 0; i < mdr.FieldCount; i++)
                 {
                     string dcName = mdr.GetName(i).ToString();
-                    toReturn += (dcName.ToUpper() + " = " + mdr[dcName].ToString());
+                    toReturn += (dcName.ToUpper() + " = " + mdr[dcName].ToString() + ", ");
                 }
                 break;
             }
@@ -486,7 +504,7 @@ namespace SOCISA
                 for (int i = 0; i < _columns.Count; i++)
                 {
                     string dcName = _columns[i].ColumnName;
-                    toReturn += (dcName.ToUpper() + " = " + mdr[dcName].ToString());
+                    toReturn += (dcName.ToUpper() + " = " + mdr[dcName].ToString() + ", ");
                 }
                 break;
             }
