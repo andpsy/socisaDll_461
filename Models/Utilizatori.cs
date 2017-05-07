@@ -97,7 +97,7 @@ namespace SOCISA.Models
             catch { }
             try { this.DETALII = utilizator["DETALII"].ToString(); }
             catch { }
-            try { this.IS_ONLINE = Convert.ToBoolean( utilizator["DETALII"]); }
+            try { this.IS_ONLINE = Convert.ToBoolean( utilizator["IS_ONLINE"]); }
             catch { }
             try { this.EMAIL = utilizator["EMAIL"].ToString(); }
             catch { }
@@ -579,6 +579,29 @@ namespace SOCISA.Models
                 for (int i = 0; i < aList.Count; i++)
                 {
                     toReturn[i] = (SocietateAsigurare)aList[i];
+                }
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response GetUtilizatoriSubordonati()
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_GetSubordonati", new object[] { new MySqlParameter("_ID_UTILIZATOR", this.ID) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                ArrayList aList = new ArrayList();
+                while (r.Read())
+                {
+                    Utilizator u = new Utilizator(authenticatedUserId, connectionString, r);
+                    aList.Add(u);
+                }
+                r.Close(); r.Dispose();
+                Utilizator[] toReturn = new Utilizator[aList.Count];
+                for (int i = 0; i < aList.Count; i++)
+                {
+                    toReturn[i] = (Utilizator)aList[i];
                 }
                 return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
