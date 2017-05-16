@@ -184,7 +184,7 @@ namespace SOCISA.Models
                     
                     if (propType != null)
                     {
-                        /*
+
                         if (propName.ToUpper() == "PASSWORD")
                         {
                             MD5 md5h = MD5.Create();
@@ -192,8 +192,9 @@ namespace SOCISA.Models
                             _parameters.Add(new MySqlParameter("_PASSWORD", md5p));
                         }
                         else
-                        */
+                        {
                             _parameters.Add(new MySqlParameter(String.Format("_{0}", propName.ToUpper()), propValue));
+                        }
                     }
                     
                 }
@@ -239,6 +240,61 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Delete()
         {
+            try
+            {
+                foreach (Action a in (Action[])this.GetActions().Result)
+                {
+                    UtilizatorAction ua = new UtilizatorAction(authenticatedUserId, connectionString);
+                    ua.ID_UTILIZATOR = Convert.ToInt32(this.ID); ua.ID_ACTION = Convert.ToInt32(a.ID);
+                    ua.Delete();
+                }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); }
+
+            try
+            {
+                foreach (Drept d in (Drept[])this.GetDrepturi().Result)
+                {
+                    UtilizatorDrept ud = new UtilizatorDrept(authenticatedUserId, connectionString);
+                    ud.ID_UTILIZATOR = Convert.ToInt32(this.ID); ud.ID_DREPT = Convert.ToInt32(d.ID);
+                    ud.Delete();
+                }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); }
+
+            try
+            {
+                foreach (Dosar d in (Dosar[])this.GetDosare().Result)
+                {
+                    UtilizatorDosar ud = new UtilizatorDosar(authenticatedUserId, connectionString);
+                    ud.ID_UTILIZATOR = Convert.ToInt32(this.ID); ud.ID_DOSAR = Convert.ToInt32(d.ID);
+                    ud.Delete();
+                }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); }
+
+            try
+            {
+                foreach (SocietateAsigurare sa in (SocietateAsigurare[])this.GetSocietatiAdministrate().Result)
+                {
+                    UtilizatorSocietateAdministrata usa = new UtilizatorSocietateAdministrata(authenticatedUserId, connectionString);
+                    usa.ID_UTILIZATOR = Convert.ToInt32(this.ID); usa.ID_SOCIETATE = Convert.ToInt32(sa.ID);
+                    usa.Delete();
+                }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); }
+
+            try
+            {
+                foreach (Setare s in (Setare[])this.GetSetari().Result)
+                {
+                    UtilizatorSetare us = new UtilizatorSetare(authenticatedUserId, connectionString);
+                    us.ID_UTILIZATOR = Convert.ToInt32(this.ID); us.ID_SETARE = Convert.ToInt32(s.ID);
+                    us.Delete();
+                }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); }
+
             response toReturn = new response(false, "", null, null, new List<Error>());;
             ArrayList _parameters = new ArrayList();
             _parameters.Add(new MySqlParameter("_ID", this.ID));

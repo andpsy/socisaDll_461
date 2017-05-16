@@ -566,6 +566,7 @@ namespace SOCISA.Models
                                 asigRca = new Asigurat(authenticatedUserId, connectionString);
                                 asigRca.DENUMIRE = ews.Cells[rowNumber, columnNames["Asigurat RCA"]].Text.Trim();
                                 r = asigRca.Insert();
+                                /*
                                 if (r.Status && r.InsertedId != null)
                                 {
                                     asigRca.ID = r.InsertedId;
@@ -574,16 +575,20 @@ namespace SOCISA.Models
                                 {
                                     toReturn.AddResponse(r);
                                 }
+                                */
+                                asigRca.ID = r.InsertedId;
                             }
                             dosar.ID_ASIGURAT_RCA = asigRca.ID;
                         }
                         catch
                         {
+                            /*
                             Error err = ErrorParser.ErrorMessage("couldNotInsertAsiguratRca");
                             List<Error> errs = new List<Error>();
                             errs.Add(err);
                             r = new response(false, err.ERROR_MESSAGE, null, null, errs);
                             toReturn.AddResponse(r);
+                            */
                         }
                         dosarExtended.AsiguratRca = asigRca;
 
@@ -805,12 +810,13 @@ namespace SOCISA.Models
                         }
                         toReturnList.Add(new object[] { toReturn, dosarExtended });
                     }
-                    catch { }
+                    catch(Exception exp) { LogWriter.Log(exp); }
                 }
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }
             catch (Exception exp)
             {
+                LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
         }
@@ -837,6 +843,7 @@ namespace SOCISA.Models
             }
             catch (Exception exp)
             {
+                LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
         }
@@ -868,6 +875,7 @@ namespace SOCISA.Models
             }
             catch (Exception exp)
             {
+                LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
         }
@@ -894,6 +902,7 @@ namespace SOCISA.Models
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
             }catch(Exception exp)
             {
+                LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
         }
@@ -922,6 +931,7 @@ namespace SOCISA.Models
             }
             catch (Exception exp)
             {
+                LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
         }
@@ -966,17 +976,18 @@ namespace SOCISA.Models
             }
             catch (Exception exp)
             {
+                LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
         }
 
         public response GetImportDates()
         {
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetImportDates");
-            IDataReader r = da.ExecuteSelectQuery();
-            List<string> dates = new List<string>();
             try
             {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetImportDates");
+                IDataReader r = da.ExecuteSelectQuery();
+                List<string> dates = new List<string>();
                 while (r.Read())
                 {
                     dates.Add(Convert.ToDateTime( r["DATA_IMPORT"]).ToString("dd.MM.yyyy HH:mm:ss"));
@@ -986,6 +997,7 @@ namespace SOCISA.Models
             }
             catch (Exception exp)
             {
+                LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
         }

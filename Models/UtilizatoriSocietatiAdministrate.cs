@@ -166,7 +166,7 @@ namespace SOCISA.Models
             {
                 _parameters.Add(new MySqlParameter("_ID_UTILIZATOR", this.ID_UTILIZATOR));
                 _parameters.Add(new MySqlParameter("_ID_SOCIETATE", this.ID_SOCIETATE));
-                da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORI_SOCIETATI_ADMINISTRATEsp_deleteByFields", _parameters.ToArray());
+                da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORI_SOCIETATI_ADMINISTRATEsp_soft_deleteByFields", _parameters.ToArray());
             }
             toReturn = da.ExecuteDeleteQuery();
             return toReturn;
