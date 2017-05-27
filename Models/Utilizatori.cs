@@ -184,7 +184,7 @@ namespace SOCISA.Models
                     
                     if (propType != null)
                     {
-
+                        /*
                         if (propName.ToUpper() == "PASSWORD")
                         {
                             MD5 md5h = MD5.Create();
@@ -192,6 +192,7 @@ namespace SOCISA.Models
                             _parameters.Add(new MySqlParameter("_PASSWORD", md5p));
                         }
                         else
+                        */
                         {
                             _parameters.Add(new MySqlParameter(String.Format("_{0}", propName.ToUpper()), propValue));
                         }
@@ -232,6 +233,19 @@ namespace SOCISA.Models
                 }
                 return this.Update();
             }
+        }
+
+        public response SetPassword(string password)
+        {
+            response toReturn = new response();
+            ArrayList _parameters = new ArrayList();
+            _parameters.Add(new MySqlParameter("_ID_UTILIZATOR", this.ID));
+            MD5 md5h = MD5.Create();
+            string md5p = CommonFunctions.GetMd5Hash(md5h, password);
+            _parameters.Add(new MySqlParameter("_PASSWORD", md5p));
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_SetPassword", _parameters.ToArray());
+            toReturn = da.ExecuteUpdateQuery();
+            return toReturn;
         }
 
         /// <summary>
@@ -387,6 +401,30 @@ namespace SOCISA.Models
                 return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response GetDosareNoi(int id_societate)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetAllFromLastLogin", new object[] { new MySqlParameter("_ID_SOCIETATE", id_societate) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                ArrayList aList = new ArrayList();
+                while (r.Read())
+                {
+                    Dosar d = new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
+                    aList.Add(d);
+                }
+                r.Close(); r.Dispose();
+                Dosar[] toReturn = new Dosar[aList.Count];
+                for (int i = 0; i < aList.Count; i++)
+                {
+                    toReturn[i] = (Dosar)aList[i];
+                }
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+
         }
 
         /// <summary>

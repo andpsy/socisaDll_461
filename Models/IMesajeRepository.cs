@@ -220,8 +220,11 @@ namespace SOCISA.Models
         {
             Mesaj mesaj = new Mesaj(authenticatedUserId, connectionString, IdDosar, Data, Subiect, Body, TipMesaj, IdSender, Importanta);
             response r = mesaj.Insert();
-            if(r.Status && r.InsertedId != null)
-                r.AddResponse( mesaj.SendToInvolvedParties());
+            if (r.Status && r.InsertedId != null)
+            {
+                mesaj.ID = r.InsertedId;
+                r.AddResponse(mesaj.SendToInvolvedParties());
+            }
             return r;
         }
 

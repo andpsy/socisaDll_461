@@ -16,6 +16,8 @@ namespace SOCISA.Models
         response GetFiltered(string _sort, string _order, string _filter, string _limit);
         response GetFiltered(string _json);
         response GetFiltered(JObject _json);
+        response GetDosareNoi(Utilizator item, int id_societate);
+        response GetDosareNoi(int _id, int id_societate);
 
         response Find(int _id);
         response Insert(Utilizator action);
@@ -23,6 +25,8 @@ namespace SOCISA.Models
         response Delete(Utilizator item);
         response Update(int id, string fieldValueCollection);
         response Update(string fieldValueCollection);
+        response SetPassword(int _id, string password);
+        response SetPassword(Utilizator item, string password);
 
         response HasChildrens(Utilizator item, string tableName);
         response HasChildren(Utilizator item, string tableName, int childrenId);
@@ -151,6 +155,16 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
         }
 
+        public response GetDosareNoi(Utilizator item, int id_societate)
+        {
+            return item.GetDosareNoi(id_societate);
+        }
+
+        public response GetDosareNoi(int _id, int id_societate)
+        {
+            Utilizator item = new Utilizator(Convert.ToInt32(authenticatedUserId), connectionString, _id);
+            return item.GetDosareNoi(id_societate);
+        }
 
         public response Find(int _id)
         {
@@ -188,6 +202,18 @@ namespace SOCISA.Models
             Utilizator tmpItem = JsonConvert.DeserializeObject<Utilizator>(fieldValueCollection); // sa vedem daca merge asa sau trebuie cu JObject
             //return JsonConvert.DeserializeObject<Utilizator>(Find(Convert.ToInt32(tmpItem.ID)).Message).Update(fieldValueCollection);
             return ((Utilizator)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
+        }
+
+        public response SetPassword(Utilizator item, string password)
+        {
+            return item.SetPassword(password);
+        }
+
+        public response SetPassword(int id, string password)
+        {
+            //Utilizator item = JsonConvert.DeserializeObject<Utilizator>(Find(id).Message);
+            Utilizator item = (Utilizator)(Find(id).Result);
+            return item.SetPassword(password);
         }
 
         public response HasChildrens(Utilizator item, string tableName)

@@ -722,7 +722,17 @@ namespace SOCISA.Models
                 {
                     toReturn[i] = (DocumentScanat)aList[i];
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response IsAssigned()
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_IsAssigned", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
+                return da.ExecuteScalarQuery();
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
@@ -731,22 +741,120 @@ namespace SOCISA.Models
         {
             try
             {
-                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_Avizare", new object[] { new MySqlParameter("_ID", this.ID), new MySqlParameter("_AVIZAT", _avizat) });
-                response r = da.ExecuteUpdateQuery();
+                response r = ValidareAvizare();
                 if (r.Status)
                 {
-                    try
+                    DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_Avizare", new object[] { new MySqlParameter("_ID", this.ID), new MySqlParameter("_AVIZAT", _avizat) });
+                    r = da.ExecuteUpdateQuery();
+                    if (r.Status)
                     {
-                        MesajeRepository mr = new MesajeRepository(authenticatedUserId, connectionString);
-                        string partial_sub = String.Format("DOSAR {0}", _avizat ? "NOU" : "ELIMINAT");
-                        string subiect = String.Format("{0} ({1})", partial_sub, this.NR_DOSAR_CASCO);
-                        mr.GenerateAndSendMessage(this.ID, DateTime.Now, subiect, subiect, partial_sub, authenticatedUserId, (int)Importanta.Low);
+                        try
+                        {
+                            MesajeRepository mr = new MesajeRepository(authenticatedUserId, connectionString);
+                            string partial_sub = String.Format("DOSAR {0}", _avizat ? "NOU" : "ELIMINAT");
+                            string subiect = String.Format("{0} ({1})", partial_sub, this.NR_DOSAR_CASCO);
+                            mr.GenerateAndSendMessage(this.ID, DateTime.Now, subiect, subiect, partial_sub, authenticatedUserId, (int)Importanta.Low);
+                        }
+                        catch { }
                     }
-                    catch { }
+                    return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(r, CommonFunctions.JsonSerializerSettings), r, null, null);
+                }else
+                {
+                    return r;
                 }
-                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(r, CommonFunctions.JsonSerializerSettings), r, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response ValidareAvizare()
+        {
+            response r = this.Validare();
+            if (!r.Status)
+            {
+                return r;
+            }
+            bool isValid = true;
+            TipDocumenteRepository tdr = new TipDocumenteRepository(authenticatedUserId, connectionString);
+            TipDocument[] tipuri_document = (TipDocument[]) tdr.GetAll().Result;
+            DocumentScanat[] documente = (DocumentScanat[])this.GetDocumente().Result;
+            if(documente == null || documente.Length == 0)
+            {
+                return new response(false, "", null, null, new List<Error>());
+            }
+            Dictionary<int, bool> validatedDocs = new Dictionary<int, bool>();
+            foreach(TipDocument td in tipuri_document)
+            {
+                isValid = ValidareTipDocument(td, documente, tipuri_document, validatedDocs);
+                if (!isValid) break;
+                validatedDocs.Add(Convert.ToInt32(td.ID), isValid);
+            }
+            return new response(isValid, "", null, null, isValid ? null : new List<Error>());
+        }
+
+        private TipDocument GetTipDocumentByDenumire(string denumire, TipDocument[] tipuri_document)
+        {
+            foreach(TipDocument td in tipuri_document)
+            {
+                if (td.DENUMIRE == denumire) return td;
+            }
+            return null;
+        }
+
+        private bool ValidareTipDocument(TipDocument td, DocumentScanat[] documente, TipDocument[] tipuri_document, Dictionary<int, bool> validatedDocs)
+        {
+            bool isValid = false;
+            if (td.MANDATORY)
+            {
+                switch (td.DENUMIRE)
+                {
+                    case "CEDAM":
+                        TipDocument tDoc = GetTipDocumentByDenumire("POLIȚĂ VINOVAT", tipuri_document);
+                        if (tDoc != null)
+                        {
+                            if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
+                            {
+                                return true;
+                            }
+                        }
+                        break;
+                    case "POLIȚĂ VINOVAT":
+                        tDoc = GetTipDocumentByDenumire("CEDAM", tipuri_document);
+                        if (tDoc != null)
+                        {
+                            if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
+                            {
+                                return true;
+                            }
+                        }
+                        break;
+                    case "FACTURĂ DE REPARAȚII":
+                        tDoc = GetTipDocumentByDenumire("CALCUL VMD", tipuri_document);
+                        if (tDoc != null)
+                        {
+                            if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
+                            {
+                                return true;
+                            }
+                        }
+                        break;
+                    case "CALCUL VMD":
+                        tDoc = GetTipDocumentByDenumire("FACTURĂ DE REPARAȚII", tipuri_document);
+                        if (tDoc != null)
+                        {
+                            if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
+                            {
+                                return true;
+                            }
+                        }
+                        break;
+                }
+                foreach(DocumentScanat ds in documente)
+                {
+                    if (ds.ID_TIP_DOCUMENT == td.ID && ds.VIZA_CASCO) { isValid = true; break; }
+                }
+                return isValid;
+            }
+            return true;
         }
 
         /// <summary>

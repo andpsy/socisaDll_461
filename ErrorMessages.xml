@@ -407,4 +407,11 @@
     <ERROR_OBJECT>TipDocumentJson</ERROR_OBJECT>
     <ERROR_TYPE>Critical</ERROR_TYPE>
   </ErrorMessage>
+  <ErrorMessage>
+    <ID>58</ID>
+    <ERROR_CODE>passwordsDontMatch</ERROR_CODE>
+    <ERROR_MESSAGE>Parolele nu coincid!</ERROR_MESSAGE>
+    <ERROR_OBJECT>UtilizatoriJson</ERROR_OBJECT>
+    <ERROR_TYPE>Critical</ERROR_TYPE>
+  </ErrorMessage>
 </ErrorMessages>

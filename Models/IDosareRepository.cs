@@ -254,6 +254,17 @@ namespace SOCISA.Models
             return ((Dosar)(Find(Convert.ToInt32(tmpItem.ID)).Result)).Update(fieldValueCollection);
         }
 
+        public response Avizare(Dosar item, bool _avizat)
+        {
+            return item.Avizare(_avizat);
+        }
+
+        public response Avizare(int _id, bool _avizat)
+        {
+            Dosar item = (Dosar)(Find(_id).Result);
+            return item.Avizare(_avizat);
+        }
+
         public response Delete(Dosar item)
         {
             return item.Delete();
@@ -957,7 +968,8 @@ namespace SOCISA.Models
                     r.Error = JsonConvert.DeserializeObject<List<Error>>(dr["ERRORS"].ToString(), CommonFunctions.JsonDeserializerSettings);
 
                     Dosar dosar = r.Status ? new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r.InsertedId)) : new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r.InsertedId), true);
-                    DosarExtended de = new DosarExtended();
+                    DosarExtended de = new DosarExtended(dosar);
+                    /*
                     de.Dosar = dosar;
                     de.AsiguratCasco = (Asigurat)dosar.GetAsiguratCasco().Result;
                     de.AsiguratRca = (Asigurat)dosar.GetAsiguratRca().Result;
@@ -967,7 +979,7 @@ namespace SOCISA.Models
                     de.SocietateRca = (SocietateAsigurare)dosar.GetSocietateRca().Result;
                     de.Intervenient = (Intervenient)dosar.GetIntervenient().Result;
                     de.TipDosar = (Nomenclator)dosar.GetTipDosar().Result;
-
+                    */
                     //toReturnList.Add(new object[] { r, dosar });
                     toReturnList.Add(new object[] { r, de });
                 }
