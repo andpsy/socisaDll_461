@@ -424,7 +424,29 @@ namespace SOCISA.Models
                 return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
 
+        public response GetDosareNeasignate(int id_societate)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_GetAllNeasignate", new object[] { new MySqlParameter("_ID_SOCIETATE", id_societate) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                ArrayList aList = new ArrayList();
+                while (r.Read())
+                {
+                    Dosar d = new Dosar(authenticatedUserId, connectionString, Convert.ToInt32(r["ID"]));
+                    aList.Add(d);
+                }
+                r.Close(); r.Dispose();
+                Dosar[] toReturn = new Dosar[aList.Count];
+                for (int i = 0; i < aList.Count; i++)
+                {
+                    toReturn[i] = (Dosar)aList[i];
+                }
+                return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
         /// <summary>
