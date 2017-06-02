@@ -704,6 +704,33 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
+        public response UserHasWright(int _ID_UTILIZATOR)
+        {
+            try
+            {
+                bool hasWright = false;
+                Utilizator utilizator = new Utilizator(authenticatedUserId, connectionString, _ID_UTILIZATOR);
+                string tipU = ((Nomenclator)utilizator.GetTipUtilizator().Result).DENUMIRE;
+                if (tipU == "Administrator")
+                    return new response(true, "", true, null, null);
+
+                if (tipU == "Super" && (utilizator.ID_SOCIETATE == this.ID_SOCIETATE_CASCO || (utilizator.ID_SOCIETATE == this.ID_SOCIETATE_RCA && this.AVIZAT)))
+                    return new response(true, "", true, null, null);
+
+                Utilizator[] us = (Utilizator[])this.GetUtilizatori().Result;
+                foreach (Utilizator u in us)
+                {
+                    if (u.ID == _ID_UTILIZATOR)
+                    {
+                        hasWright = true;
+                        break;
+                    }
+                }
+                return new response(true, "", hasWright, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
         public response GetDocumente()
         {
             try
