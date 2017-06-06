@@ -794,12 +794,8 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
-        /// <summary>
-        /// Functie pt. returnarea mesajelor noi, folosita pt. dashboard
-        /// </summary>
-        /// <param name="_ID_UTILIZATOR">Id-ul unic al utilizatorului</param>
-        /// <returns>vector de perechi [SOCISA.NomenclatorJson, int]</returns>
-        public response GetNewMessages()
+        /*
+        public response CountNewMessages()
         {
             object[] toReturn = null;
             try
@@ -817,5 +813,75 @@ namespace SOCISA.Models
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
+
+        public response GetNewMesaje()
+        {
+            object[] toReturn = null;
+            try
+            {
+                List<Mesaj> dtList = new List<Mesaj>();
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_GetNewMessages");
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    dtList.Add(new Mesaj(authenticatedUserId, connectionString, r));
+                }
+                r.Close(); r.Dispose();
+                toReturn = dtList.ToArray();
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+        */
+
+        public response GetNewMesaje(DateTime _LAST_REFRESH)
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "MESAJEsp_GetByIdDosarNew", new object[] { new MySqlParameter("_ID_DOSAR", null), new MySqlParameter("_LAST_REFRESH", _LAST_REFRESH) });
+                response r = da.ExecuteScalarQuery();
+                return r;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response GetMesaje()
+        {
+            object[] toReturn = null;
+            try
+            {
+                List<Mesaj> dtList = new List<Mesaj>();
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_GetMessages");
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    dtList.Add(new Mesaj(authenticatedUserId, connectionString, r));
+                }
+                r.Close(); r.Dispose();
+                toReturn = dtList.ToArray();
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+        public response GetSentMesaje()
+        {
+            object[] toReturn = null;
+            try
+            {
+                List<Mesaj> dtList = new List<Mesaj>();
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "UTILIZATORIsp_GetSentMessages");
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                while (r.Read())
+                {
+                    dtList.Add(new Mesaj(authenticatedUserId, connectionString, r));
+                }
+                r.Close(); r.Dispose();
+                toReturn = dtList.ToArray();
+                return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
     }
 }
