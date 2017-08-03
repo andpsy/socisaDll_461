@@ -607,7 +607,7 @@ namespace SOCISA.Models
                         {
                             try
                             {
-                                sCasco = new SocietateAsigurare(authenticatedUserId, connectionString, ews.Cells[rowNumber, columnNames["Asigurator CASCO"]].Text.Trim());
+                                sCasco = new SocietateAsigurare(authenticatedUserId, connectionString, ews.Cells[rowNumber, columnNames["Asigurator CASCO"]].Text.Trim(), true);
                                 sCasco = sCasco.ID == null ? null : sCasco;
                             }
                             catch { sCasco = null; }
@@ -641,7 +641,7 @@ namespace SOCISA.Models
                         {
                             try
                             {
-                                sRca = new SocietateAsigurare(authenticatedUserId, connectionString, ews.Cells[rowNumber, columnNames["Asigurator RCA"]].Text.Trim());
+                                sRca = new SocietateAsigurare(authenticatedUserId, connectionString, ews.Cells[rowNumber, columnNames["Asigurator RCA"]].Text.Trim(), true);
                                 sRca = sRca.ID == null ? null : sRca;
                             }
                             catch { sRca = null; }

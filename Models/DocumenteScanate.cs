@@ -190,6 +190,11 @@ namespace SOCISA.Models
                     this.EXTENSIE_FISIER = this.CALE_FISIER.Substring(this.CALE_FISIER.LastIndexOf('.'));
                     //File.Delete(this.CALE_FISIER); // nu mai stergem, ca ne trebuie si in File Storage !
                 }
+                if(this.FILE_CONTENT != null && this.CALE_FISIER != null)
+                {
+                    this.SMALL_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Small)).Result;
+                    this.MEDIUM_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Custom)).Result;
+                }
             }
             catch(Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() {new Error(exp) }); }
             response toReturn = Validare();
@@ -261,6 +266,11 @@ namespace SOCISA.Models
                     this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
                     this.EXTENSIE_FISIER = this.CALE_FISIER.Substring(this.CALE_FISIER.LastIndexOf('.'));
                     //File.Delete(this.CALE_FISIER);
+                }
+                if (this.FILE_CONTENT != null && this.CALE_FISIER != null)
+                {
+                    this.SMALL_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Small)).Result;
+                    this.MEDIUM_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Custom)).Result;
                 }
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }

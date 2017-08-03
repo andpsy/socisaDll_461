@@ -64,11 +64,11 @@ namespace SOCISA.Models
             r.Close(); r.Dispose();
         }
 
-        public SocietateAsigurare(int _authenticatedUserId, string _connectionString, string _DENUMIRE_SCURTA)
+        public SocietateAsigurare(int _authenticatedUserId, string _connectionString, string _DENUMIRE, bool _DENUMIRE_SCURTA)
         {
             authenticatedUserId = _authenticatedUserId;
             connectionString = _connectionString;
-            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SOCIETATI_ASIGURAREsp_GetByDenumireScurta", new object[] { new MySqlParameter("_DENUMIRE_SCURTA", _DENUMIRE_SCURTA) });
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "SOCIETATI_ASIGURAREsp_GetByDenumire", new object[] {new MySqlParameter("_DENUMIRE", _DENUMIRE),  new MySqlParameter("_DENUMIRE_SCURTA", _DENUMIRE_SCURTA) });
             MySqlDataReader r = da.ExecuteSelectQuery();
             while (r.Read())
             {

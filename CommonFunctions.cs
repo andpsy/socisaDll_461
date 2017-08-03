@@ -151,6 +151,43 @@ namespace SOCISA
             }
         }
 
+        public static string DATE_FORMAT
+        {
+            get
+            {
+                try
+                {
+                    string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+                    string settings = File.ReadAllText(settingsFile);
+                    dynamic result = JsonConvert.DeserializeObject(settings);
+                    return Convert.ToString(result.DateFormat);
+                }catch(Exception exp)
+                {
+                    LogWriter.Log(exp);
+                    return "dd.MM.yyyy";
+                }
+            }
+        }
+
+        public static string DATE_TIME_FORMAT
+        {
+            get
+            {
+                try
+                {
+                    string settingsFile = Path.Combine(AppContext.BaseDirectory, "AppSettings.json");
+                    string settings = File.ReadAllText(settingsFile);
+                    dynamic result = JsonConvert.DeserializeObject(settings);
+                    return Convert.ToString(result.DateTimeFormat);
+                }
+                catch (Exception exp)
+                {
+                    LogWriter.Log(exp);
+                    return "dd.MM.yyyy";
+                }
+            }
+        }
+
         public static T ConvertValue<T, U>(U value) where U : IConvertible
         {
             return (T)Convert.ChangeType(value, typeof(T));
@@ -198,7 +235,7 @@ namespace SOCISA
             {"Action", "actions" },
             {"Asigurat","asigurati" },
             {"Auto","auto" },
-            { "DocumentScanat","documente_scanate"},
+            {"DocumentScanat","documente_scanate"},
             {"Dosar", "dosare" },
             {"DosarProces","dosare_procese" },
             {"DosarStadiu","dosare_stadii" },

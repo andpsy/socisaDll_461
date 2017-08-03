@@ -754,6 +754,24 @@ namespace SOCISA.Models
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
         }
 
+        public response GetDocumenteTipuri()
+        {
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_DocumenteTipuri", new object[] { new MySqlParameter("_ID_DOSAR", this.ID) });
+                MySqlDataReader r = da.ExecuteSelectQuery();
+                ArrayList aList = new ArrayList();
+                while (r.Read())
+                {
+                    aList.Add(new object[] { r["ID"], r["DENUMIRE"], r["CNT"] });
+                }
+                r.Close(); r.Dispose();
+                return new response(true, JsonConvert.SerializeObject(aList.ToArray(), CommonFunctions.JsonSerializerSettings), aList.ToArray(), null, null);
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new List<Error>() { new Error(exp) }); }
+        }
+
+
         public response IsAssigned()
         {
             try
@@ -809,11 +827,28 @@ namespace SOCISA.Models
                 return new response(false, "", null, null, new List<Error>());
             }
             Dictionary<int, bool> validatedDocs = new Dictionary<int, bool>();
-            foreach(TipDocument td in tipuri_document)
+
+            foreach (TipDocument td in tipuri_document)
             {
-                isValid = ValidareTipDocument(td, documente, tipuri_document, validatedDocs);
-                if (!isValid) break;
-                validatedDocs.Add(Convert.ToInt32(td.ID), isValid);
+                bool localIsValid = false;
+                if (td.MANDATORY)
+                {
+                    foreach (DocumentScanat ds in documente)
+                    {
+                        if (ds.ID_TIP_DOCUMENT == td.ID && ds.VIZA_CASCO) { localIsValid = true; break; }
+                    }
+                    validatedDocs.Add(Convert.ToInt32(td.ID), localIsValid);
+                }
+            }
+
+            foreach (TipDocument td in tipuri_document)
+            {
+                if (td.MANDATORY && (!validatedDocs.ContainsKey(Convert.ToInt32(td.ID)) || (validatedDocs.ContainsKey(Convert.ToInt32(td.ID)) && !validatedDocs[Convert.ToInt32(td.ID)])))
+                {
+                    isValid = ValidareTipDocument(td, documente, tipuri_document, validatedDocs);
+                    if (!isValid) break;
+                    //validatedDocs.Add(Convert.ToInt32(td.ID), isValid);
+                }
             }
             return new response(isValid, "", null, null, isValid ? null : new List<Error>());
         }
@@ -835,7 +870,7 @@ namespace SOCISA.Models
                 switch (td.DENUMIRE)
                 {
                     case "CEDAM":
-                        TipDocument tDoc = GetTipDocumentByDenumire("POLIȚĂ VINOVAT", tipuri_document);
+                        TipDocument tDoc = GetTipDocumentByDenumire("POLITA VINOVAT", tipuri_document);
                         if (tDoc != null)
                         {
                             if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
@@ -844,7 +879,7 @@ namespace SOCISA.Models
                             }
                         }
                         break;
-                    case "POLIȚĂ VINOVAT":
+                    case "POLITA VINOVAT":
                         tDoc = GetTipDocumentByDenumire("CEDAM", tipuri_document);
                         if (tDoc != null)
                         {
@@ -854,7 +889,7 @@ namespace SOCISA.Models
                             }
                         }
                         break;
-                    case "FACTURĂ DE REPARAȚII":
+                    case "FACTURA DE REPARATII":
                         tDoc = GetTipDocumentByDenumire("CALCUL VMD", tipuri_document);
                         if (tDoc != null)
                         {
@@ -865,7 +900,28 @@ namespace SOCISA.Models
                         }
                         break;
                     case "CALCUL VMD":
-                        tDoc = GetTipDocumentByDenumire("FACTURĂ DE REPARAȚII", tipuri_document);
+                        tDoc = GetTipDocumentByDenumire("FACTURA DE REPARATII", tipuri_document);
+                        if (tDoc != null)
+                        {
+                            if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
+                            {
+                                return true;
+                            }
+                        }
+                        break;
+
+                    case "PROCES VERBAL":
+                        tDoc = GetTipDocumentByDenumire("CONSTATARE AMIABILA", tipuri_document);
+                        if (tDoc != null)
+                        {
+                            if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
+                            {
+                                return true;
+                            }
+                        }
+                        break;
+                    case "CONSTATARE AMIABILA":
+                        tDoc = GetTipDocumentByDenumire("PROCES VERBAL", tipuri_document);
                         if (tDoc != null)
                         {
                             if (validatedDocs.ContainsKey(Convert.ToInt32(tDoc.ID)) && validatedDocs[Convert.ToInt32(tDoc.ID)])
@@ -875,10 +931,12 @@ namespace SOCISA.Models
                         }
                         break;
                 }
-                foreach(DocumentScanat ds in documente)
+                /*
+                foreach (DocumentScanat ds in documente)
                 {
                     if (ds.ID_TIP_DOCUMENT == td.ID && ds.VIZA_CASCO) { isValid = true; break; }
                 }
+                */
                 return isValid;
             }
             return true;
@@ -1394,6 +1452,7 @@ namespace SOCISA.Models
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
         public response Validare()
         {
+            #region -- old --
             /*
             response toReturn = new response(true, "", null, null, new List<Error>());
             Error err = new Error();
@@ -1456,6 +1515,7 @@ namespace SOCISA.Models
                 }
             }
             */
+            #endregion
             bool succes;
             response toReturn = Validator.Validate(authenticatedUserId, connectionString, this, _TABLE_NAME, out succes);
             if(!succes) // daca nu s-au putut citi validarile din fisier, sau nu sunt definite in fisier, mergem pe varianta hardcodata
@@ -1471,7 +1531,7 @@ namespace SOCISA.Models
                     toReturn.InsertedId = null;
                     toReturn.Error.Add(err);
                 }
-
+                /*
                 if (this.ID_ASIGURAT_RCA == null || this.ID_ASIGURAT_RCA <= 0)
                 {
                     toReturn.Status = false;
@@ -1480,7 +1540,7 @@ namespace SOCISA.Models
                     toReturn.InsertedId = null;
                     toReturn.Error.Add(err);
                 }
-
+                */
                 if (this.ID_SOCIETATE_CASCO == null || this.ID_SOCIETATE_CASCO <= 0)
                 {
                     toReturn.Status = false;

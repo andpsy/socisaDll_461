@@ -180,6 +180,8 @@ namespace SOCISA
 
 
             string docs = "";
+            //pentru insiruirea in opis a tuturor documentelor, negrupate pe tip
+            /*
             Models.DocumentScanat[] dsj = (Models.DocumentScanat[])dosar.GetDocumente().Result;
             foreach (Models.DocumentScanat doc in dsj)
             {
@@ -187,11 +189,18 @@ namespace SOCISA
                 //docs = String.Format("- {1}\r\n{0}", docs, (doc.DETALII != "" && doc.DETALII != null ? doc.DETALII : doc.DENUMIRE_FISIER));
                 docs = String.Format("- {1}\r\n{0}", docs, tip_document.DENUMIRE + " " + (doc.DETALII != "" && doc.DETALII != null ? doc.DETALII : ""));
             }
+            */
+            object[] DocumenteTipuri = (object[])dosar.GetDocumenteTipuri().Result;
+            foreach(object[] documentTip in DocumenteTipuri)
+            {
+                docs = String.Format("{0}\r\n- {1}{2}", docs, documentTip[1].ToString(), Convert.ToInt32(documentTip[2]) > 1 ? " (" + documentTip[2].ToString() + " file)" : "");
+            }
+
             field_names.Add("{{DOCUMENTE}}", docs);
 
 
-            PdfAnsiTrueTypeFont boldFont = new PdfAnsiTrueTypeFont(new FileStream(Path.Combine(AppContext.BaseDirectory, "Content", "arialbold.ttf"), FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
-            PdfAnsiTrueTypeFont regularFont = new PdfAnsiTrueTypeFont(new FileStream(Path.Combine(AppContext.BaseDirectory, "Content", "arial.ttf"), FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
+            PdfUnicodeTrueTypeFont boldFont = new PdfUnicodeTrueTypeFont(new FileStream(Path.Combine(AppContext.BaseDirectory, "Content", "arialbold.ttf"), FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
+            PdfUnicodeTrueTypeFont regularFont = new PdfUnicodeTrueTypeFont(new FileStream(Path.Combine(AppContext.BaseDirectory, "Content", "arial.ttf"), FileMode.Open, FileAccess.Read, FileShare.Read), 12, true);
 
             PdfFormattedContent pfc = new PdfFormattedContent();
             foreach (string s in pdfText)
@@ -351,7 +360,8 @@ namespace SOCISA
                     {
                         if (dsj.VIZA_CASCO)
                         {
-                            MemoryStream ms = new MemoryStream(dsj.FILE_CONTENT);
+                            //MemoryStream ms = new MemoryStream(dsj.FILE_CONTENT); // -- pt. citire content fisier din  BD
+                            FileStream ms = File.Open(Path.Combine(CommonFunctions.GetScansFolder(), dsj.CALE_FISIER), FileMode.Open, FileAccess.Read);
                             switch (dsj.EXTENSIE_FISIER.Replace(".", "").ToLower())
                             {
                                 case "pdf":
@@ -385,8 +395,12 @@ namespace SOCISA
                                     poDocument.Pages.Add(p);
                                     break;
                                 default:
+                                    ms.Flush();
+                                    ms.Dispose();
                                     throw new Exception("unsupportedFormat");
                             }
+                            ms.Flush();
+                            ms.Dispose();
                         }
                     }
                     catch(Exception exp) { LogWriter.Log(exp); }

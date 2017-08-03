@@ -149,5 +149,17 @@ namespace SOCISA
             }
             catch { return null; }
         }
+
+        public static string SaveBinaryContentToFile(byte[] fileContent, string extension)
+        {
+            string filePath = Guid.NewGuid() + extension;
+            string newFilePath = File.Exists(filePath) ? filePath : Path.Combine(CommonFunctions.GetScansFolder(), filePath);
+            FileStream fs = File.Create(newFilePath);
+            fs.Write(fileContent, 0, fileContent.Length);
+            fs.Flush();
+            fs.Dispose();
+            response r = ThumbNails.GenerateImgThumbNail(filePath);
+            return filePath;
+        }
     }
 }
