@@ -6,6 +6,7 @@ using System.Data.Common;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace SOCISA.Models
 {
@@ -44,6 +45,10 @@ namespace SOCISA.Models
         response GetChildren(int _id, string tableName, int childrenId);
 
         bool LoadTemplateFileIntoDb(string filePath, string _DETALII);
+        response GetOrphanFiles();
+        response GetOrphanDocuments();
+        response DeleteOrphanFile(string fileName);
+        response RestoreOrphanDocument(int _id);
     }
 
     public class DocumenteScanateRepository : IDocumenteScanateRepository
@@ -85,6 +90,43 @@ namespace SOCISA.Models
                 return new response(true, JsonConvert.SerializeObject(toReturn, CommonFunctions.JsonSerializerSettings), toReturn, null, null); 
             }
             catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) }); }
+        }
+
+        public response GetOrphanFiles()
+        {
+            try
+            {
+                string[] fs = FileManager.GetOrphanFiles(authenticatedUserId, connectionString);
+                return new response(true, "", fs, null, null);
+            }catch(Exception exp)
+            {
+                LogWriter.Log(exp);
+                return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) });
+            }
+        }
+
+        public response GetOrphanDocuments()
+        {
+            try
+            {
+                return new response(true, "", FileManager.GetOrphanDocuments(authenticatedUserId, connectionString), null, null);
+            }catch(Exception exp)
+            {
+                LogWriter.Log(exp);
+                return new response(false, exp.ToString(), null, null, new System.Collections.Generic.List<Error>() { new Error(exp) });
+            }
+        }
+
+        public response DeleteOrphanFile(string fileName)
+        {
+            bool toReturn = FileManager.DeleteOrphan(Path.Combine(CommonFunctions.GetScansFolder(), fileName));
+            return new response(toReturn, "", toReturn, null, null);
+        }
+        public response RestoreOrphanDocument(int _id)
+        {
+            DocumentScanat item = (DocumentScanat)(Find(_id).Result);
+            bool toReturn = FileManager.RestoreFileFromDb(item);
+            return new response(toReturn, "", toReturn, null, null);
         }
 
         public response CountAll()

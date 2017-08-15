@@ -61,17 +61,18 @@ namespace SOCISA.Models
         response ExportDosarCompletToPdf(string templateFileName, int _id);
         response ExportDosarCompletToPdf(Dosar item);
         response ExportDosarCompletToPdf(int _id);
-        void Import(Dosar item);
+        void Import(Dosar item, int _import_type);
         response SetDataUltimeiModificari(DateTime data, Dosar item);
         response GetDataUltimeiModificari(Dosar item);
         response GetDosareFromExcel(string sheet, string fileName);
         response GetDosareFromExcel(JObject _json);
-        response ImportDosare(response responsesDosare, DateTime _date);
-        response ImportDosareDirect(string sheet, string fileName);
-        response ImportDosareDirect(JObject _json);
-        response ImportDosareWithErrors(response responsesDosareWithErrors, DateTime _date);
+        response ImportDosare(response responsesDosare, DateTime _date, int _import_type);
+        response ImportDosareDirect(string sheet, string fileName, int _import_type);
+        response ImportDosareDirect(JObject _json, int _import_type);
+        response ImportDosareWithErrors(response responsesDosareWithErrors, DateTime _date, int _import_type);
         response GetDosareFromLog(DateTime data);
         response GetImportDates();
+        response MovePendinToOk(int _pending_id);
     }
 
     public class DosareRepository : IDosareRepository
@@ -460,9 +461,9 @@ namespace SOCISA.Models
 
             return d.ExportDosarCompletToPdf(template);
         }
-        public void Import(Dosar item)
+        public void Import(Dosar item, int _import_type)
         {
-            item.Import();
+            item.Import(_import_type);
         }
         public response SetDataUltimeiModificari(DateTime data, Dosar item)
         {
@@ -477,16 +478,16 @@ namespace SOCISA.Models
             return item.GetInvolvedParties();
         }
 
-        public response ImportDosareDirect(string sheet, string fileName)
+        public response ImportDosareDirect(string sheet, string fileName, int _import_type)
         {
             response r = GetDosareFromExcel(sheet, fileName);
-            return ImportAll(r, DateTime.Now);
+            return ImportAll(r, DateTime.Now, _import_type);
         }
 
-        public response ImportDosareDirect (JObject _json)
+        public response ImportDosareDirect (JObject _json, int _import_type)
         {
             response r = GetDosareFromExcel(_json);
-            return ImportAll(r, DateTime.Now);
+            return ImportAll(r, DateTime.Now, _import_type);
         }
 
         /// <summary>
@@ -859,7 +860,7 @@ namespace SOCISA.Models
             }
         }
 
-        public response ImportAll(response responsesDosare, DateTime _date)
+        public response ImportAll(response responsesDosare, DateTime _date, int _import_type)
         {
             try
             {
@@ -879,7 +880,7 @@ namespace SOCISA.Models
                         response.Status = false;
                     }
                     response.InsertedId = r.InsertedId;
-                    dosarExtended.Dosar.Log(response, _date);
+                    dosarExtended.Dosar.Log(response, _date, _import_type);
                     toReturnList.Add(new object[] { response, dosarExtended });
                 }
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
@@ -896,7 +897,7 @@ namespace SOCISA.Models
         /// </summary>
         /// <param name="dosare">vector de SOCISA.DosareJson cu Dosarele de importat</param>
         /// <returns>vector de {SOCISA.response, SOCISA.DosareJson}</returns>
-        public response ImportDosare(response responsesDosare, DateTime _date)
+        public response ImportDosare(response responsesDosare, DateTime _date, int _import_type)
         {
             try
             {
@@ -907,7 +908,7 @@ namespace SOCISA.Models
                     response response = (response)responseDosar[0];
                     response r = dosarExtended.Dosar.Insert();
                     response.InsertedId = r.InsertedId;
-                    dosarExtended.Dosar.Log(response, _date);
+                    dosarExtended.Dosar.Log(response, _date, _import_type);
                     toReturnList.Add(new object[] { response, dosarExtended });
                 }
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
@@ -923,7 +924,7 @@ namespace SOCISA.Models
         /// </summary>
         /// <param name="dosare">vector de SOCISA.DosareJson cu Dosarele de importat</param>
         /// <returns>vector de {SOCISA.response, SOCISA.DosareJson}</returns>
-        public response ImportDosareWithErrors(response responsesDosareWithErrors, DateTime _date)
+        public response ImportDosareWithErrors(response responsesDosareWithErrors, DateTime _date, int _import_type)
         {
             try
             {
@@ -935,7 +936,7 @@ namespace SOCISA.Models
                     response r = dosarExtended.Dosar.InsertWithErrors();
                     response.InsertedId = r.InsertedId;
                     response.Status = false;
-                    dosarExtended.Dosar.Log(response, _date);
+                    dosarExtended.Dosar.Log(response, _date, _import_type);
                     toReturnList.Add(new object[] { response, dosarExtended });
                 }
                 return new response(true, JsonConvert.SerializeObject(toReturnList.ToArray(), CommonFunctions.JsonSerializerSettings), toReturnList.ToArray(), null, null);
@@ -1012,6 +1013,14 @@ namespace SOCISA.Models
                 LogWriter.Log(exp);
                 return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) });
             }
+        }
+
+        public response MovePendinToOk(int _pending_id)
+        {
+            Dosar d = new Dosar(authenticatedUserId, connectionString, _pending_id, true);
+            response r = d.MovePendinToOk();
+            // -- to do - generate message ???
+            return r;
         }
     }
 }

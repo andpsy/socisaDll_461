@@ -68,10 +68,12 @@ namespace SOCISA
             this.Message = String.Format("{0};{1}", this.Message == null ? "" : this.Message, _toAdd.Message == null ? "" : _toAdd.Message);
             if (this.Error == null && (_toAdd.Error != null && _toAdd.Error.Count > 0))
                 this.Error = new List<SOCISA.Error>();
-
-            foreach (Error err in _toAdd.Error)
+            if (_toAdd.Error != null && _toAdd.Error.Count > 0)
             {
-                this.Error.Add(err);
+                foreach (Error err in _toAdd.Error)
+                {
+                    this.Error.Add(err);
+                }
             }
             if (_toAdd.InsertedId != null)
                 this.InsertedId = _toAdd.InsertedId;

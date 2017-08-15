@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
+using System.Linq;
 
 namespace SOCISA
 {

@@ -455,7 +455,8 @@ namespace SOCISA.Models
                 {
                     MesajUtilizator mesajUtilizator = new MesajUtilizator(authenticatedUserId, connectionString) { ID_UTILIZATOR = Convert.ToInt32(utilizator.ID), ID_MESAJ = Convert.ToInt32(this.ID) };
                     response r = mesajUtilizator.Insert();
-                    toReturn.AddResponse(r);
+                    if(!r.Status)
+                        toReturn.AddResponse(r);
                 }
                 return toReturn;
             }

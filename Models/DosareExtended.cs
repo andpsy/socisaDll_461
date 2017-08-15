@@ -24,7 +24,7 @@ namespace SOCISA.Models
         {
             this.Dosar = d;
             this.AsiguratCasco = (Asigurat)d.GetAsiguratCasco().Result;
-            this.AsiguratRca = (Asigurat)d.GetAsiguratCasco().Result;
+            this.AsiguratRca = (Asigurat)d.GetAsiguratRca().Result;
             this.AutoCasco = (Auto)d.GetAutoCasco().Result;
             this.AutoRca = (Auto)d.GetAutoRca().Result;
             this.Intervenient = (Intervenient)d.GetIntervenient().Result;
@@ -38,7 +38,7 @@ namespace SOCISA.Models
         {
             this.Dosar = d;
             this.AsiguratCasco = (Asigurat)d.GetAsiguratCasco().Result;
-            this.AsiguratRca = (Asigurat)d.GetAsiguratCasco().Result;
+            this.AsiguratRca = (Asigurat)d.GetAsiguratRca().Result;
             this.AutoCasco = (Auto)d.GetAutoCasco().Result;
             this.AutoRca = (Auto)d.GetAutoRca().Result;
             this.Intervenient = (Intervenient)d.GetIntervenient().Result;

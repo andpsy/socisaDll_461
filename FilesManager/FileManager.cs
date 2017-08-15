@@ -4,6 +4,8 @@ using System.IO;
 using System.Data;
 using MySql.Data.MySqlClient;
 //using Microsoft.AspNetCore.Http;
+using System.Linq;
+using System.Collections;
 
 namespace SOCISA
 {
@@ -160,6 +162,95 @@ namespace SOCISA
             fs.Dispose();
             response r = ThumbNails.GenerateImgThumbNail(filePath);
             return filePath;
+        }
+
+        public static string[] GetOrphanFiles(int _authenticatedUserId, string _connectionString)
+        {
+            List<string> toReturn = new List<string>();
+            Models.DocumenteScanateRepository dsr = new Models.DocumenteScanateRepository(_authenticatedUserId, _connectionString);
+            Models.DocumentScanat[] dss = (Models.DocumentScanat[])dsr.GetAll().Result;
+
+            //string[] files = Directory.GetFiles(CommonFunctions.GetScansFolder());
+            var files = Directory.GetFiles(CommonFunctions.GetScansFolder()).AsQueryable().Except(Directory.GetFiles(CommonFunctions.GetScansFolder(), "*_Custom.jpg"));
+            foreach (string fileName in files)
+            {
+                string fName = Path.GetFileName(fileName);
+                try
+                {
+                    int f = dss.Where(item => item.CALE_FISIER == fName).Count();
+                    if (f == 0)
+                        toReturn.Add(fName);
+                }catch { toReturn.Add(fName); }
+            }
+            return toReturn.ToArray();
+        }
+
+        public static bool DeleteOrphan(string fileName)
+        {
+            try
+            {
+                string extension = fileName.Substring(fileName.LastIndexOf('.'));
+                File.Delete(Path.Combine(CommonFunctions.GetScansFolder(), fileName.Replace(extension, "_Custom.jpg")));
+                File.Delete(Path.Combine(CommonFunctions.GetScansFolder(), fileName));
+                return true;
+            }catch(Exception exp) { LogWriter.Log(exp); return false; }
+        }
+
+        public static bool DeleteOrphans(string[] fileNames)
+        {
+            try
+            {
+                foreach (string fileName in fileNames)
+                {
+                    File.Delete(Path.Combine(CommonFunctions.GetScansFolder(), fileName));
+                }
+                return true;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return false; }
+        }
+
+        public static Models.DocumentScanat[] GetOrphanDocuments(int _authenticatedUserId, string _connectionString)
+        {
+            List<Models.DocumentScanat> toReturn = new List<Models.DocumentScanat>();
+            Models.DocumenteScanateRepository dsr = new Models.DocumenteScanateRepository(_authenticatedUserId, _connectionString);
+            Models.DocumentScanat[] dss = (Models.DocumentScanat[])dsr.GetAll().Result;
+            foreach(Models.DocumentScanat ds in dss)
+            {
+                if(!File.Exists(Path.Combine(CommonFunctions.GetScansFolder(), ds.CALE_FISIER)))
+                {
+                    toReturn.Add(ds);
+                }
+            }
+            return toReturn.ToArray();
+        }
+
+        public static bool RestoreFileFromDb(Models.DocumentScanat ds)
+        {
+            try
+            {
+                FileStream fs = new FileStream(Path.Combine(CommonFunctions.GetScansFolder(), ds.CALE_FISIER), FileMode.Create, FileAccess.ReadWrite);
+                fs.Write(ds.FILE_CONTENT, 0, ds.FILE_CONTENT.Length);
+                fs.Flush();
+                fs.Dispose();
+                return true;
+                // to do - restore thumbnails
+            }catch(Exception exp) { LogWriter.Log(exp); return false; }
+        }
+
+        public static bool RestoreFilesFromDb(Models.DocumentScanat[] dss)
+        {
+            try
+            {
+                foreach (Models.DocumentScanat ds in dss)
+                {
+                    FileStream fs = new FileStream(Path.Combine(CommonFunctions.GetScansFolder(), ds.CALE_FISIER), FileMode.Create, FileAccess.ReadWrite);
+                    fs.Write(ds.FILE_CONTENT, 0, ds.FILE_CONTENT.Length);
+                    fs.Flush();
+                    fs.Dispose();
+                }
+                return true;
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return false; }
         }
     }
 }

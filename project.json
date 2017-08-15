@@ -59,10 +59,14 @@
         "System.Drawing.Design": "4.0.0.0",
         "System.Net": "4.0.0.0",
         "System.Net.Http": "4.0.0.0",
+        "System.Security": "4.0.0.0",
         "System.Xml": "4.0.0.0",
         "System.Xml.Linq": "4.0.0.0",
         "System.Xml.Serialization": "4.0.0.0"
       }
     }
+  },
+  "dependencies": {
+    "System.Linq.Queryable": "4.3.0"
   }
 }

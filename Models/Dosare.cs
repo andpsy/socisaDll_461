@@ -802,7 +802,7 @@ namespace SOCISA.Models
                         }
                         catch { }
                     }
-                    return new response(true, Newtonsoft.Json.JsonConvert.SerializeObject(r, CommonFunctions.JsonSerializerSettings), r, null, null);
+                    return new response(true, "", null, null, null);
                 }else
                 {
                     return r;
@@ -953,6 +953,7 @@ namespace SOCISA.Models
             {
                 return toReturn;
             }
+            #region -- old --
             /* -- insert informatii externe (auto, asigurati, intervenient, tipdosar, societati) -- */
             /*
             if (this.AsiguratCasco != null)
@@ -1005,6 +1006,7 @@ namespace SOCISA.Models
             }
             */
             /* -- end insert informatii externe (auto, asigurati, intervenient, tipdosar, societati) -- */
+            #endregion
 
             this.DATA_ULTIMEI_MODIFICARI = DateTime.Now;
             this.DATA_CREARE = DateTime.Now;
@@ -1417,31 +1419,32 @@ namespace SOCISA.Models
         /// Metoda pentru preluare (import) dosar de la societate externa
         /// </summary>
         /// <returns>SOCISA.response = new object(bool = status, string = error message, int = id-ul cheie returnat)</returns>
-        public void Import()
+        public void Import(int _import_type)
         {
             response r = Insert();
-            Log(r);
+            Log(r, _import_type);
         }
 
         /// <summary>
         /// Metoda pentru logarea importului Dosarului curent
         /// </summary>
-        public void Log(response r)
+        public void Log(response r, int _import_type)
         {
-            Log(r, DateTime.Now.Date);
+            Log(r, DateTime.Now.Date, _import_type);
         }
 
         /// <summary>
         /// Metoda pentru logarea importului Dosarului curent
         /// </summary>
         /// <param name="_data_import">Data importului</param>
-        public void Log(response r, DateTime _data_import)
+        public void Log(response r, DateTime _data_import, int _import_type)
         {
             DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_import_log", new object[] { 
                 new MySqlParameter("_STATUS", r.Status), 
                 new MySqlParameter("_MESSAGE", r.Message), 
                 new MySqlParameter("_INSERTED_ID", r.InsertedId), 
-                new MySqlParameter("_ERRORS", Newtonsoft.Json.JsonConvert.SerializeObject(r.Error, CommonFunctions.JsonSerializerSettings)), 
+                new MySqlParameter("_ERRORS", Newtonsoft.Json.JsonConvert.SerializeObject(r.Error, CommonFunctions.JsonSerializerSettings)),
+                new MySqlParameter("_IMPORT_TYPE", _import_type),
                 new MySqlParameter("_DATA_IMPORT", _data_import) });
             da.ExecuteInsertQuery();
         }
@@ -1735,6 +1738,19 @@ namespace SOCISA.Models
         public response ExportDosarCompletToPdf(string templateFileName)
         {
             return PdfGenerator.ExportDosarCompletToPdf(authenticatedUserId, connectionString, templateFileName, this);
+        }
+
+        public response MovePendinToOk()
+        {
+            response toReturn = new response(false, "", null, null, new List<Error>()); ;
+            try
+            {
+                DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOSAREsp_MovePendinToOk", new object[] { new MySqlParameter("_PENDING_ID", ID) });
+                toReturn = da.ExecuteInsertQuery();
+            }
+            catch { }
+            return toReturn;
+
         }
     }
 }

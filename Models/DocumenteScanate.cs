@@ -246,6 +246,88 @@ namespace SOCISA.Models
             return toReturn;
         }
 
+        public response InsertWithErrors()
+        {
+            //try { if (this.DATA_INCARCARE == new DateTime() || this.DATA_INCARCARE == null) this.DATA_INCARCARE = GetFileCreationDate(); }
+            try { if (this.DATA_INCARCARE == new DateTime() || this.DATA_INCARCARE == null) this.DATA_INCARCARE = DateTime.Now; }
+            catch { }
+            try
+            {
+                if (this.FILE_CONTENT == null && this.CALE_FISIER != null)
+                {
+                    //this.FILE_CONTENT = FileManager.GetFileContentFromFile(this.CALE_FISIER);
+                    this.FILE_CONTENT = FileManager.UploadFile(this.CALE_FISIER);
+                    this.SMALL_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Small)).Result;
+                    this.MEDIUM_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Custom)).Result;
+                    this.DIMENSIUNE_FISIER = this.FILE_CONTENT.Length;
+                    this.EXTENSIE_FISIER = this.CALE_FISIER.Substring(this.CALE_FISIER.LastIndexOf('.'));
+                    //File.Delete(this.CALE_FISIER); // nu mai stergem, ca ne trebuie si in File Storage !
+                }
+                if (this.FILE_CONTENT != null && this.CALE_FISIER != null)
+                {
+                    this.SMALL_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Small)).Result;
+                    this.MEDIUM_ICON = (byte[])ThumbNails.GenerateByteThumbNail(this.CALE_FISIER, CommonFunctions.GetThumbNailSizes(ThumbNailType.Custom)).Result;
+                }
+            }
+            catch (Exception exp) { LogWriter.Log(exp); return new response(false, exp.Message, null, null, new List<Error>() { new Error(exp) }); }
+            response toReturn = Validare();
+            if (!toReturn.Status)
+            {
+                return toReturn;
+            }
+            PropertyInfo[] props = this.GetType().GetProperties();
+            ArrayList _parameters = new ArrayList();
+            var col = CommonFunctions.table_columns(authenticatedUserId, connectionString, "documente_scanate");
+            foreach (PropertyInfo prop in props)
+            {
+                if (col != null && col.ToUpper().IndexOf(prop.Name.ToUpper()) > -1) // ca sa includem in Array-ul de parametri doar coloanele tabelei, nu si campurile externe si/sau alte proprietati
+                {
+                    string propName = prop.Name;
+                    string propType = prop.PropertyType.ToString();
+                    object propValue = prop.GetValue(this, null);
+                    propValue = propValue == null ? DBNull.Value : propValue;
+                    if (propType != null)
+                    {
+                        if (propName.ToUpper() != "ID") // il vom folosi doar la Edit!
+                            _parameters.Add(new MySqlParameter(String.Format("_{0}", propName.ToUpper()), propValue));
+                    }
+                }
+            }
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "PENDING_DOCUMENTE_SCANATE_IMPORTSsp_insert", _parameters.ToArray());
+            toReturn = da.ExecuteInsertQuery();
+            if (toReturn.Status)
+            {
+                this.ID = toReturn.InsertedId;
+                /*
+                try
+                {
+                    if (System.Web.HttpContext.Current.Request.Params["SEND_MESSAGE"] != null && Convert.ToBoolean(System.Web.HttpContext.Current.Request.Params["SEND_MESSAGE"]))
+                        Mesaje.GenerateAndSendMessage(this.ID, DateTime.Now, "Document nou", Convert.ToInt32(System.Web.HttpContext.Current.Session["AUTHENTICATED_ID"]), (int)Mesaje.Importanta.Low);
+                }
+                catch { }
+                */
+            }
+
+            return toReturn;
+        }
+
+        public void Log(response r, int _import_type)
+        {
+            Log(r, DateTime.Now.Date, _import_type);
+        }
+
+        public void Log(response r, DateTime _data_import, int _import_type)
+        {
+            DataAccess da = new DataAccess(authenticatedUserId, connectionString, CommandType.StoredProcedure, "DOCUMENTE_SCANATEsp_import_log", new object[] {
+                new MySqlParameter("_STATUS", r.Status),
+                new MySqlParameter("_MESSAGE", r.Message),
+                new MySqlParameter("_INSERTED_ID", r.InsertedId),
+                new MySqlParameter("_ERRORS", Newtonsoft.Json.JsonConvert.SerializeObject(r.Error, CommonFunctions.JsonSerializerSettings)),
+                new MySqlParameter("_IMPORT_TYPE", _import_type),
+                new MySqlParameter("_DATA_IMPORT", _data_import) });
+            da.ExecuteInsertQuery();
+        }
+
         /// <summary>
         /// Metoda pentru modificarea Documentului scanat curent
         /// </summary>

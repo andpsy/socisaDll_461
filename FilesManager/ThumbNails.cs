@@ -82,7 +82,7 @@ namespace SOCISA
         public static response GenerateByteThumbNail(string path, string fileName, int width, int height)
         {
             FileInfo fi = new FileInfo(Path.Combine(path, fileName));
-            switch (fi.Extension)
+            switch (fi.Extension.ToLower())
             {
                 case ".pdf":
                     try
@@ -189,7 +189,7 @@ namespace SOCISA
             //string outputFile = fileName.Replace(fi.Extension, sType == "s" ? "_s.gif" : "_m.gif");
             string outputFile = fileName.Replace(fi.Extension, "_" + sType + ".jpg");
 
-            switch (fi.Extension)
+            switch (fi.Extension.ToLower())
             {
                 case ".pdf":
                     try
